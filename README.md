@@ -28,6 +28,10 @@ El bot responde al prefijo `!` y cuenta con los siguientes comandos:
    * **Permiso**: Restringido (solo usuarios con el rol configurado en `ADMIN_ROLE_NAME`, por defecto **Juez**).
    * **Acción**: Elimina todos los registros de la base de datos de manera irreversible.
 
+4. **`!file <id>`**:
+    * **Permiso**: Restringido (solo usuarios con el rol configurado en `ADMIN_ROLE_NAME`, por defecto **Juez**).
+    * **Acción**: Descarga el archivo adjunto asociado al mensaje con el ID especificado.
+
 ---
 
 ## 💻 Desarrollo y Ejecución Local
