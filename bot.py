@@ -85,6 +85,34 @@ async def clean_msgs(ctx):
         print(f"Error al eliminar mensajes: {e}")
         await ctx.send("❌ Hubo un error al intentar eliminar los mensajes.")
 
+@bot.command(name='list')
+async def list_users(ctx):
+    """Muestra la lista de usuarios que han enviado mensajes (Solo para el rol definido)."""
+    if not has_admin_role(ctx):
+        await ctx.send("⛔ No tienes permisos para usar este comando.")
+        return
+
+    try:
+        users = database.get_users_with_messages()
+        if not users:
+            await ctx.send("No hay usuarios registrados (no hay mensajes).")
+            return
+
+        response = "**Usuarios que han enviado mensajes:**\n\n"
+        for user in users:
+            line = f"👤 {user}\n"
+            if len(response) + len(line) > 1900:
+                await ctx.send(response)
+                response = line
+            else:
+                response += line
+        if response:
+            await ctx.send(response)
+    except Exception as e:
+        print(f"Error al listar usuarios: {e}")
+        await ctx.send("❌ Hubo un error al obtener la lista de usuarios.")
+
+
 if __name__ == '__main__':
     if not TOKEN or TOKEN == "tu_token_aqui":
         print("⚠️ ADVERTENCIA: Por favor, configura tu DISCORD_TOKEN en el archivo .env antes de iniciar el bot.")
