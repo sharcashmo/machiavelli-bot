@@ -43,3 +43,12 @@ def clear_all_messages():
     cursor.execute("DELETE FROM messages")
     conn.commit()
     conn.close()
+
+def get_users_with_messages():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT DISTINCT user_name FROM messages ORDER BY user_name ASC")
+    rows = [row[0] for row in cursor.fetchall()]
+    conn.close()
+    return rows
+
