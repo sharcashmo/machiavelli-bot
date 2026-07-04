@@ -1,7 +1,8 @@
+import os
 import sqlite3
 from datetime import datetime
 
-DB_NAME = "messages.db"
+DB_NAME = os.getenv("DATABASE_PATH", "messages.db")
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
