@@ -54,7 +54,14 @@ async def send_msg(ctx, *, message_content: str = None):
             return
 
         database.add_message(str(ctx.author), message_content or "", ctx.message.created_at, file_name, file_data)
-        await ctx.send("✅ Mensaje/archivo guardado correctamente.")
+        # Borrar el mensaje original del canal para que no sea visible
+        await ctx.message.delete()
+        # Confirmación visible en el canal (sin borrar)
+        if file_name:
+            confirm_msg = f"✅ {ctx.author.mention} Tu archivo **{file_name}** ha sido guardado correctamente."
+        else:
+            confirm_msg = f"✅ {ctx.author.mention} Tu mensaje ha sido guardado correctamente."
+        await ctx.send(confirm_msg)
     except Exception as e:
         print(f"Error al guardar mensaje: {e}")
         await ctx.send("❌ Hubo un error al guardar el mensaje/archivo.")
