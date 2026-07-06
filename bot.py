@@ -122,7 +122,7 @@ async def list_users(ctx):
             return
 
         response = "**Usuarios que han enviado mensajes:**\n\n"
-        for user in users:
+        for user, timestamp in users:
             line = f"🕒 **{timestamp}** | 👤 {user}\n"
             if len(response) + len(line) > 1900:
                 await ctx.send(response)

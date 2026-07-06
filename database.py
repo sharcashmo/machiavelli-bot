@@ -57,8 +57,8 @@ def clear_all_messages():
 def get_users_with_messages():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("SELECT DISTINCT user_name FROM messages ORDER BY user_name ASC")
-    rows = [row[0] for row in cursor.fetchall()]
+    cursor.execute("SELECT DISTINCT user_name, timestamp FROM messages ORDER BY user_name ASC")
+    rows = cursor.fetchall()
     conn.close()
     return rows
 
