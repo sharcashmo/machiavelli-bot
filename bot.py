@@ -4,7 +4,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 import database
-
+import random
 
 
 # Cargar variables de entorno
@@ -32,6 +32,19 @@ def has_admin_role(ctx):
         if role.name == ADMIN_ROLE:
             return True
     return False
+
+@bot.command(name="dice")
+async def lanzar_dado(ctx, cantidad: int = 1):
+    """Lanza 1 o 2 dados. Uso: !dice o !dice 2"""
+    if cantidad < 1 or cantidad > 2:
+        await ctx.send("Por favor, lanza 1 o 2 dados.")
+        return
+
+    resultados = [random.randint(1, 6) for _ in range(cantidad)]
+    suma = sum(resultados)
+    
+    mensaje = f"🎲 Resultado: {resultados} (Total: {suma})"
+    await ctx.send(mensaje)
 
 @bot.command(name='send')
 async def send_msg(ctx, *, message_content: str = None):
