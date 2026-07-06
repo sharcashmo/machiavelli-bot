@@ -11,6 +11,7 @@ import random
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 ADMIN_ROLE = os.getenv("ADMIN_ROLE_NAME", "Juez")
+COMMANDS_CHANNEL = int(os.getenv("COMMANDS_CHANNEL"))
 
 # Configurar intents
 intents = discord.Intents.default()
@@ -24,6 +25,15 @@ async def on_ready():
     database.init_db()
     print(f'Bot conectado como {bot.user}')
 
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CheckFailure):
+        # Borrar el mensaje original del canal para que no sea visible
+        await ctx.message.delete()
+    else:
+        # Registrar otros errores inesperados
+        print(f"Error inesperado: {error}")
+
 # Función auxiliar para comprobar rol
 def has_admin_role(ctx):
     if not ctx.guild:
@@ -33,7 +43,12 @@ def has_admin_role(ctx):
             return True
     return False
 
+# Función auxiliar para comprobar el canal
+def is_allowed_channel(ctx):
+    return ctx.channel.id == COMMANDS_CHANNEL
+
 @bot.command(name="dice")
+@commands.check(is_allowed_channel)
 async def lanzar_dado(ctx, cantidad: int = 1):
     """Lanza 1 o 2 dados. Uso: !dice o !dice 2"""
     if cantidad < 1 or cantidad > 2:
@@ -47,6 +62,7 @@ async def lanzar_dado(ctx, cantidad: int = 1):
     await ctx.send(mensaje)
 
 @bot.command(name='send')
+@commands.check(is_allowed_channel)
 async def send_msg(ctx, *, message_content: str = None):
     """Guarda un mensaje y/o archivo en la base de datos."""
     try:
@@ -80,6 +96,7 @@ async def send_msg(ctx, *, message_content: str = None):
         await ctx.send("❌ Hubo un error al guardar el mensaje/archivo.")
 
 @bot.command(name='view')
+@commands.check(is_allowed_channel)
 async def view_msgs(ctx):
     """Muestra todos los mensajes almacenados (Solo para el rol definido)."""
     if not has_admin_role(ctx):
@@ -108,6 +125,7 @@ async def view_msgs(ctx):
         await ctx.send(response)
 
 @bot.command(name='clean')
+@commands.check(is_allowed_channel)
 async def clean_msgs(ctx):
     """Elimina todos los mensajes almacenados (Solo para el rol definido)."""
     if not has_admin_role(ctx):
@@ -122,6 +140,7 @@ async def clean_msgs(ctx):
         await ctx.send("❌ Hubo un error al intentar eliminar los mensajes.")
 
 @bot.command(name='list')
+@commands.check(is_allowed_channel)
 async def list_users(ctx):
     """Muestra la lista de usuarios que han enviado mensajes (Solo para el rol definido)."""
     if not has_admin_role(ctx):
@@ -149,6 +168,7 @@ async def list_users(ctx):
         await ctx.send("❌ Hubo un error al obtener la lista de usuarios.")
 
 @bot.command(name='file')
+@commands.check(is_allowed_channel)
 async def download_file(ctx, message_id: int):
     """Descarga el archivo adjunto de un mensaje por su ID (Solo para el rol definido)."""
     if not has_admin_role(ctx):
