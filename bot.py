@@ -1,6 +1,7 @@
 import os
 import io
 import discord
+from discord import app_commands
 from discord.ext import commands
 from dotenv import load_dotenv
 import database
@@ -20,175 +21,157 @@ intents.message_content = True
 # Inicializar bot
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+# Decoradores de seguridad
+def has_admin_role(interaction: discord.Interaction):
+    if not interaction.guild: return False
+    return any(role.name == ADMIN_ROLE for role in interaction.user.roles)
+
+def is_allowed_channel(interaction: discord.Interaction):
+    return interaction.channel_id == COMMANDS_CHANNEL
+
+# --- COMANDO DE SINCRONIZACIÓN MANUAL ---
+@bot.command(name='sync')
+@commands.is_owner()
+async def sync_commands(ctx):
+    """Sincroniza los slash commands bajo demanda (Solo Dueño del Bot)"""
+    await ctx.send("Sincronizando comandos con Discord, por favor espera...")
+    try:
+        synced = await bot.tree.sync()
+        await ctx.send(f"✅ Éxito: Sincronizados {len(synced)} comandos globalmente.")
+    except Exception as e:
+        await ctx.send(f"❌ Error crítico al sincronizar: {e}")
+
 @bot.event
 async def on_ready():
     database.init_db()
     print(f'Bot conectado como {bot.user}')
 
 @bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CheckFailure):
-        # Borrar el mensaje original del canal para que no sea visible
-        await ctx.message.delete()
+async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
+    if isinstance(error, app_commands.CheckFailure):
+        await interaction.response.send_message("⛔ Canal o permisos no autorizados.", ephemeral=True)
     else:
-        # Registrar otros errores inesperados
-        print(f"Error inesperado: {error}")
+        print(f"Error: {error}")
+        await interaction.response.send_message("❌ Error interno.", ephemeral=True)
 
-# Función auxiliar para comprobar rol
-def has_admin_role(ctx):
-    if not ctx.guild:
-        return False # No permitir en mensajes directos
-    for role in ctx.author.roles:
-        if role.name == ADMIN_ROLE:
-            return True
-    return False
-
-# Función auxiliar para comprobar el canal
-def is_allowed_channel(ctx):
-    return ctx.channel.id == COMMANDS_CHANNEL
-
-@bot.command(name="dice")
-@commands.check(is_allowed_channel)
-async def lanzar_dado(ctx, cantidad: int = 1):
-    """Lanza 1 o 2 dados. Uso: !dice o !dice 2"""
+@bot.tree.command(name="dice", description="Lanza dados (1 o 2)")
+@app_commands.check(is_allowed_channel)
+async def lanzar_dado(interaction: discord.Interaction, cantidad: int = 1):
+    """Lanza 1 o 2 dados. Uso de interfaz nativa en Discord"""
     if cantidad < 1 or cantidad > 2:
-        await ctx.send("Por favor, lanza 1 o 2 dados.")
+        await interaction.response.send_message("Por favor, lanza 1 o 2 dados.", ephemeral=True)
         return
-
+    
     resultados = [random.randint(1, 6) for _ in range(cantidad)]
     suma = sum(resultados)
+    await interaction.response.send_message(f"🎲 Resultado: {resultados} (Total: {suma})")
+
+@bot.tree.command(name="send", description="Guarda mensaje o archivo")
+@app_commands.check(is_allowed_channel)
+async def send_msg(interaction: discord.Interaction, message: str = None, file: discord.Attachment = None):
+    # 'defer' para operaciones de IO/DB que puedan tardar
+    await interaction.response.defer(ephemeral=True) 
     
-    mensaje = f"🎲 Resultado: {resultados} (Total: {suma})"
-    await ctx.send(mensaje)
-
-@bot.command(name='send')
-@commands.check(is_allowed_channel)
-async def send_msg(ctx, *, message_content: str = None):
-    """Guarda un mensaje y/o archivo en la base de datos."""
-    try:
-        file_name = None
-        file_data = None
-        
-        if ctx.message.attachments:
-            attachment = ctx.message.attachments[0]
-            # Límite de 5 MB
-            if attachment.size > 5 * 1024 * 1024:
-                await ctx.send("❌ El archivo es demasiado grande (máximo 5 MB).")
-                return
-            file_name = attachment.filename
-            file_data = await attachment.read()
-
-        if not message_content and not file_data:
-            await ctx.send("❌ Debes proporcionar un mensaje de texto o adjuntar un archivo.")
+    file_name = None
+    file_data = None
+    
+    if file:
+        if file.size > 5 * 1024 * 1024:
+            await interaction.followup.send("❌ Archivo > 5MB.", ephemeral=True)
             return
+        file_name = file.filename
+        file_data = await file.read()
 
-        database.add_message(str(ctx.author), message_content or "", ctx.message.created_at, file_name, file_data)
-        # Borrar el mensaje original del canal para que no sea visible
-        await ctx.message.delete()
-        # Confirmación visible en el canal (sin borrar)
-        if file_name:
-            confirm_msg = f"✅ {ctx.author.mention} Tu archivo **{file_name}** ha sido guardado correctamente."
-        else:
-            confirm_msg = f"✅ {ctx.author.mention} Tu mensaje ha sido guardado correctamente."
-        await ctx.send(confirm_msg)
-    except Exception as e:
-        print(f"Error al guardar mensaje: {e}")
-        await ctx.send("❌ Hubo un error al guardar el mensaje/archivo.")
-
-@bot.command(name='view')
-@commands.check(is_allowed_channel)
-async def view_msgs(ctx):
-    """Muestra todos los mensajes almacenados (Solo para el rol definido)."""
-    if not has_admin_role(ctx):
-        await ctx.send("⛔ No tienes permisos para usar este comando.")
+    if not message and not file_data:
+        await interaction.followup.send("❌ Nada que guardar.", ephemeral=True)
         return
 
+    database.add_message(str(interaction.user), message or "", interaction.created_at, file_name, file_data)
+    await interaction.followup.send("✅ Guardado correctamente.", ephemeral=True)
+
+@bot.tree.command(name="view", description="Ver mensajes")
+@app_commands.check(is_allowed_channel)
+async def view_msgs(interaction: discord.Interaction):
+    if not has_admin_role(interaction):
+        await interaction.response.send_message("⛔ Sin permisos.", ephemeral=True)
+        return
+
+    await interaction.response.defer(ephemeral=False)
     messages = database.get_all_messages()
     if not messages:
-        await ctx.send("No hay mensajes almacenados.")
+        await interaction.followup.send("Vacío.", ephemeral=False)
         return
 
-    response = "**Mensajes almacenados:**\n\n"
-    for msg_id, user_name, content, timestamp, file_name in messages:
-        # Construir línea de texto, incluir enlace de descarga si hay archivo
-        line = f"🆔 **{msg_id}** | 🕒 **{timestamp}** | 👤 **{user_name}**: {content}"
-        if file_name:
-            line += f" !file {msg_id}"
-        line += "\n"
-        # Añadir al response con control de tamaño
-        if len(response) + len(line) > 1900:
-            await ctx.send(response)
-            response = line
-        else:
-            response += line
-    if response:
-        await ctx.send(response)
+    # Construcción de respuesta
+    response = "\n".join([f"👤 {m[1]}: {m[2]}" for m in messages])
+    await interaction.followup.send(response[:2000], ephemeral=False)
 
-@bot.command(name='clean')
-@commands.check(is_allowed_channel)
-async def clean_msgs(ctx):
-    """Elimina todos los mensajes almacenados (Solo para el rol definido)."""
-    if not has_admin_role(ctx):
-        await ctx.send("⛔ No tienes permisos para usar este comando.")
+@bot.tree.command(name='clean', description="Elimina todos los mensajes almacenados (Solo Juez)")
+@app_commands.check(is_allowed_channel)
+async def clean_msgs(interaction: discord.Interaction):
+    if not has_admin_role(interaction):
+        await interaction.response.send_message("⛔ Solo un Juez puede ejecutar este comando.", ephemeral=True)
         return
         
     try:
         database.clear_all_messages()
-        await ctx.send("🗑️ Todos los mensajes han sido eliminados.")
+        await interaction.response.send_message("🗑️ Todos los mensajes han sido eliminados.", ephemeral=False)
     except Exception as e:
         print(f"Error al eliminar mensajes: {e}")
-        await ctx.send("❌ Hubo un error al intentar eliminar los mensajes.")
+        await interaction.response.send_message("❌ Hubo un error al intentar eliminar los mensajes.", ephemeral=False)
 
-@bot.command(name='list')
-@commands.check(is_allowed_channel)
-async def list_users(ctx):
-    """Muestra la lista de usuarios que han enviado mensajes (Solo para el rol definido)."""
-    if not has_admin_role(ctx):
-        await ctx.send("⛔ No tienes permisos para usar este comando.")
+@bot.tree.command(name='list', description="Muestra usuarios que han enviado mensajes (Solo Juez)")
+@app_commands.check(is_allowed_channel)
+async def list_users(interaction: discord.Interaction):
+    if not has_admin_role(interaction):
+        await interaction.response.send_message("⛔ No tienes permisos para usar este comando.", ephemeral=True)
         return
+
+    # Deferimos la respuesta por si la base de datos es grande
+    await interaction.response.defer(ephemeral=False)
 
     try:
         users = database.get_users_with_messages()
         if not users:
-            await ctx.send("No hay usuarios registrados (no hay mensajes).")
+            await interaction.followup.send("No hay usuarios registrados (no hay mensajes).", ephemeral=False)
             return
 
         response = "**Usuarios que han enviado mensajes:**\n\n"
         for user, timestamp in users:
             line = f"🕒 **{timestamp}** | 👤 {user}\n"
             if len(response) + len(line) > 1900:
-                await ctx.send(response)
+                await interaction.followup.send(response, ephemeral=False)
                 response = line
             else:
                 response += line
         if response:
-            await ctx.send(response)
+            await interaction.followup.send(response, ephemeral=False)
     except Exception as e:
         print(f"Error al listar usuarios: {e}")
-        await ctx.send("❌ Hubo un error al obtener la lista de usuarios.")
+        await interaction.followup.send("❌ Hubo un error al obtener la lista de usuarios.", ephemeral=False)
 
-@bot.command(name='file')
-@commands.check(is_allowed_channel)
-async def download_file(ctx, message_id: int):
-    """Descarga el archivo adjunto de un mensaje por su ID (Solo para el rol definido)."""
-    if not has_admin_role(ctx):
-        await ctx.send("⛔ No tienes permisos para usar este comando.")
+@bot.tree.command(name='file', description="Descarga el archivo adjunto de un mensaje por su ID (Solo Juez)")
+@app_commands.check(is_allowed_channel)
+async def download_file(interaction: discord.Interaction, message_id: int):
+    if not has_admin_role(interaction):
+        await interaction.response.send_message("⛔ No tienes permisos para usar este comando.", ephemeral=True)
         return
+
+    # Descargar archivos puede tardar más de 3 segundos, usamos defer
+    await interaction.response.defer(ephemeral=False)
 
     try:
         result = database.get_file(message_id)
         if not result or not result[0]:
-            await ctx.send(f"❌ No se encontró ningún archivo asociado al mensaje ID {message_id}.")
+            await interaction.followup.send(f"❌ No se encontró ningún archivo asociado al mensaje ID {message_id}.", ephemeral=False)
             return
         
         file_name, file_data = result
-        # Enviar archivo a través de discord.File
         file_stream = io.BytesIO(file_data)
-        await ctx.send(file=discord.File(file_stream, filename=file_name))
+        await interaction.followup.send(file=discord.File(file_stream, filename=file_name), ephemeral=False)
     except Exception as e:
         print(f"Error al descargar el archivo: {e}")
-        await ctx.send("❌ Hubo un error al intentar recuperar el archivo.")
-
+        await interaction.followup.send("❌ Hubo un error al intentar recuperar el archivo.", ephemeral=False)
 
 
 if __name__ == '__main__':
