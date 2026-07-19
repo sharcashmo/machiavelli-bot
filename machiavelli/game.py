@@ -600,7 +600,7 @@ class Game:
 
         # El primer año no haremos tirada de hambre
         self.famine = []
-        if self.scenario.rules.famine_active and self.turn_number >= 0:
+        if self.scenario.rules.famine_active and self.turn_number > 0:
             self.turn_events.append("__**Fase de Hambre**__")
 
             report.append(f"### __Primavera de {self.scenario.year + self.turn_number // 4}: Hambre__")
