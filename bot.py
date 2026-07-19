@@ -7,12 +7,22 @@ from dotenv import load_dotenv
 import database
 import random
 
+load_dotenv()
+
+from machiavelli.database import upgrade
+from machiavelli.discord import init_game_commands
 
 # Cargar variables de entorno
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 ADMIN_ROLE = os.getenv("ADMIN_ROLE_NAME", "Juez")
 COMMANDS_CHANNEL = int(os.getenv("COMMANDS_CHANNEL"))
+
+# La base de datos
+DB_PATH = os.getenv("DATABASE_PATH", "machiavelli.db")
+
+# Ejecutamos las migraciones
+upgrade(DB_PATH)
 
 # Configurar intents
 intents = discord.Intents.default()
@@ -32,19 +42,46 @@ def is_allowed_channel(interaction: discord.Interaction):
 # --- COMANDO DE SINCRONIZACIÓN MANUAL ---
 @bot.command(name='sync')
 @commands.is_owner()
-async def sync_commands(ctx):
-    """Sincroniza los slash commands bajo demanda (Solo Dueño del Bot)"""
-    await ctx.send("Sincronizando comandos con Discord, por favor espera...")
-    try:
-        synced = await bot.tree.sync()
-        await ctx.send(f"✅ Éxito: Sincronizados {len(synced)} comandos globalmente.")
-    except Exception as e:
-        await ctx.send(f"❌ Error crítico al sincronizar: {e}")
+async def sync_commands(ctx, modo: str | None = None):
+    """Sincroniza los slash commands bajo demanda (Solo Dueño del Bot)
+    
+    Uso:
+        !sync        -> Sincroniza en ESTE servidor (Instantáneo)
+        !sync global -> Sincroniza en TODO Discord (Tarda unos minutos/hora)"""
+    if modo == "global":
+        await ctx.send("🌍 Sincronizando comandos GLOBALMENTE (puede tardar en aparecer)...")
+        try:
+            synced = await bot.tree.sync()
+            await ctx.send(f"✅ Éxito: Sincronizados {len(synced)} comandos globalmente.")
+        except Exception as e:
+            await ctx.send(f"❌ Error: {e}")
+    else:
+        await ctx.send("🏠 Sincronizando comandos en este servidor específico...")
+        try:
+            # Clona los comandos que tenemos en memoria dentro de este servidor concreto
+            bot.tree.copy_global_to(guild=ctx.guild)
+            # Sincroniza solo este servidor
+            synced = await bot.tree.sync(guild=ctx.guild)
+            await ctx.send(f"✅ Éxito: Sincronizados {len(synced)} comandos en este servidor al instante.")
+        except Exception as e:
+            await ctx.send(f"❌ Error local: {e}")
 
 @bot.event
 async def on_ready():
-    database.init_db()
     print(f'Bot conectado como {bot.user}')
+    
+    # La base de datos antigua, por si todavía me hace falta
+    database.init_db()
+
+    # Los nuevos comandos
+    sharcashvelli_group, sharcashvelli_admin_group = init_game_commands(DB_PATH)
+    if not bot.tree.get_command("sharcashvelli"):
+        bot.tree.add_command(sharcashvelli_group)
+        print("Grupo 'sharcashvelli' registrado en memoria local.")
+        
+    if not bot.tree.get_command("sharcashvelli_admin"):
+        bot.tree.add_command(sharcashvelli_admin_group)
+        print("Grupo 'sharcashvelli_admin' registrado en memoria local.")
 
 @bot.event
 async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):

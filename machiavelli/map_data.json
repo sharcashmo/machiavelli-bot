@@ -1,0 +1,1080 @@
+{
+  "provinces": [
+    {
+      "name": "Avignon",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "swiss" },
+        { "destination": "prove" },
+        { "destination": "turin" }
+      ],
+      "sea_routes": [{ "destination": "prove N" }, { "destination": "WGOL" }]
+    },
+    {
+      "name": "Swiss",
+      "city": "city",
+      "land_routes": [
+        { "destination": "avign" },
+        { "destination": "turin" },
+        { "destination": "tyrol" }
+      ]
+    },
+    {
+      "name": "Provence",
+      "land_routes": [
+        { "destination": "avign" },
+        { "destination": "turin" },
+        { "destination": "saluz" },
+        { "destination": "savoy" },
+        { "destination": "marse" }
+      ]
+    },
+    {
+      "name": "Provence",
+      "custom_id": "prove N",
+      "sea_routes": [
+        { "destination": "avign" },
+        { "destination": "marse" },
+        { "destination": "WGOL" }
+      ]
+    },
+    {
+      "name": "Provence",
+      "custom_id": "prove S",
+      "sea_routes": [
+        { "destination": "marse" },
+        { "destination": "savoy" },
+        { "destination": "WGOL" },
+        { "destination": "EGOL" }
+      ]
+    },
+    {
+      "name": "Marseille",
+      "city": "fortified",
+      "has_port": true,
+      "land_routes": [{ "destination": "prove" }],
+      "sea_routes": [
+        { "destination": "prove N" },
+        { "destination": "prove S" },
+        { "destination": "WGOL" }
+      ]
+    },
+
+    {
+      "name": "Tyrolea",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "swiss" },
+        { "destination": "turin" },
+        { "destination": "como" },
+        { "destination": "milan" },
+        { "destination": "carin" },
+        { "destination": "austr" }
+      ]
+    },
+    {
+      "name": "Austria",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "tyrol" },
+        { "destination": "carin" },
+        { "destination": "slavo" },
+        { "destination": "hunga" }
+      ]
+    },
+    {
+      "name": "Hungary",
+      "city": "city",
+      "land_routes": [{ "destination": "austr" }, { "destination": "slavo" }]
+    },
+    {
+      "name": "Carinthia",
+      "land_routes": [
+        { "destination": "tyrol" },
+        { "destination": "austr" },
+        { "destination": "slavo" },
+        { "destination": "carni" },
+        { "destination": "friul" },
+        { "destination": "vicen" },
+        { "destination": "trent" },
+        { "destination": "milan" }
+      ]
+    },
+
+    {
+      "name": "Como",
+      "land_routes": [
+        { "destination": "tyrol" },
+        { "destination": "milan" },
+        { "destination": "pavia" },
+        { "destination": "turin" }
+      ]
+    },
+    {
+      "name": "Milan",
+      "city": "fortified",
+      "major_city": 3,
+      "land_routes": [
+        { "destination": "tyrol" },
+        { "destination": "carin" },
+        { "destination": "trent" },
+        { "destination": "berga" },
+        { "destination": "cremo" },
+        { "destination": "pianc" },
+        { "destination": "pavia" },
+        { "destination": "como" }
+      ]
+    },
+    {
+      "name": "Pavia",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "como" },
+        { "destination": "milan" },
+        { "destination": "pianc" },
+        { "destination": "forno" },
+        { "destination": "montf" },
+        { "destination": "turin" }
+      ]
+    },
+    {
+      "name": "Cremona",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "berga" },
+        { "destination": "bresc" },
+        { "destination": "mantu" },
+        { "destination": "parma" },
+        { "destination": "pianc" },
+        { "destination": "milan" }
+      ]
+    },
+    {
+      "name": "Piancenza",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "pavia" },
+        { "destination": "milan" },
+        { "destination": "cremo" },
+        { "destination": "parma" },
+        { "destination": "forno" }
+      ]
+    },
+    {
+      "name": "Fornova",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "pavia" },
+        { "destination": "pianc" },
+        { "destination": "parma" },
+        { "destination": "pontr" },
+        { "destination": "genoa" },
+        { "destination": "montf" }
+      ]
+    },
+    {
+      "name": "Parma",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "forno" },
+        { "destination": "pianc" },
+        { "destination": "cremo" },
+        { "destination": "mantu" },
+        { "destination": "moden" },
+        { "destination": "pontr" }
+      ]
+    },
+
+    {
+      "name": "Bergamo",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "trent" },
+        { "destination": "bresc" },
+        { "destination": "cremo" },
+        { "destination": "milan" }
+      ]
+    },
+    {
+      "name": "Brescia",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "trent" },
+        { "destination": "veron" },
+        { "destination": "mantu" },
+        { "destination": "cremo" },
+        { "destination": "berga" }
+      ]
+    },
+    {
+      "name": "Verona",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "trent" },
+        { "destination": "vicen" },
+        { "destination": "padua" },
+        { "destination": "ferra" },
+        { "destination": "mantu" },
+        { "destination": "bresc" }
+      ]
+    },
+    {
+      "name": "Vicenza",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "trent" },
+        { "destination": "carin" },
+        { "destination": "friul" },
+        { "destination": "trevi" },
+        { "destination": "padua" },
+        { "destination": "veron" }
+      ]
+    },
+    {
+      "name": "Friuli",
+      "land_routes": [
+        { "destination": "carin" },
+        { "destination": "carni" },
+        { "destination": "trevi" },
+        { "destination": "vicen" }
+      ],
+      "sea_routes": [
+        { "destination": "carni" },
+        { "destination": "trevi" },
+        { "destination": "L" },
+        { "destination": "UA" }
+      ]
+    },
+    {
+      "name": "Treviso",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "padua" },
+        { "destination": "vicen" },
+        { "destination": "friul" }
+      ],
+      "sea_routes": [
+        { "destination": "padua" },
+        { "destination": "friul" },
+        { "destination": "L" }
+      ]
+    },
+    {
+      "name": "Padua",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "veron" },
+        { "destination": "vicen" },
+        { "destination": "trevi" },
+        { "destination": "ferra" }
+      ],
+      "sea_routes": [
+        { "destination": "trevi" },
+        { "destination": "ferra" },
+        { "destination": "L" },
+        { "destination": "UA" }
+      ]
+    },
+    {
+      "name": "Venice",
+      "city": "fortified",
+      "major_city": 3,
+      "has_port": true,
+      "is_venice": true,
+      "sea_routes": [{ "destination": "L" }]
+    },
+    {
+      "name": "Istria",
+      "land_routes": [{ "destination": "croat" }],
+      "sea_routes": [
+        { "destination": "croat N" },
+        { "destination": "croat S" },
+        { "destination": "dalma" },
+        { "destination": "UA" }
+      ]
+    },
+    {
+      "name": "Dalmatia",
+      "city": "city",
+      "land_routes": [
+        { "destination": "croat" },
+        { "destination": "bosni" },
+        { "destination": "herze" }
+      ],
+      "sea_routes": [
+        { "destination": "istri" },
+        { "destination": "croat S" },
+        { "destination": "herze" },
+        { "destination": "UA" },
+        { "destination": "LA" }
+      ]
+    },
+
+    {
+      "name": "Pisa",
+      "city": "fortified",
+      "has_port": true,
+      "land_routes": [
+        { "destination": "lucca" },
+        { "destination": "pisto" },
+        { "destination": "sienn" },
+        { "destination": "piomb" }
+      ],
+      "sea_routes": [
+        { "destination": "lucca" },
+        { "destination": "piomb" },
+        { "destination": "EGOL" },
+        { "destination": "WTS" },
+        { "destination": "ETS", "strait": "piomb" }
+      ]
+    },
+    {
+      "name": "Pistoia",
+      "land_routes": [
+        { "destination": "lucca" },
+        { "destination": "bolog" },
+        { "destination": "flore" },
+        { "destination": "pisa" }
+      ]
+    },
+    {
+      "name": "Florence",
+      "city": "fortified",
+      "major_city": 3,
+      "land_routes": [
+        { "destination": "bolog" },
+        { "destination": "romag" },
+        { "destination": "urbin" },
+        { "destination": "arezz" },
+        { "destination": "sienn" },
+        { "destination": "pisa" },
+        { "destination": "pisto" }
+      ]
+    },
+    {
+      "name": "Arezzo",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "flore" },
+        { "destination": "urbin" },
+        { "destination": "perug" },
+        { "destination": "sienn" }
+      ]
+    },
+
+    {
+      "name": "Bologna",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "ferra" },
+        { "destination": "mantu" },
+        { "destination": "moden" },
+        { "destination": "lucca" },
+        { "destination": "pisto" },
+        { "destination": "flore" },
+        { "destination": "romag" }
+      ],
+      "sea_routes": [
+        { "destination": "ferra" },
+        { "destination": "romag" },
+        { "destination": "UA" }
+      ]
+    },
+    {
+      "name": "Romagna",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "bolog" },
+        { "destination": "flore" },
+        { "destination": "urbin" },
+        { "destination": "ancon" }
+      ],
+      "sea_routes": [
+        { "destination": "bolog" },
+        { "destination": "ancon" },
+        { "destination": "UA" }
+      ]
+    },
+    {
+      "name": "Ancona",
+      "city": "fortified",
+      "has_port": true,
+      "land_routes": [
+        { "destination": "romag" },
+        { "destination": "urbin" },
+        { "destination": "spole" },
+        { "destination": "aquil" }
+      ],
+      "sea_routes": [
+        { "destination": "romag" },
+        { "destination": "aquil" },
+        { "destination": "UA" },
+        { "destination": "LA" }
+      ]
+    },
+    {
+      "name": "Urbino",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "romag" },
+        { "destination": "ancon" },
+        { "destination": "spole" },
+        { "destination": "perug" },
+        { "destination": "arezz" },
+        { "destination": "flore" }
+      ]
+    },
+    {
+      "name": "Spoleto",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "tivol" },
+        { "destination": "rome" },
+        { "destination": "perug" },
+        { "destination": "urbin" },
+        { "destination": "ancon" },
+        { "destination": "aquil" },
+        { "destination": "capua" }
+      ]
+    },
+    {
+      "name": "Perugia",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "urbin" },
+        { "destination": "spole" },
+        { "destination": "rome" },
+        { "destination": "patri" },
+        { "destination": "sienn" },
+        { "destination": "arezz" }
+      ]
+    },
+    {
+      "name": "Rome",
+      "city": "fortified",
+      "major_city": 2,
+      "land_routes": [
+        { "destination": "perug" },
+        { "destination": "spole" },
+        { "destination": "tivol" },
+        { "destination": "patri" }
+      ]
+    },
+    {
+      "name": "Patrimony",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "sienn" },
+        { "destination": "perug" },
+        { "destination": "rome" },
+        { "destination": "tivol" }
+      ],
+      "sea_routes": [
+        { "destination": "sienn" },
+        { "destination": "tivol" },
+        { "destination": "ETS" }
+      ]
+    },
+    {
+      "name": "Tivoli",
+      "city": "fortress",
+      "has_port": true,
+      "land_routes": [
+        { "destination": "patri" },
+        { "destination": "rome" },
+        { "destination": "spole" },
+        { "destination": "capua" }
+      ],
+      "sea_routes": [
+        { "destination": "patri" },
+        { "destination": "capua" },
+        { "destination": "ETS" },
+        { "destination": "GON" }
+      ]
+    },
+
+    {
+      "name": "Capua",
+      "land_routes": [
+        { "destination": "tivol" },
+        { "destination": "spole" },
+        { "destination": "aquil" },
+        { "destination": "naple" }
+      ],
+      "sea_routes": [
+        { "destination": "tivol" },
+        { "destination": "naple" },
+        { "destination": "GON" }
+      ]
+    },
+    {
+      "name": "Naples",
+      "city": "fortified",
+      "major_city": 2,
+      "has_port": true,
+      "land_routes": [
+        { "destination": "capua" },
+        { "destination": "aquil" },
+        { "destination": "saler" }
+      ],
+      "sea_routes": [
+        { "destination": "capua" },
+        { "destination": "saler" },
+        { "destination": "GON" }
+      ]
+    },
+    {
+      "name": "Salerno",
+      "city": "fortress",
+      "has_port": true,
+      "land_routes": [
+        { "destination": "naple" },
+        { "destination": "aquil" },
+        { "destination": "bari" },
+        { "destination": "otran" }
+      ],
+      "sea_routes": [
+        { "destination": "naple" },
+        { "destination": "otran" },
+        { "destination": "GON" }
+      ]
+    },
+    {
+      "name": "Otranto",
+      "land_routes": [{ "destination": "saler" }, { "destination": "bari" }],
+      "sea_routes": [
+        { "destination": "saler" },
+        { "destination": "bari" },
+        { "destination": "GON" },
+        { "destination": "IS" },
+        { "destination": "LA" }
+      ]
+    },
+    {
+      "name": "Bari",
+      "city": "fortified",
+      "has_port": true,
+      "land_routes": [
+        { "destination": "aquil" },
+        { "destination": "saler" },
+        { "destination": "otran" }
+      ],
+      "sea_routes": [
+        { "destination": "aquil" },
+        { "destination": "otran" },
+        { "destination": "LA" }
+      ]
+    },
+    {
+      "name": "Aquila",
+      "city": "fortress",
+      "land_routes": [
+        { "destination": "ancon" },
+        { "destination": "spole" },
+        { "destination": "capua" },
+        { "destination": "naple" },
+        { "destination": "saler" },
+        { "destination": "bari" }
+      ],
+      "sea_routes": [
+        { "destination": "ancon" },
+        { "destination": "bari" },
+        { "destination": "LA" }
+      ]
+    },
+    {
+      "name": "Messina",
+      "city": "fortified",
+      "has_port": true,
+      "land_routes": [{ "destination": "paler" }],
+      "sea_routes": [
+        { "destination": "paler" },
+        { "destination": "ETS" },
+        { "destination": "GON" },
+        { "destination": "IS" }
+      ]
+    },
+    {
+      "name": "Palermo",
+      "city": "fortified",
+      "has_port": true,
+      "land_routes": [{ "destination": "messi" }],
+      "sea_routes": [
+        { "destination": "messi" },
+        { "destination": "WM" },
+        { "destination": "WTS" },
+        { "destination": "ETS" },
+        { "destination": "IS" },
+        { "destination": "BOT" }
+      ]
+    },
+
+    {
+      "name": "Tunis",
+      "city": "fortified",
+      "major_city": 2,
+      "has_port": true,
+      "sea_routes": [{ "destination": "WM" }, { "destination": "BOT" }]
+    },
+    {
+      "name": "Durazzo",
+      "city": "fortified",
+      "has_port": true,
+      "land_routes": [{ "destination": "alban" }],
+      "sea_routes": [
+        { "destination": "alban" },
+        { "destination": "LA" },
+        { "destination": "IS" }
+      ]
+    },
+    {
+      "name": "Albania",
+      "city": "city",
+      "land_routes": [
+        { "destination": "herze" },
+        { "destination": "duraz" },
+        { "destination": "ragus" }
+      ],
+      "sea_routes": [
+        { "destination": "ragus" },
+        { "destination": "duraz" },
+        { "destination": "LA" }
+      ]
+    },
+    {
+      "name": "Herzegovina",
+      "land_routes": [
+        { "destination": "dalma" },
+        { "destination": "bosni" },
+        { "destination": "alban" },
+        { "destination": "ragus" }
+      ],
+      "sea_routes": [
+        { "destination": "dalma" },
+        { "destination": "ragus" },
+        { "destination": "LA" }
+      ]
+    },
+    {
+      "name": "Bosnia",
+      "land_routes": [
+        { "destination": "herze" },
+        { "destination": "dalma" },
+        { "destination": "croat" }
+      ]
+    },
+
+    {
+      "name": "Turin",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "prove" },
+        { "destination": "avign" },
+        { "destination": "swiss" },
+        { "destination": "tyrol" },
+        { "destination": "como" },
+        { "destination": "pavia" },
+        { "destination": "montf" },
+        { "destination": "savoy" },
+        { "destination": "saluz" }
+      ]
+    },
+    {
+      "name": "Saluzzo",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "prove" },
+        { "destination": "turin" },
+        { "destination": "savoy" }
+      ]
+    },
+    {
+      "name": "Montferrat",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "pavia" },
+        { "destination": "forno" },
+        { "destination": "genoa" },
+        { "destination": "savoy" },
+        { "destination": "turin" }
+      ]
+    },
+    {
+      "name": "Savoy",
+      "city": "fortified",
+      "has_port": true,
+      "land_routes": [
+        { "destination": "prove" },
+        { "destination": "saluz" },
+        { "destination": "turin" },
+        { "destination": "montf" },
+        { "destination": "genoa" }
+      ],
+      "sea_routes": [
+        { "destination": "prove S" },
+        { "destination": "genoa" },
+        { "destination": "EGOL" }
+      ]
+    },
+    {
+      "name": "Genoa",
+      "city": "fortified",
+      "major_city": 3,
+      "has_port": true,
+      "land_routes": [
+        { "destination": "savoy" },
+        { "destination": "montf" },
+        { "destination": "forno" },
+        { "destination": "pontr" },
+        { "destination": "moden" }
+      ],
+      "sea_routes": [
+        { "destination": "savoy" },
+        { "destination": "moden" },
+        { "destination": "EGOL" }
+      ]
+    },
+    {
+      "name": "Pontremoli",
+      "land_routes": [
+        { "destination": "forno" },
+        { "destination": "parma" },
+        { "destination": "moden" },
+        { "destination": "genoa" }
+      ]
+    },
+    {
+      "name": "Lucca",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "moden" },
+        { "destination": "bolog" },
+        { "destination": "pisto" },
+        { "destination": "pisa" }
+      ],
+      "sea_routes": [
+        { "destination": "moden" },
+        { "destination": "pisa" },
+        { "destination": "EGOL" }
+      ]
+    },
+    {
+      "name": "Modena",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "parma" },
+        { "destination": "mantu" },
+        { "destination": "bolog" },
+        { "destination": "lucca" },
+        { "destination": "genoa" },
+        { "destination": "pontr" }
+      ],
+      "sea_routes": [
+        { "destination": "genoa" },
+        { "destination": "lucca" },
+        { "destination": "EGOL" }
+      ]
+    },
+    {
+      "name": "Mantua",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "parma" },
+        { "destination": "cremo" },
+        { "destination": "bresc" },
+        { "destination": "veron" },
+        { "destination": "ferra" },
+        { "destination": "bolog" },
+        { "destination": "moden" }
+      ]
+    },
+    {
+      "name": "Ferrara",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "padua" },
+        { "destination": "veron" },
+        { "destination": "mantu" },
+        { "destination": "bolog" }
+      ],
+      "sea_routes": [
+        { "destination": "padua" },
+        { "destination": "bolog" },
+        { "destination": "UA" }
+      ]
+    },
+
+    {
+      "name": "Piombino",
+      "city": "fortified",
+      "has_port": true,
+      "land_routes": [{ "destination": "pisa" }, { "destination": "sienn" }],
+      "sea_routes": [
+        { "destination": "pisa" },
+        { "destination": "sienn" },
+        { "destination": "WTS" },
+        { "destination": "ETS" }
+      ]
+    },
+    {
+      "name": "Sienna",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "pisa" },
+        { "destination": "flore" },
+        { "destination": "arezz" },
+        { "destination": "perug" },
+        { "destination": "patri" },
+        { "destination": "piomb" }
+      ],
+      "sea_routes": [
+        { "destination": "piomb" },
+        { "destination": "patri" },
+        { "destination": "ETS" }
+      ]
+    },
+    {
+      "name": "Corsica",
+      "city": "city",
+      "has_port": true,
+      "sea_routes": [
+        { "destination": "WGOL" },
+        { "destination": "EGOL" },
+        { "destination": "WTS" }
+      ]
+    },
+    {
+      "name": "Sardinia",
+      "city": "city",
+      "has_port": true,
+      "sea_routes": [
+        { "destination": "WGOL" },
+        { "destination": "WTS" },
+        { "destination": "WM" }
+      ]
+    },
+
+    {
+      "name": "Trent",
+      "city": "fortified",
+      "land_routes": [
+        { "destination": "carin" },
+        { "destination": "vicen" },
+        { "destination": "veron" },
+        { "destination": "bresc" },
+        { "destination": "berga" },
+        { "destination": "milan" }
+      ]
+    },
+
+    {
+      "name": "Slavonia",
+      "land_routes": [
+        { "destination": "hunga" },
+        { "destination": "austr" },
+        { "destination": "carin" },
+        { "destination": "carni" },
+        { "destination": "croat" }
+      ]
+    },
+    {
+      "name": "Carniola",
+      "city": "city",
+      "land_routes": [
+        { "destination": "friul" },
+        { "destination": "carin" },
+        { "destination": "slavo" },
+        { "destination": "croat" }
+      ],
+      "sea_routes": [
+        { "destination": "friul" },
+        { "destination": "croat N" },
+        { "destination": "UA" }
+      ]
+    },
+    {
+      "name": "Croatia",
+      "city": "city",
+      "land_routes": [
+        { "destination": "carni" },
+        { "destination": "slavo" },
+        { "destination": "bosni" },
+        { "destination": "dalma" },
+        { "destination": "istri" }
+      ]
+    },
+    {
+      "name": "Croatia",
+      "custom_id": "croat N",
+      "city": "city",
+      "sea_routes": [
+        { "destination": "carni" },
+        { "destination": "istri" },
+        { "destination": "UA" }
+      ]
+    },
+    {
+      "name": "Croatia",
+      "custom_id": "croat S",
+      "city": "city",
+      "sea_routes": [{ "destination": "dalma" }, { "destination": "istri" }]
+    },
+
+    {
+      "name": "Ragusa",
+      "city": "fortified",
+      "has_port": true,
+      "land_routes": [{ "destination": "herze" }, { "destination": "alban" }],
+      "sea_routes": [
+        { "destination": "herze" },
+        { "destination": "alban" },
+        { "destination": "LA" }
+      ]
+    }
+  ],
+  "seas": [
+    {
+      "name": "Western Gulf of Lyons",
+      "sea_routes": [
+        { "destination": "prove N" },
+        { "destination": "prove S" },
+        { "destination": "marse" },
+        { "destination": "corsi" },
+        { "destination": "sardi" },
+        { "destination": "EGOL" },
+        { "destination": "WTS" },
+        { "destination": "WM" }
+      ]
+    },
+    {
+      "name": "Eastern Gulf of Lyons",
+      "sea_routes": [
+        { "destination": "prove S" },
+        { "destination": "savoy" },
+        { "destination": "genoa" },
+        { "destination": "moden" },
+        { "destination": "lucca" },
+        { "destination": "pisa" },
+        { "destination": "corsi" },
+        { "destination": "WGOL" },
+        { "destination": "WTS" }
+      ]
+    },
+    {
+      "name": "Western Tyrrhenian Sea",
+      "sea_routes": [
+        { "destination": "pisa" },
+        { "destination": "piomb" },
+        { "destination": "corsi" },
+        { "destination": "sardi" },
+        { "destination": "paler" },
+        { "destination": "WGOL" },
+        { "destination": "EGOL" },
+        { "destination": "ETS" },
+        { "destination": "WM" }
+      ]
+    },
+    {
+      "name": "Eastern Tyrrhenian Sea",
+      "sea_routes": [
+        { "destination": "pisa", "strait": "piomb" },
+        { "destination": "piomb" },
+        { "destination": "sienn" },
+        { "destination": "patri" },
+        { "destination": "tivol" },
+        { "destination": "paler" },
+        { "destination": "messi" },
+        { "destination": "WTS" },
+        { "destination": "GON" }
+      ]
+    },
+    {
+      "name": "Western Mediterranean",
+      "sea_routes": [
+        { "destination": "sardi" },
+        { "destination": "paler" },
+        { "destination": "tunis" },
+        { "destination": "WGOL" },
+        { "destination": "WTS" },
+        { "destination": "BOT" }
+      ]
+    },
+    {
+      "name": "Bay of Tunis",
+      "sea_routes": [
+        { "destination": "tunis" },
+        { "destination": "paler" },
+        { "destination": "WM" },
+        { "destination": "IS" }
+      ]
+    },
+    {
+      "name": "Gulf of Naples",
+      "sea_routes": [
+        { "destination": "tivol" },
+        { "destination": "capua" },
+        { "destination": "naple" },
+        { "destination": "saler" },
+        { "destination": "otran" },
+        { "destination": "messi" },
+        { "destination": "ETS" },
+        { "destination": "IS", "strait": "messi" }
+      ]
+    },
+    {
+      "name": "Ionian Sea",
+      "sea_routes": [
+        { "destination": "paler" },
+        { "destination": "messi" },
+        { "destination": "otran" },
+        { "destination": "duraz" },
+        { "destination": "BOT" },
+        { "destination": "LA" },
+        { "destination": "GON", "strait": "messi" }
+      ]
+    },
+    {
+      "name": "Lower Adriatic",
+      "sea_routes": [
+        { "destination": "ancon" },
+        { "destination": "aquil" },
+        { "destination": "bari" },
+        { "destination": "otran" },
+        { "destination": "duraz" },
+        { "destination": "alban" },
+        { "destination": "herze" },
+        { "destination": "dalma" },
+        { "destination": "ragus" },
+        { "destination": "IS" },
+        { "destination": "UA" }
+      ]
+    },
+    {
+      "name": "Upper Adriatic",
+      "sea_routes": [
+        { "destination": "ancon" },
+        { "destination": "romag" },
+        { "destination": "bolog" },
+        { "destination": "ferra" },
+        { "destination": "padua" },
+        { "destination": "friul" },
+        { "destination": "carni" },
+        { "destination": "croat N" },
+        { "destination": "istri" },
+        { "destination": "dalma" },
+        { "destination": "LA" },
+        { "destination": "L" }
+      ]
+    },
+    {
+      "name": "Lagoon",
+      "sea_routes": [
+        { "destination": "padua" },
+        { "destination": "trevi" },
+        { "destination": "friul" },
+        { "destination": "venic" },
+        { "destination": "UA" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "test": {
+    "name": "Italia 1494",
+    "year": 1494,
+    "victory_conditions": {
+      "cities": 15,
+      "home_countries": 2
+    },
+    "rules": {
+      "fortress_active": false,
+      "assassinations_active": true
+    },
+    "home_countries": [
+      {
+        "faction_id": "M",
+        "province_ids": ["milan", "pavia"]
+      },
+      {
+        "faction_id": "V",
+        "province_ids": ["venic", "padua"]
+      }
+    ],
+    "powers": [
+      {
+        "id": "M",
+        "garrisons": ["milan"]
+      },
+      {
+        "id": "V",
+        "extra_provinces": ["trevi"],
+        "armies": ["padua"],
+        "fleets": ["TS"]
+      }
+    ],
+    "variable_income_home_countries": ["M", "V"],
+    "variable_income_provinces": ["rome"]
+  },
+  "Be": {
+    "name": "The balance of power (six players)",
+    "year": 1454,
+    "victory_conditions": {
+      "cities": 15,
+      "home_countries": 2
+    },
+    "rules": {
+      "fortress_active": false
+    },
+    "home_countries": [
+      {
+        "faction_id": "M",
+        "province_ids": [
+          "pavia",
+          "cremo",
+          "como",
+          "forno",
+          "pianc",
+          "parma",
+          "milan"
+        ]
+      },
+      {
+        "faction_id": "V",
+        "province_ids": [
+          "padua",
+          "veron",
+          "venic",
+          "dalma",
+          "bresc",
+          "berga",
+          "vicen",
+          "trevi",
+          "friul",
+          "istri"
+        ]
+      },
+      {
+        "faction_id": "L",
+        "province_ids": ["arezz", "flore", "pisa", "pisto"]
+      },
+      {
+        "faction_id": "P",
+        "province_ids": [
+          "bolog",
+          "ancon",
+          "perug",
+          "rome",
+          "patri",
+          "spole",
+          "urbin",
+          "romag",
+          "tivol"
+        ]
+      },
+      {
+        "faction_id": "N",
+        "province_ids": [
+          "bari",
+          "naple",
+          "messi",
+          "paler",
+          "otran",
+          "saler",
+          "aquil",
+          "capua"
+        ]
+      },
+      {
+        "faction_id": "T",
+        "province_ids": ["alban", "duraz", "tunis", "herze", "bosni"]
+      }
+    ],
+    "powers": [
+      {
+        "id": "M",
+        "armies": ["pavia", "cremo", "milan"]
+      },
+      {
+        "id": "V",
+        "armies": ["padua", "veron"],
+        "fleets": ["dalma"],
+        "garrisons": ["venic"]
+      },
+      {
+        "id": "L",
+        "armies": ["arezz", "flore"],
+        "fleets": ["pisa"]
+      },
+      {
+        "id": "P",
+        "armies": ["bolog", "perug", "rome"],
+        "fleets": ["ancon"]
+      },
+      {
+        "id": "N",
+        "armies": ["bari", "messi"],
+        "fleets": ["naple", "paler"]
+      },
+      {
+        "id": "T",
+        "armies": ["alban"],
+        "fleets": ["duraz", "tunis"]
+      }
+    ],
+    "excluded_locations": [
+      "hunga",
+      "austr",
+      "tyrol",
+      "carin",
+      "swiss",
+      "avign",
+      "marse",
+      "prove"
+    ],
+    "variable_income_home_countries": ["P", "N", "M", "T", "L", "L", "V", "V"],
+    "variable_income_provinces": ["genoa", "naple", "milan"]
+  }
+}
