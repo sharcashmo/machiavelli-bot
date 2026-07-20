@@ -154,7 +154,10 @@ def test_load_game_success():
     mock_cursor = MagicMock(spec=sqlite3.Cursor)
     mock_conn.cursor.return_value = mock_cursor
 
-    mock_cursor.fetchone.return_value = (7, "Campaña de Milán", 987654, None, 0, None, None, '["venic", "bari"]', '["rome", "parma"]')
+    mock_cursor.fetchone.return_value = (
+        7, "Campaña de Milán", 987654, None, 0, None, None,
+        '["venic", "bari"]', '["rome", "parma"]', '["turin"]'
+    )
 
     lista_jugadores_simulados = [
         Player(player_id="fake_carlos", discord_id=111),
@@ -175,11 +178,12 @@ def test_load_game_success():
         assert game.players == lista_jugadores_simulados
         assert "venic" in game.famine
         assert "parma" in game.independent_garrisons
+        assert "turin" in game.besieges
 
         mock_cursor.execute.assert_has_calls([
             call(
-                "SELECT id, name, channel_id, scenario_id, turn_number, "
-                "weekly_deadline, next_deadline, famine, independent_garrisons FROM games WHERE id = ?", (7,)
+                "SELECT id, name, channel_id, scenario_id, turn_number, weekly_deadline, next_deadline, "
+                "famine, independent_garrisons, besieges FROM games WHERE id = ?", (7,)
             ),
             call("SELECT message FROM game_events WHERE game_id = ? ORDER BY id ASC", (7,))
         ])
@@ -214,9 +218,9 @@ def test_game_save_inserts_new_game():
 
     # Verificamos que llamó al INSERT
     mock_cursor.execute.assert_any_call(
-        "INSERT INTO games (name, channel_id, scenario_id, turn_number, "
-        "weekly_deadline, next_deadline, famine, independent_garrisons) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        ("Nueva Partida", 111, None, 0, None, None, "[]", "[]")
+        "INSERT INTO games (name, channel_id, scenario_id, turn_number, weekly_deadline, next_deadline, "
+        "famine, independent_garrisons, besieges) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        ("Nueva Partida", 111, None, 0, None, None, "[]", "[]", "[]")
     )
     # Verificamos que el objeto actualizó su ID en memoria
     assert game.database_id == 99
@@ -238,9 +242,9 @@ def test_game_save_updates_existing_game():
 
     # Verificamos que ejecutó el UPDATE usando el ID como filtro
     mock_cursor.execute.assert_any_call(
-        "UPDATE games SET name = ?, channel_id = ?, scenario_id = ?, turn_number = ?, "
-        "weekly_deadline = ?, next_deadline = ?, famine = ?, independent_garrisons = ? WHERE id = ?", 
-        ("Partida Renombrada", 222, None, 0, None, None, "[]", "[]", 42)
+        "UPDATE games SET name = ?, channel_id = ?, scenario_id = ?, turn_number = ?, weekly_deadline = ?, "
+        "next_deadline = ?, famine = ?, independent_garrisons = ?, besieges = ? WHERE id = ?", 
+        ("Partida Renombrada", 222, None, 0, None, None, "[]", "[]", "[]", 42)
     )
     # El ID no debe haber cambiado
     assert game.database_id == 42

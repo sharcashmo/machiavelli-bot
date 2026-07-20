@@ -120,7 +120,7 @@ class Player:
             ),
         )
     
-    def player_report(self, map: Map):
+    def player_report(self, map: Map, besieges: list[str]) -> list[str]:
         """Genera las líneas del informe de situación para el jugador."""
         report = []
         report.append(f"__**  {PowerDict[self.power]} (<@{self.discord_id}>)  **__")
@@ -142,7 +142,10 @@ class Player:
                 assassination = " y ".join([", ".join(ass_names[0:-1]), ass_names[-1]])
             else:
                 assassination = ass_names[0]
-            report.append(f"***Recursos:*** {self.ducats} ducados. Fichas de asesinato: {assassination}")
+            report.append(
+                f"***Recursos:*** {self.ducats} ducados. "
+                f"Fichas de asesinato ({len(ass_names)}): {assassination}"
+            )
 
             # Provincias controladas
             province_names = [p.name for k, p in map.provinces.items() if k in self.controlled_locations]
@@ -168,7 +171,10 @@ class Player:
                 report.append(f"***Rebeliones:*** {provinces}")
             
             # Ejércitos
-            province_names = [p.name for k, p in map.provinces.items() if k in self.armies]
+            province_names = [
+                " ".join([p.name, "(asediando)"]) if k in besieges else p.name
+                for k, p in map.provinces.items() if k in self.armies
+            ]
             if len(province_names) == 0:
                 provinces = "Ninguno"
             elif len(province_names) > 1:
@@ -178,7 +184,10 @@ class Player:
             report.append(f"***Ejércitos:*** {provinces}")
             
             # Flotas
-            province_names = [p.name for k, p in map.provinces.items() if k in self.fleets]
+            province_names = [
+                " ".join([p.name, "(asediando)"]) if k in besieges else p.name
+                for k, p in map.provinces.items() if k in self.fleets
+            ]
             if len(province_names) == 0:
                 provinces = "Ninguna"
             elif len(province_names) > 1:
@@ -267,6 +276,7 @@ class Game:
         map (Map | None): El mapa de la partida.
         famine (list[str]): Identificadores de las provincias en que hay hambre.
         independent_garrisons (list[str]): Identificadores de las provincias en que hay guarniciones independientes.
+        besieges (list[str]): Indentificadores de las provincias en las que se están desarrollando asedios.
         turn_events (list[str]): Eventos ocurridos durante el turno, para su publicación en el reporte.
     """
 
@@ -282,6 +292,7 @@ class Game:
     map: Map | None = None
     famine: list[str] = field(default_factory=list)
     independent_garrisons: list[str] = field(default_factory=list)
+    besieges: list[str] = field(default_factory=list)
     turn_events: list[str] = field(default_factory=list)
 
     def save(self, conn: sqlite3.Connection) -> None:
@@ -298,7 +309,8 @@ class Game:
         columns = [
             f.name for f in fields(self)
             if f.name not in (
-                "database_id", "players", "scenario", "map", "famine", "independent_garrisons", "turn_events"
+                "database_id", "players", "scenario", "map",
+                "famine", "independent_garrisons", "besieges", "turn_events"
             )
         ]
         values = [getattr(self, col) for col in columns]
@@ -310,6 +322,10 @@ class Game:
         garrisons_json = json.dumps(self.independent_garrisons)
         columns.append("independent_garrisons")
         values.append(garrisons_json)
+
+        besieges_json = json.dumps(self.besieges)
+        columns.append("besieges")
+        values.append(besieges_json)
 
         # Partida nueva
         if self.database_id is None:
@@ -516,9 +532,11 @@ class Game:
         # Parsea famine y garrisons (de JSON a list)
         famine = json.loads(init_kwargs["famine"]) if init_kwargs["famine"] else []
         garrisons = json.loads(init_kwargs["independent_garrisons"]) if init_kwargs["independent_garrisons"] else []
+        besieges = json.loads(init_kwargs["besieges"]) if init_kwargs["besieges"] else []
 
         init_kwargs["famine"] = famine
         init_kwargs["independent_garrisons"] = garrisons
+        init_kwargs["besieges"] = besieges
 
         game = cls(**init_kwargs)
 
@@ -725,6 +743,6 @@ class Game:
             report.append(f"***Guarniciones independientes:*** {garrisons}")
         
         for p in self.players:
-            report.extend(p.player_report(self.map))
+            report.extend(p.player_report(self.map, self.besieges))
 
         return report
