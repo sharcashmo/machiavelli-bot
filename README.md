@@ -40,7 +40,7 @@ COMMANDS_CHANNEL=id_del_canal
 
 ## Versión
 
-La versión actual de desarrollo es la 0.1.0. La versión actual de producción es la 0.1.0.
+La versión actual de desarrollo es la 0.1.1. La versión actual de producción es la 0.1.0.
 
 ## Comandos disponibles
 
@@ -125,3 +125,30 @@ Añade un jugador a la partida.
 
 *Versión 0.1.0*
 Ejecuta las órdenes de la partida y genera el informe para el siguiente turno.
+
+## Futuras versiones
+
+Se prevén las siguientes versiones
+
+### Versión 0.1.1
+
+Algunas pequeñas correcciones que no afectan a los comandos.
+
+- [X] Añadir información sobre los asedios en marcha.
+
+### Versión 0.2.0 y siguientes
+
+Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a las versiones conforme se completen.
+
+- [ ] Cambiar el nombre del grupo de comandos a algo más corto y fácil de escribir (¿`/shi` y  `/shi_admin`?)
+- [ ] Crear nuevos comandos para introducir las órdenes de forma interactiva
+- [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades en él
+
+## Histórico de versiones
+
+- Versión 0.0.1:
+  Primera versión, incluye comandos para enviar las órdenes como fichero adjunto, para ver quién los ha mandado y para descargarlos. Este primer bot no tiene ninguna lógica relacionada con el juego, solo es un "almacenador" de mensajes.
+- Versión 0.1.0: Primer bot que tiene la lógica del juego. Incorpora sus tablas; las potencias, los jugadores, la información de la situación del tablero y la ejecución y reporte del primerísimo turno, el inicio de Primavera (Hambre e Ingresos).
+
+  Estos comandos (bajo el grupo `/sharcashvelli` y `/sharcashvelli_admin`) conviven con los de la *versión 0.0.1* ya que no tienen forma de permitir el envío de órdenes de juego, que todavía deben enviarse con `!send`.
+- Versión 0.1.1: Se añade información sobre los asedios.

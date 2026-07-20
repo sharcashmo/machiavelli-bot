@@ -2,7 +2,7 @@
 import logging
 import sqlite3
 
-_SCHEMA_VERSION = 1
+_SCHEMA_VERSION = 2
 
 _UPGRADES = (
     # SCHEMA 1
@@ -44,6 +44,10 @@ _UPGRADES = (
         message TEXT NOT NULL,
         FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
     );
+    """,
+    # SCHEMA 2
+    """\
+    ALTER TABLE games ADD COLUMN besieges TEXT;
     """,
 )
 
