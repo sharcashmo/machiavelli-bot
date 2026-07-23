@@ -438,12 +438,12 @@ async def game_report(interaction: discord.Interaction):
         
         # Enviamos el último bloque que haya quedado rezagado en el bucle
         if current_message:
-            await interaction.followup.send(current_message)
+            await interaction.followup.send(current_message, ephemeral=True)
             
     except GameNotFoundException:
-        await interaction.followup.send("**Error:** No hay ninguna partida activa en este canal para poder ejecutarla.")
+        await interaction.followup.send("**Error:** No hay ninguna partida activa en este canal para poder ejecutarla.", ephemeral=True)
     except Exception as e:
-        await interaction.followup.send(f"**Error inesperado al mostrar el informe:** `{type(e).__name__}: {e}`.")
+        await interaction.followup.send(f"**Error inesperado al mostrar el informe:** `{type(e).__name__}: {e}`.", ephemeral=True)
 
 @game_group.command(
     name="cmdlist", description="Muestra la lista de tus órdenes registradas"
