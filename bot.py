@@ -74,14 +74,14 @@ async def on_ready():
     database.init_db()
 
     # Los nuevos comandos
-    sharcashvelli_group, sharcashvelli_admin_group = init_game_commands(DB_PATH)
-    if not bot.tree.get_command("sharcashvelli"):
-        bot.tree.add_command(sharcashvelli_group)
-        print("Grupo 'sharcashvelli' registrado en memoria local.")
+    mach_group, shar_group = init_game_commands(DB_PATH)
+    if not bot.tree.get_command("mach"):
+        bot.tree.add_command(mach_group)
+        print("Grupo 'mach' registrado en memoria local.")
         
-    if not bot.tree.get_command("sharcashvelli_admin"):
-        bot.tree.add_command(sharcashvelli_admin_group)
-        print("Grupo 'sharcashvelli_admin' registrado en memoria local.")
+    if not bot.tree.get_command("shar"):
+        bot.tree.add_command(shar_group)
+        print("Grupo 'shar' registrado en memoria local.")
 
 @bot.event
 async def on_app_command_error(interaction: discord.Interaction, error: app_commands.AppCommandError):

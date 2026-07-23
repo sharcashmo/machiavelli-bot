@@ -81,67 +81,70 @@ Descarga un archivo enviado por un jugador. El identificador del archivo es el q
 *Versión 0.0.1*
 Elimina todos los mensajes almacenados en el bot.
 
-### `/sharcashvelli` (todos)
+### `/mach` (todos)
 
-*Versión 0.1.0*
+*Versión 0.2.0*
 Conjunto de comandos para su uso por los jugadores. En este momento hay dos.
+En la versión `0.1.x` el comando era `/sharcashvelli`.
 
-#### `/sharcashvelli game_status`
+#### `/mach game_status`
 
-*Versión 0.1.0*
+*Versión 0.2.0*
 Muestra el estado de la partida.
 
-#### `/sharcashvelli game_report`
+#### `/mach game_report`
 
-*Versión 0.1.0*
+*Versión 0.2.0*
 Muestra el último informe de la partida.
 
-### `/sharcashvelli_admin` (Juez)
+### `/shar` (Juez)
 
-*Versión 0.1.0*
+*Versión 0.2.0*
 Conjunto de comandos para su uso por el administrador. En este momento hay seis.
+En la versión `0.1.x` el comando era `/sharcashvelli_admin`.
 
-#### `/sharcashvelli_admin create`
+#### `/shar create`
 
-*Versión 0.1.0*
+*Versión 0.2.0*
 Crea una partida en el canal en que se ejecuta.
 
-#### `/sharcashvelli_admin set_scenario`
+#### `/shar set_scenario`
 
-*Versión 0.1.0*
+*Versión 0.2.0*
 Selecciona un escenario para la partida.
 
-#### `/sharcashvelli_admin set_deadlines`
+#### `/shar set_deadlines`
 
-*Versión 0.1.0*
+*Versión 0.2.0*
 Fija las fechas de ejecuciones de turnos de la partida.
 
-#### `/sharcashvelli_admin add_player`
+#### `/shar add_player`
 
-*Versión 0.1.0*
+*Versión 0.2.0*
 Añade un jugador a la partida.
 
-#### `/sharcashvelli_admin run_game`
+#### `/shar run_game`
 
-*Versión 0.1.0*
+*Versión 0.2.0*
 Ejecuta las órdenes de la partida y genera el informe para el siguiente turno.
 
 ## Futuras versiones
 
 Se prevén las siguientes versiones
 
-### Versión 0.1.1
+### Versión 0.2.0
 
-Algunas pequeñas correcciones que no afectan a los comandos.
+- [X] Los grupos de comandos ahora se llaman `mach` para los comandos de usuario, y `shar` para los de administración.
+- [X] El comando `/mach game_report` ahora manda un mensaje privado (ephemeral) para no saturar el canal.
+- [X] Crear nuevos comandos para introducir las órdenes de forma interactiva
+  - [X] Crear nuevo comando `/mach cmdlist` para mostrar los comandos que tenemos actualmente escritos.
+  - [X] Crear nuevo comando `/mach cmd` para enviar órdenes. Parcial, solo soporta las órdenes de mantenimiento.
 
-- [X] Añadir información sobre los asedios en marcha.
-
-### Versión 0.2.0 y siguientes
+### Desarrollos futuros
 
 Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a las versiones conforme se completen.
 
-- [ ] Cambiar el nombre del grupo de comandos a algo más corto y fácil de escribir (¿`/shi` y  `/shi_admin`?)
-- [ ] Crear nuevos comandos para introducir las órdenes de forma interactiva
+- [ ] Ejecutar todas las acciones del turno. Actualmente solo hace el setup inicial
 - [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades en él
 
 ## Histórico de versiones
@@ -151,4 +154,5 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
 - Versión 0.1.0: Primer bot que tiene la lógica del juego. Incorpora sus tablas; las potencias, los jugadores, la información de la situación del tablero y la ejecución y reporte del primerísimo turno, el inicio de Primavera (Hambre e Ingresos).
 
   Estos comandos (bajo el grupo `/sharcashvelli` y `/sharcashvelli_admin`) conviven con los de la *versión 0.0.1* ya que no tienen forma de permitir el envío de órdenes de juego, que todavía deben enviarse con `!send`.
+
 - Versión 0.1.1: Se añade información sobre los asedios.

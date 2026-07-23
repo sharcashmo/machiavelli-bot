@@ -2,7 +2,7 @@
 import logging
 import sqlite3
 
-_SCHEMA_VERSION = 2
+_SCHEMA_VERSION = 3
 
 _UPGRADES = (
     # SCHEMA 1
@@ -48,6 +48,19 @@ _UPGRADES = (
     # SCHEMA 2
     """\
     ALTER TABLE games ADD COLUMN besieges TEXT;
+    """,
+    # SCHEMA 3
+    """\
+    CREATE TABLE IF NOT EXISTS commands (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        game_id INTEGER NOT NULL,
+        player_id TEXT NOT NULL,
+        actor TEXT NOT NULL,
+        command TEXT NOT NULL,
+        target TEXT,
+        FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE,
+        FOREIGN KEY (game_id, player_id) REFERENCES players(game_id, player_id) ON DELETE CASCADE
+    );
     """,
 )
 

@@ -4,26 +4,14 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Self
 from types import MappingProxyType
-
-PowerDict: MappingProxyType[str, str] = MappingProxyType(
-    {
-        "M": "Milan",
-        "V": "Venice",
-        "L": "Florence",
-        "N": "Naples",
-        "P": "Papacy",
-        "F": "France",
-        "T": "Turks",
-        "A": "Austria",
-    }
-)
+from machiavelli.tables import GameTables
 
 @dataclass
 class Power:
     """Representa una potencia activa en la partida.
 
     Attributes:
-        id (str): Identificador de una sola letra de la potencia (clave de PowerDict).
+        id (str): Identificador de una sola letra de la potencia (clave de GameTables.powers).
         name (str): Nombre completo de la potencia, asignado automáticamente.
         home_countries (list[str]): IDs de los países natales controlados actualmente (ej. ["M"]).
         controlled_provinces (list[str]): IDs de las provincias controladas actualmente (ej. ["rome"]).
@@ -42,9 +30,9 @@ class Power:
 
     def __post_init__(self):
         """Configuración inicial."""
-        if self.id not in PowerDict:
-            raise ValueError(f"El ID de potencia '{self.id}' no es válido en el PowerDict.")
-        self.name = PowerDict[self.id]
+        if self.id not in GameTables.powers:
+            raise ValueError(f"El ID de potencia '{self.id}' no es válido en el GameTables.powers.")
+        self.name = GameTables.powers[self.id]
 
 
 @dataclass(frozen=True)
@@ -65,7 +53,7 @@ class HomeCountry:
     """Define el territorio inicial y originario de una facción en el escenario.
 
     Attributes:
-        faction_id (str): ID de la facción propietaria (ej. "M", "V" de map.PowerDict).
+        faction_id (str): ID de la facción propietaria (ej. "M", "V" de GameTables.powers).
         province_ids (list[str]): Lista de IDs de las provincias que componen este país natal.
     """
 

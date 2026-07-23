@@ -22,46 +22,57 @@ class GameTables:
     expenses = {
         "A": {
             "text": "Paliar hambruna",
+            "target_type": "province",
             "cost": 3
         },
         "B": {
             "text": "Pacificar rebelión",
+            "target_type": "province",
             "cost": 12
         },
         "C": {
             "text": "Comenzar rebelión en provincia no natal",
+            "target_type": "province",
             "cost": 9
         },
         "D": {
             "text": "Comenzar rebelión en provincia natal",
+            "target_type": "province",
             "cost": 15
         },
         "E": {
             "text": "Ordenar asesinato",
+            "target_type": "power",
             "cost": 12
         },
         "F": {
             "text": "Contra-soborno",
+            "target_type": "unit",
             "cost": 3
         },
         "G": {
             "text": "Desbandar guarnición autónoma",
+            "target_type": "unit",
             "cost": 6
         },
         "H": {
             "text": "Comprar guarnición autónoma",
+            "target_type": "unit",
             "cost": 9
         },
         "I":  {
             "text": "Convertir guarnición en autónoma",
+            "target_type": "unit",
             "cost": 9
         },
         "J":  {
             "text": "Desbandar unidad",
+            "target_type": "unit",
             "cost": 12
         },
         "K":  {
             "text": "Comprar Ejército o Flota",
+            "target_type": "unit",
             "cost": 18
         }
     }
@@ -75,14 +86,68 @@ class GameTables:
         ("both", "Mal año (fila y columna)")
     ]
 
-    orders = {
-        "A": "Avanzar a Provincia o Mar",
-        "B": "Asediar Ciudad",
-        "H": "Mantener",
-        "L": "Levantar asedio",
-        "S": "Apoyar Provincia o Mar",
-        "T": "Transportar Ejército",
-        "C": "Convertir o desbandar"
+    powers = {
+        "M": "Milan",
+        "V": "Venice",
+        "L": "Florence",
+        "N": "Naples",
+        "P": "Papacy",
+        "F": "France",
+        "T": "Turks",
+        "A": "Austria",
+    }
+
+    actors = {
+        "A": "Ejército",
+        "F": "Flota",
+        "G": "Guarnición",
+        "E": "Gasto"
+    }
+
+    military_orders = {
+        "A": {
+            "text": "Avanzar a Provincia o Mar",
+            "target_type": "location"
+        },
+        "B": {
+            "text": "Asediar Ciudad",
+            "target_type": None
+        },
+        "H": {
+            "text": "Mantener",
+            "target_type": None
+        },
+        "L": {
+            "text": "Levantar asedio",
+            "target_type": None
+        },
+        "S": {
+            "text": "Apoyar Provincia o Mar",
+            "target_type": "location_ext"
+        },
+        "T": {
+            "text": "Transportar Ejército",
+            "target_type": "army_ext"
+        },
+        "C": {
+            "text": "Convertir o desbandar",
+            "target_type": "unit_type"
+        }
+    }
+
+    maintenance_orders = {
+        "M": {
+            "text": "Mantener",
+            "target_type": None
+        },
+        "D": {
+            "text": "Desbandar",
+            "target_type": None
+        },
+        "R": {
+            "text": "Reclutar",
+            "target_type": None
+        }
     }
 
     famine = [

@@ -1,6 +1,7 @@
 # machiavelli/game.py
+from __future__ import annotations
 from dataclasses import dataclass, field, fields
-from machiavelli.scenario import Scenario, Power, HomeCountry, PowerDict
+from machiavelli.scenario import Scenario, Power, HomeCountry
 from machiavelli.map import Map
 from machiavelli.tables import GameTables
 from typing import Self
@@ -27,6 +28,155 @@ class GameNotFoundException(Exception):
     pass
 
 @dataclass
+class Command:
+    """Representa un comando en la partida.
+
+    En esta clase guardaremos los comandos de los jugadores. Además guardamos datos sobre el jugador y la partida
+    necesarios para interactuar con la base de datos.
+
+    El formato de los comandos va a ser el siguiente:
+
+    - actor:
+        A <provincia>: el ejército que esté situado en esa provincia.
+        F <provincia>: la flota situada en sa provincia.
+        G <provincia>: la guarnición que esté situada en esa provincia.
+        E <gasto>    : un gasto/soborno/etc.
+    - command:
+        + En la fase de mantenimiento:
+            actor es una unidad
+            * M: mantener
+            * D: desbandar
+            * C: crear
+
+    Attributes:
+        game(Game)    : Referencia al Game a que pertenece este comando.
+        player(Player): Referencia al Player al que pertenece este comando.
+        actor (str)   : Unidad, provincia o facción que está actuando.
+        command (str) : Comando que se está ejecutando.
+        target (str)  : Objetivo del comando.
+    """
+    
+    game: Game
+    player: Player
+    actor: str
+    command: str
+    target: str
+
+    def save(self, conn: sqlite3.Connection):
+        """Guarda los datos del comando"""
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            "INSERT INTO commands (game_id, player_id, actor, command, target) VALUES (?, ?, ?, ?, ?)",
+            (self.game.database_id, self.player.player_id, self.actor, self.command, self.target))
+    
+    @classmethod
+    def load_commands(cls, conn: sqlite3.Connection, game: Game, player: Player) -> list[Self]:
+        """Busca y devuelve todos los comandos de un jugador.
+
+        Args:
+            conn (sqlite3.Connection): Conexión activa a la BBDD.
+            game (Game)              : Referencia a la partida actual.
+            player (Player)          : Referencia al jugador actual.
+
+        Returns:
+            list[Command]: Lista de objetos Command instanciados.
+        """
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT actor, command, target FROM commands WHERE game_id = ? AND player_id = ?",
+            (game.database_id, player.player_id)
+        )
+        rows = cursor.fetchall()
+
+        commands = []
+        for row in rows:
+            commands.append(cls(game, player, actor = row[0], command = row[1], target = row[2]))
+
+        return commands
+    
+    def __str__(self) -> str:
+        """Devuelve una representación legible del comando"""
+
+        provinces = self.game.map.provinces
+        seas = self.game.map.seas
+
+        locations = provinces | seas
+
+        try:
+            report = []
+            
+            # target_type will be set from action
+            target_type = None
+
+            # Actor
+            # A/F/G/E (Army/Fleet/Garrison/Expense)
+            actor_type, actor_id = self.actor.split()
+            report.append(GameTables.actors[actor_type])
+
+            if actor_type in ("A", "F", "G"):
+                # Army/Fleet/Garrison
+                report.append(locations[actor_id].name)
+            elif actor_type == "E":
+                # Expense
+                report.append(
+                    f"{GameTables.expenses[actor_id]['text']} ({GameTables.expenses[actor_id]['cost']})"
+                )
+                target_type = GameTables.expenses[actor_id]['target_type']
+            
+            # Command
+            # For A/F/G it is maintenance_orders (spring maintenance turn) or military_orders (campaigns)
+            # For E it is the ammount of money to spend
+            if actor_type in ("A", "F", "G"):
+                # Army/Fleet/Garrison
+                if self.game.turn_number % 4 == 1:
+                    # Spring maintenance turn
+                    report.append(GameTables.maintenance_orders[self.command]["text"])
+                    target_type = GameTables.maintenance_orders[self.command]["target_type"]
+                else:
+                    # Campaign
+                    report.append(GameTables.military_orders[self.command]["text"])
+                    target_type = GameTables.maintenance_orders[self.command]["target_type"]
+            elif actor_type == "E":
+                report.append(self.command)
+            
+            # Target. Target types are
+            # None
+            # army_ext    : an army that can be from other faction (for transport orders)
+            # location    : a location (province/sea)
+            # location_ext: a location (province/sea); a faction descriptor can be added (for use with support orders)
+            # province    : a province
+            # power       : una potencia (para su uso para los asesinatos)
+            # unit        : una unidad cualquiera (ejército/flota/guarnición)
+            if target_type:
+                if target_type == "army_ext":
+                    army_ext = self.target.split()
+                    report.append(GameTables.actors[army_ext[0]])
+                    report.append(provinces[army_ext[1]].name)
+                    if len(army_ext > 2):
+                        report.append(GameTables.powers[army_ext[2]])
+                elif target_type == "location":
+                    report.append(locations[self.target].name)
+                elif target_type == "location_ext":
+                    location_ext = self.target.split()
+                    report.append(locations[self.location_ext[0]].name)
+                    if len(location_ext > 1):
+                        report.append(GameTables.powers[location_ext[1]])
+                elif target_type == "province":
+                    report.append(provinces[self.target].name)
+                elif target_type == "power":
+                    report.append(GameTables.powers[self.target])
+                elif target_type == "unit":
+                    unit_ext = self.target.split()
+                    report.append(GameTables.actors[unit_ext[0]])
+                    report.append(locations[unit_ext[1]].name)
+
+            return " ".join(report)
+        except:
+            # Alguna orden mal formada
+            return "Orden inválida"
+
+@dataclass
 class Player:
     """Representa a un jugador de la partida.
 
@@ -34,20 +184,22 @@ class Player:
     así como el estado de sus ejércitos, provincias y recursos.
 
     Attributes:
-        player_id (str): Identificador único del jugador.
-        discord_id (int): Identificador de usuario de Discord.
+        game (Game)                     : Partida a la que pertenece el jugador.
+        player_id (str)                 : Identificador único del jugador.
+        discord_id (int)                : Identificador de usuario de Discord.
         controlled_locations (list[str]): Lista de códigos de localizaciones controladas por el jugador.
-        armies (list[str]): Lista de códigos de localizaciones en que se sitúan los Ejércitos del jugador.
-        fleets (list[str]): Lista de códigos de localizaciones en que se sitúan las Flotas del jugador.
-        garrisons (list[str]): Lista de códigos de localizaciones en que se situán las Guarniciones del jugador.
-        ass_counters (list[str]): Lista de fichas de asesinatos.
-        ducats (int): Ducados del jugador.
-        rebelled_provinces (list[str]): Lista de códigos de localizaciones de provincias rebeladas.
-        rebelled_cities (list[str]): Lista de códigos de localizaciones de ciudades rebeladas.
-        home_countries (list[str]): Lista de naciones natales que controla el jugador.
-        power (str): Potencia que maneja el jugador
+        armies (list[str])              : Lista de códigos de localizaciones en que se sitúan los Ejércitos del jugador.
+        fleets (list[str])              : Lista de códigos de localizaciones en que se sitúan las Flotas del jugador.
+        garrisons (list[str])           : Lista de códigos de localizaciones en que se situán las Guarniciones del jugador.
+        ass_counters (list[str])        : Lista de fichas de asesinatos.
+        ducats (int)                    : Ducados del jugador.
+        rebelled_provinces (list[str])  : Lista de códigos de localizaciones de provincias rebeladas.
+        rebelled_cities (list[str])     : Lista de códigos de localizaciones de ciudades rebeladas.
+        home_countries (list[str])      : Lista de naciones natales que controla el jugador.
+        power (str)                     : Potencia que maneja el jugador
     """
 
+    game: Game
     player_id: str
     discord_id: int | None = None
     controlled_locations: list[str] = field(default_factory=list)
@@ -60,6 +212,7 @@ class Player:
     rebelled_cities: list[str] = field(default_factory=list)
     home_countries: list[str] = field(default_factory=list)
     power: str | None = None
+    commands: list[Command] = field(default_factory=list)
 
     def assign_power(self, power: Power):
         """Asigna una potencia al jugador e inicializa sus valores"""
@@ -70,7 +223,7 @@ class Player:
         self.fleets = power.fleets.copy()
         self.garrisons = power.garrisons.copy()
 
-    def save(self, conn: sqlite3.Connection, game_id: int) -> None:
+    def save(self, conn: sqlite3.Connection) -> None:
         """Guarda o actualiza al jugador en la base de datos vinculándolo a una partida.
 
         Al usar ON CONFLICT, si el par (game_id, player_id) ya existe,
@@ -78,7 +231,6 @@ class Player:
 
         Args:
             conn (sqlite3.Connection): La conexión a la base de datos.
-            game_id (int): El ID de la partida.
         """
         cursor = conn.cursor()
 
@@ -114,20 +266,43 @@ class Player:
                 power = excluded.power
             """,
             (
-                game_id, self.player_id, self.discord_id, locations_json,
+                self.game.database_id, self.player_id, self.discord_id, locations_json,
                 armies_json, fleets_json, garrisons_json, ass_counters_json, self.ducats,
                 rebelled_provinces_json, rebelled_cities_json, home_countries_json, self.power
             ),
         )
+
+        # Guarda los comandos del jugador
+        self.save_commands(conn)
     
-    def player_report(self, map: Map, besieges: list[str]) -> list[str]:
+    def save_commands(self, conn: sqlite3.Connection) -> None:
+        """Guarda o actualiza las órdenes del jugador
+
+        Args:
+            conn (sqlite3.Connection): La conexión a la base de datos.
+        """
+        cursor = conn.cursor()
+
+        # Guarda los comandos del jugador. Primero limpia los datos anteriores
+        cursor.execute(
+            "DELETE FROM commands WHERE game_id = ? AND player_id = ?",
+            (self.game.database_id, self.player_id)
+        )
+
+        for command in self.commands:
+            command.save(conn)
+    
+    def player_report(self) -> list[str]:
         """Genera las líneas del informe de situación para el jugador."""
+        map = self.game.map
+        besieges = self.game.besieges
+
         report = []
-        report.append(f"__**  {PowerDict[self.power]} (<@{self.discord_id}>)  **__")
+        report.append(f"__**  {GameTables.powers[self.power]} (<@{self.discord_id}>)  **__")
 
         if self.home_countries:
             # Países natales
-            hc_names = [PowerDict[p] for p in self.home_countries]
+            hc_names = [GameTables.powers[p] for p in self.home_countries]
             if len(self.home_countries) > 1:
                 hc = " y ".join([", ".join(hc_names[0:-1]), hc_names[-1]])
             else:
@@ -135,7 +310,7 @@ class Player:
             report.append(f"***Naciones controladas:*** {hc}")
 
             # Recursos
-            ass_names = [PowerDict[p] for p in self.ass_counters]
+            ass_names = [GameTables.powers[p] for p in self.ass_counters]
             if len(self.ass_counters) == 0:
                 assassination = "Ninguna"
             elif len(self.ass_counters) > 1:
@@ -209,14 +384,159 @@ class Player:
             report.append("Eliminado")
 
         return report
+    
+    # Funciones para la precarga de órdenes disponibles
+    def cmd_available_actors(self) -> list[tuple[str, str]]:
+        """Devuelve la lista de actores disponibles para una orden de un jugador.
+        
+        Los actores disponibles se devuelven como una lista de tuples, con el código y la cadena visible. Ej:
+        ("A veron", "Ejército de Verona")
+        """
+        # Primero, tenemos que saber si estamos en una campaña o en el mantenimiento
+        choices = []
+
+        map = self.game.map
+        turn_number = self.game.turn_number
+        provinces = self.game.map.provinces
+        seas = self.game.map.seas
+        locations = self.game.map.provinces | self.game.map.seas
+
+        if self.game.turn_number % 4 == 1:
+            # Primer turno de la primavera, mantenimiento
+            
+            # Los actores son todos las unidades del jugador
+            for a in self.armies:
+                choices.append((f"A {a}", f"Ejército en {provinces[a].name}"))
+            for a in self.fleets:
+                choices.append((f"F {a}", f"Flota en {locations[a].name}"))
+            for a in self.garrisons:
+                choices.append((f"G {a}", f"Guarnición en {provinces[a].name}"))
+
+            # Y, además, cualquier provincia natal del jugador que tenga ciudad
+            home_countries_cities = [
+                p
+                for hc in self.game.scenario.home_countries
+                for p in hc.province_ids
+                if hc.faction_id in self.home_countries
+                if map.provinces[p].city in ("city", "fortified")
+            ]
+            for p in home_countries_cities:
+                if p not in self.armies and p not in self.fleets:
+                    choices.append((f"A {p}", f"Ejército en {provinces[p].name} (reclutar)"))
+                    if map.provinces[p].has_port:
+                        choices.append((f"F {p}", f"Flota en {provinces[p].name} (reclutar)"))
+                if p not in self.garrisons:
+                    choices.append((f"G {p}", f"Guarnición en {provinces[p].name} (reclutar)"))
+        else:
+            # Campaña
+            pass
+
+        return choices
+
+    def cmd_available_commands(self, actor: str) -> list[tuple[str, str]]:
+        """Devuelve la lista de comandos disponibles para una orden de un jugador y un actor.
+        
+        El actor se entrega como una cadena, en el que se muestra el tipo de actor, y su identificación.
+
+        Los comandos disponibles se devuelven como una lista de tuples, con el código y la cadena visible. Ej:
+        ("M", "Mantener").
+        """
+        # Primero, tenemos que saber si estamos en una campaña o en el mantenimiento
+        choices = []
+
+        if self.game.turn_number % 4 == 1:
+            # Primer turno de la primavera, mantenimiento
+            
+            # Los actores son todos las unidades del jugador
+            actor_type, actor_id = actor.split()
+            
+            # ¿Es nuevo?
+            if ((actor_type == "A" and actor_id in self.armies) or
+                (actor_type == "F" and actor_id in self.fleets) or
+                (actor_type == "G" and actor_id in self.garrisons)):
+                # Es una unidad existente
+                for c in ("M", "D"):
+                    choices.append((c, GameTables.maintenance_orders[c]["text"]))
+            else:
+                # Es una unidad nueva. Permito "D"isolver para cancelar órdenes previas
+                for c in ("R", "D"):
+                    choices.append((c, GameTables.maintenance_orders[c]["text"]))
+        else:
+            # Campaña
+            pass
+
+        return choices
+
+    def cmd_available_targets(self, actor: str, command: str) -> list[tuple[str, str]]:
+        """Devuelve la lista de comandos disponibles para una orden de un jugador y un actor.
+        
+        El actor se entrega como una cadena, en el que se muestra el tipo de actor, y su identificación.
+        El comando es una cadena simple, el código de comando.
+
+        Los comandos disponibles se devuelven como una lista de tuples, con el código y la cadena visible. Ej:
+        ("M", "Mantener").
+        """
+        # Primero, tenemos que saber si estamos en una campaña o en el mantenimiento
+        choices = []
+
+        if self.game.turn_number % 4 == 1:
+            # Primer turno de la primavera, mantenimiento
+            choices.append(("", "Ninguno"))
+        else:
+            # Campaña
+            pass
+
+        return choices
+    
+    def cmd_add_command(self, command: Command) -> list[str]:
+        """Añade o modifica una orden del jugador"""
+        report = []
+
+        # Reportamos la orden recibida
+        report.append(f"Orden `{command}` enviada.")
+
+        if self.game.turn_number %4 == 1:
+            # Primer turno de la primavera, mantenimiento
+            # Busco si ya existe un comando para el mismo actor
+            current_cmd = [c for c in self.commands if c.actor == command.actor]
+            if current_cmd:
+                ### Si lo hay, sustituyo el comando
+                assert len(current_cmd) == 1
+                report.append(f"Sustituye la orden anterior `{current_cmd[0]}`.")
+                current_cmd[0].command = command.command
+                current_cmd[0].target = command.target
+
+                # Si es una unidad recién creada y elijo "D" como orden, borra la orden
+                actor_type, actor_id = command.actor.split()
+
+                if (((actor_type == "A" and actor_id not in self.armies) or
+                    (actor_type == "F" and actor_id not in self.fleets) or
+                    (actor_type == "G" and actor_id not in self.garrisons)) and
+                    (command.command == "D")):
+                    self.commands.remove(current_cmd[0])
+            else:
+                if command.command != "D":
+                    ### Nuevo actor, añado el comando
+                    self.commands.append(command)
+        else:
+            # Campaña
+            pass
+
+        # Reportamos las órdenes hasta ahora
+        report.append("**Órdenes recibidas hasta ahora:**")
+        for c in self.commands:
+            report.append(f"`{c}`")
+        
+        return report
+
 
     @classmethod
-    def load_players(cls, conn: sqlite3.Connection, game_id: int) -> list[Self]:
+    def load_players(cls, conn: sqlite3.Connection, game: Game) -> list[Self]:
         """Busca y devuelve todos los jugadores asociados a un id de partida.
 
         Args:
             conn (sqlite3.Connection): Conexión activa a la BBDD.
-            game_id (int): ID numérico de la partida en la base de datos.
+            game (Game)              : Partida actual.
 
         Returns:
             list[Player]: Lista de objetos Player instanciados.
@@ -228,7 +548,7 @@ class Player:
                 ass_counters, ducats, rebelled_provinces, rebelled_cities, home_countries, power
             FROM players WHERE game_id = ?
             """,
-            (game_id,),
+            (game.database_id,),
         )
         rows = cursor.fetchall()
 
@@ -242,7 +562,8 @@ class Player:
             rebelled_provinces = json.loads(row[8]) if row[8] else []
             rebelled_cities = json.loads(row[9]) if row[9] else []
             home_countries = json.loads(row[10]) if row[10] else []
-            players.append(cls(
+            player = cls(
+                game = game,
                 player_id = row[0],
                 discord_id = row[1],
                 controlled_locations = locations,
@@ -255,7 +576,9 @@ class Player:
                 rebelled_cities = rebelled_cities,
                 home_countries = home_countries,
                 power = row[11]
-            ))
+            )
+            player.commands = Command.load_commands(conn, game, player)
+            players.append(player)
 
         return players
 
@@ -264,20 +587,20 @@ class Game:
     """Representa una partida de Machiavelli.
 
     Attributes:
-        name (str): El nombre descriptivo de la partida (ej. "Equilibrio de Poder I").
-        channel_id (int): El identificador del canal de Discord.
-        database_id (int | None): El ID autoincremental de la BBDD (None si es nueva).
-        scenario_id (str | None): El identificador del escenario.
-        turn_number (int): El número de turno actual de la partida. La partida se crea en el turn_number 0.
-        weekly_deadline (str | None): La fecha semanal en la que se ejecutarán los turnos.
-        next_deadline (str | None): La fecha en la que se ejecutará el siguiente turno.
-        players (list[Player]): Lista de jugadores apuntados a la partida.
-        scenario (Scenario | None): El escenario completo asociado a la partida.
-        map (Map | None): El mapa de la partida.
-        famine (list[str]): Identificadores de las provincias en que hay hambre.
+        name (str)                       : El nombre descriptivo de la partida (ej. "Equilibrio de Poder I").
+        channel_id (int)                 : El identificador del canal de Discord.
+        database_id (int | None)         : El ID autoincremental de la BBDD (None si es nueva).
+        scenario_id (str | None)         : El identificador del escenario.
+        turn_number (int)                : El turno actual de la partida. La partida se crea en el turn_number 0.
+        weekly_deadline (str | None)     : La fecha semanal en la que se ejecutarán los turnos.
+        next_deadline (str | None)       : La fecha en la que se ejecutará el siguiente turno.
+        players (list[Player])           : Lista de jugadores apuntados a la partida.
+        scenario (Scenario | None)       : El escenario completo asociado a la partida.
+        map (Map | None)                 : El mapa de la partida.
+        famine (list[str])               : Identificadores de las provincias en que hay hambre.
         independent_garrisons (list[str]): Identificadores de las provincias en que hay guarniciones independientes.
-        besieges (list[str]): Indentificadores de las provincias en las que se están desarrollando asedios.
-        turn_events (list[str]): Eventos ocurridos durante el turno, para su publicación en el reporte.
+        besieges (list[str])             : Indentificadores de las provincias asedios en marcha.
+        turn_events (list[str])          : Eventos ocurridos durante el turno, para su publicación en el reporte.
     """
 
     name: str
@@ -542,7 +865,7 @@ class Game:
 
         # Cargamos los jugadores
         game.database_id = game_row[0]
-        game.players = Player.load_players(conn, game_row[0])
+        game.players = Player.load_players(conn, game)
 
         # Cargamos los eventos
         cursor.execute("SELECT message FROM game_events WHERE game_id = ? ORDER BY id ASC", (game.database_id,))
@@ -659,7 +982,7 @@ class Game:
         self.turn_events.append("__**Fase de Ingresos**__")
 
         for player in self.players:
-            report.append(f"- {PowerDict[player.power]} (<@{player.discord_id}>)")
+            report.append(f"- {GameTables.powers[player.power]} (<@{player.discord_id}>)")
 
             # Ingresos fijos (provincias y mares)
             # Provincias controladas y ocupadas
@@ -693,7 +1016,7 @@ class Game:
                     dice = random.randint(1, 6)
                     this_hc_income = GameTables.variable_income[hc][dice - 1]
                     report.append(
-                        f"  * **Ingresos variables.** {PowerDict[hc]} (1d6 => {dice}), {this_hc_income} ducados")
+                        f"  * **Ingresos variables.** {GameTables.powers[hc]} (1d6 => {dice}), {this_hc_income} ducados")
                     hc_income += this_hc_income
             
             for p in self.scenario.variable_income_provinces:
@@ -712,10 +1035,15 @@ class Game:
                 f"  * **Total ingresos.** {province_income} + {city_income} + {hc_income} = {total_income} ducados")
             
             self.turn_events.append(
-                f"***{PowerDict[player.power]} (<@{player.discord_id}>):*** "
+                f"***{GameTables.powers[player.power]} (<@{player.discord_id}>):*** "
                 f"Ingresos fijos: {province_income + city_income} ducados. "
                 f"Variables: {hc_income} ducados. Total: {total_income} ducados."
             )
+
+            # Prepara las órdenes para el siguiente turno
+            player.commands = [Command(f"A {a}", "M", "") for a in player.armies]
+            player.commands.extend([Command(f"F {f}", "M", "") for f in player.fleets])
+            player.commands.extend([Command(f"G {g}", "M", "") for g in player.garrisons])
 
         return report
 
@@ -743,6 +1071,6 @@ class Game:
             report.append(f"***Guarniciones independientes:*** {garrisons}")
         
         for p in self.players:
-            report.extend(p.player_report(self.map, self.besieges))
+            report.extend(p.player_report())
 
         return report

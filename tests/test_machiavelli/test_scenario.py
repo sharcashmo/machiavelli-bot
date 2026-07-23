@@ -52,7 +52,7 @@ def mock_scenario_data():
 
 
 def test_power_creation_autogenerates_name():
-    """Comprueba que al pasar solo el ID se recupera el nombre correcto del PowerDict."""
+    """Comprueba que al pasar solo el ID se recupera el nombre correcto del GameTables.powers."""
     potencia = Power(id="M")
 
     assert potencia.id == "M"
@@ -96,7 +96,7 @@ def test_power_territory_mutation():
 def test_power_creation_with_invalid_id_raises_error():
     """Comprueba que si se intenta crear una potencia con un ID inexistente lanza un ValueError."""
     with pytest.raises(ValueError):
-        Power(id="X")  # 'X' no existe en nuestro PowerDict
+        Power(id="X")  # 'X' no existe en nuestro GameTables.powers
 
 
 

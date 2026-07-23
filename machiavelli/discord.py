@@ -1,22 +1,47 @@
 # machiavelli/discord.py
 import os
+import traceback
 import sqlite3
 import discord
 from discord import app_commands
 from datetime import datetime
 
-from machiavelli.game import Game, Player, DuplicatedGameException, GameNotFoundException
+from machiavelli.game import Game, Player, Command, DuplicatedGameException, GameNotFoundException
 from machiavelli.scenario import Scenario
+
+# Estructura del documento (para orientarme)
+# 1. Grupos de comandos
+# 2. Inicializa los comandos
+# 4. Comandos administrativos
+# 5. Comandos de los jugadores
+
+def format_error_with_location(e: Exception) -> str:
+    """Extrae el nombre de la excepción, el mensaje, el archivo y la línea exacta del error."""
+    # Obtenemos la lista de marcos de la pila donde ocurrió la excepción
+    tb_list = traceback.extract_tb(e.__traceback__)
+
+    if tb_list:
+        # Cogemos el último marco (donde saltó la excepción exactamente)
+        last_frame = tb_list[-1]
+        filename = os.path.basename(
+            last_frame.filename
+        )  # Solo el nombre del archivo (ej: discord.py)
+        lineno = last_frame.lineno
+        func_name = last_frame.name
+
+        return f"`{type(e).__name__}: {e}`\nUbicación: `{filename}:{lineno}` en `{func_name}()`"
+
+    return f"`{type(e).__name__}: {e}`"
 
 # Grupo de comandos
 game_group = app_commands.Group(
-    name="sharcashvelli", 
+    name="mach", 
     description="Comandos de las partidas de Machiavelli"
 )
 
 # Grupo de administración
 admin_group = app_commands.Group(
-    name="sharcashvelli_admin", 
+    name="shar", 
     description="Comandos de gestión interna para el Juez/Admin",
     default_permissions=discord.Permissions(administrator=True)
 )
@@ -34,6 +59,8 @@ def init_game_commands(db_path: str) -> app_commands.Group:
     admin_group.db_path = db_path
     return game_group, admin_group
 
+
+# Comandos administrativos
 
 @admin_group.command(
     name="create", description="Crea una nueva partida en este canal")
@@ -193,7 +220,7 @@ async def set_scenario(interaction: discord.Interaction, scenario_id: str):
         await interaction.followup.send(f"**Error inesperado:** `{type(e).__name__}: {e}`")
 
 
-# LA FUNCIÓN DE AUTOCOMPLETE
+# Precarga de la lista de escenarios
 @set_scenario.autocomplete("scenario_id")
 async def set_scenario_autocomplete(
     interaction: discord.Interaction, 
@@ -219,70 +246,6 @@ async def set_scenario_autocomplete(
     # Discord capa el Autocomplete a un máximo de 25 opciones en pantalla
     return choices[:25]
 
-@game_group.command(name="game_status", description="Muestra el estado actual de la partida en este canal")
-async def game_status(interaction: discord.Interaction):
-    # Deferimos porque leer la base de datos y procesar el estado puede tomar un instante
-    await interaction.response.defer(ephemeral=False)
-    
-    try:
-        with sqlite3.connect(game_group.db_path) as conn:
-            # Cargamos la partida usando el canal actual
-            game = Game.load_game(conn, channel_id=interaction.channel_id)
-            
-            # Llamamos a tu función interna que genera las líneas del reporte
-            lineas_reporte = game.report_status()
-            
-            # Unimos todas las líneas devueltas con saltos de línea
-            # Ponemos un fallback por si acaso la lista viniera vacía
-            mensaje_status = "\n".join(lineas_reporte) if lineas_reporte else "No hay datos de estado disponibles."
-            
-        # Enviamos el reporte maquetado al canal
-        await interaction.followup.send(mensaje_status)
-        
-    except GameNotFoundException:
-        await interaction.followup.send(
-            "**Error:** No hay ninguna partida activa en este canal.\n"
-            "Crea una primero usando `/sharcashvelli_admin create`."
-        )
-    except Exception as e:
-        await interaction.followup.send(f"**Error inesperado:** `{type(e).__name__}: {e}`")
-
-@game_group.command(name="game_report", description="Muestra el informe del último turno jugado")
-async def game_report(interaction: discord.Interaction):
-    # Deferimos porque leer la base de datos y procesar el estado puede tomar un instante
-    await interaction.response.defer(ephemeral=False)
-    
-    try:
-        with sqlite3.connect(game_group.db_path) as conn:
-            # Cargamos la partida usando el canal actual
-            game = Game.load_game(conn, channel_id=interaction.channel_id)
-
-        report = game.turn_report()
-
-        current_message = ""
-
-        for l in report:
-            # Comprobamos si añadir esta línea supera el límite de Discord (dejamos margen de seguridad)
-            if len(current_message) + len(l) + 1 > 1950:
-                # Enviamos lo que llevamos acumulado hasta ahora
-                await interaction.followup.send(current_message)
-                # Empezamos el nuevo bloque con la línea actual
-                current_message = l
-            else:
-                # Si cabe, la acumulamos separada por un salto de línea
-                if current_message:
-                    current_message += f"\n{l}"
-                else:
-                    current_message = l
-        
-        # Enviamos el último bloque que haya quedado rezagado en el bucle
-        if current_message:
-            await interaction.followup.send(current_message)
-            
-    except GameNotFoundException:
-        await interaction.followup.send("**Error:** No hay ninguna partida activa en este canal para poder ejecutarla.")
-    except Exception as e:
-        await interaction.followup.send(f"**Error inesperado al mostrar el informe:** `{type(e).__name__}: {e}`.")
 
 @admin_group.command(
     name="set_deadlines", description="Configura el horario semanal y el próximo deadline")
@@ -412,3 +375,294 @@ async def run_game(interaction: discord.Interaction):
         await interaction.followup.send("**Error:** No hay ninguna partida activa en este canal para poder ejecutarla.")
     except Exception as e:
         await interaction.followup.send(f"**Error inesperado al ejecutar el turno:** `{type(e).__name__}: {e}`.")
+
+
+
+# 5. Comandos de los jugadores
+
+@game_group.command(name="game_status", description="Muestra el estado actual de la partida en este canal")
+async def game_status(interaction: discord.Interaction):
+    # Deferimos porque leer la base de datos y procesar el estado puede tomar un instante
+    await interaction.response.defer(ephemeral=False)
+    
+    try:
+        with sqlite3.connect(game_group.db_path) as conn:
+            # Cargamos la partida usando el canal actual
+            game = Game.load_game(conn, channel_id=interaction.channel_id)
+            
+            # Llamamos a tu función interna que genera las líneas del reporte
+            lineas_reporte = game.report_status()
+            
+            # Unimos todas las líneas devueltas con saltos de línea
+            # Ponemos un fallback por si acaso la lista viniera vacía
+            mensaje_status = "\n".join(lineas_reporte) if lineas_reporte else "No hay datos de estado disponibles."
+            
+        # Enviamos el reporte maquetado al canal
+        await interaction.followup.send(mensaje_status)
+        
+    except GameNotFoundException:
+        await interaction.followup.send(
+            "**Error:** No hay ninguna partida activa en este canal.\n"
+            "Crea una primero usando `/sharcashvelli_admin create`."
+        )
+    except Exception as e:
+        await interaction.followup.send(f"**Error inesperado:** `{type(e).__name__}: {e}`")
+
+@game_group.command(name="game_report", description="Muestra el informe del último turno jugado")
+async def game_report(interaction: discord.Interaction):
+    # Deferimos porque leer la base de datos y procesar el estado puede tomar un instante
+    await interaction.response.defer(ephemeral=True)
+    
+    try:
+        with sqlite3.connect(game_group.db_path) as conn:
+            # Cargamos la partida usando el canal actual
+            game = Game.load_game(conn, channel_id=interaction.channel_id)
+
+        report = game.turn_report()
+
+        current_message = ""
+
+        for l in report:
+            # Comprobamos si añadir esta línea supera el límite de Discord (dejamos margen de seguridad)
+            if len(current_message) + len(l) + 1 > 1950:
+                # Enviamos lo que llevamos acumulado hasta ahora
+                await interaction.followup.send(current_message)
+                # Empezamos el nuevo bloque con la línea actual
+                current_message = l
+            else:
+                # Si cabe, la acumulamos separada por un salto de línea
+                if current_message:
+                    current_message += f"\n{l}"
+                else:
+                    current_message = l
+        
+        # Enviamos el último bloque que haya quedado rezagado en el bucle
+        if current_message:
+            await interaction.followup.send(current_message)
+            
+    except GameNotFoundException:
+        await interaction.followup.send("**Error:** No hay ninguna partida activa en este canal para poder ejecutarla.")
+    except Exception as e:
+        await interaction.followup.send(f"**Error inesperado al mostrar el informe:** `{type(e).__name__}: {e}`.")
+
+@game_group.command(
+    name="cmdlist", description="Muestra la lista de tus órdenes registradas"
+)
+async def cmdlist(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+
+    try:
+        with sqlite3.connect(game_group.db_path) as conn:
+            game = Game.load_game(conn, channel_id=interaction.channel_id)
+            player = next(
+                (p for p in game.players if p.discord_id == interaction.user.id),
+                None,
+            )
+
+            if not player:
+                await interaction.followup.send(
+                    "**Error:** No estás inscrito en la partida de este canal.",
+                    ephemeral=True,
+                )
+                return
+
+            # Recupera las órdenes
+            commands = [str(c) for c in player.commands]
+
+            if not commands:
+                await interaction.followup.send(
+                    f"**No hay comandos para {player.player_id}:**",
+                    ephemeral=True,
+                )
+                return
+
+            lines = "\n".join(
+                [f"**{i+1}.** `{o}`" for i, o in enumerate(commands)]
+            )
+
+            await interaction.followup.send(
+                f"**Comandos actuales para {player.player_id}:**\n{lines}",
+                ephemeral=True,
+            )
+
+    except GameNotFoundException:
+        await interaction.followup.send(
+            "**Error:** No hay ninguna partida activa en este canal.",
+            ephemeral=True,
+        )
+    except Exception as e:
+        errormsg = format_error_with_location(e)
+        await interaction.followup.send(
+            # f"**Error inesperado:** `{type(e).__name__}: {e}`", ephemeral=True
+            f"**Error inesperado:** `{errormsg}`", ephemeral=True
+        )
+
+# ==============================================================================
+# send commands
+# ==============================================================================
+
+# first, autocomplete
+
+async def cmd_actor_autocomplete(
+    interaction: discord.Interaction, 
+    current: str
+) -> list[app_commands.Choice[str]]:
+    """Actores disponibles para el jugador actual."""
+    try:
+        with sqlite3.connect(game_group.db_path) as conn:
+            game = Game.load_game(conn, channel_id=interaction.channel_id)
+            player = next((p for p in game.players if p.discord_id == interaction.user.id), None)
+            
+            if not player:
+                return []
+            
+            # Actores disponibles
+            actors = player.cmd_available_actors()
+
+            choices = []
+            for code, label in actors:
+                if current.lower() in label.lower() or current.lower() in code.lower():
+                    choices.append(app_commands.Choice(name=label,value=code))
+
+            return choices[:25]
+    except Exception:
+        return []
+
+
+async def cmd_command_autocomplete(
+    interaction: discord.Interaction, 
+    current: str
+) -> list[app_commands.Choice[str]]:
+    """Sugiere las órdenes válidas según el actor seleccionado previamente."""
+    # Leemos el valor que el usuario ha seleccionado/escrito en el campo 'actor'
+    actor = getattr(interaction.namespace, "actor", None)
+
+    if not actor:
+        return [app_commands.Choice(name="Selecciona primero un actor", value="")]
+
+    try:
+        with sqlite3.connect(game_group.db_path) as conn:
+            game = Game.load_game(conn, channel_id=interaction.channel_id)
+            player = next((p for p in game.players if p.discord_id == interaction.user.id), None)
+
+            # Comandos disponibles
+            commands = player.cmd_available_commands(actor)
+
+            choices = []
+            for code, label in commands:
+                if current.lower() in label.lower() or current.lower() in code.lower():
+                    choices.append(app_commands.Choice(name=label,value=code))
+
+            return choices[:25]
+    except Exception:
+        return []
+
+
+async def cmd_target_autocomplete(
+    interaction: discord.Interaction, 
+    current: str
+) -> list[app_commands.Choice[str]]:
+    """Sugiere los objetivos válidos según el actor y el comando seleccionados."""
+    actor = getattr(interaction.namespace, "actor", None)
+    command = getattr(interaction.namespace, "command", None)
+
+    if not actor or not command:
+        return [app_commands.Choice(name="Selecciona primero actor y comando", value="")]
+
+    try:
+        with sqlite3.connect(game_group.db_path) as conn:
+            game = Game.load_game(conn, channel_id=interaction.channel_id)
+            player = next((p for p in game.players if p.discord_id == interaction.user.id), None)
+
+            # Targets disponibles
+            targets = player.cmd_available_targets(actor, command)
+
+            choices = []
+            for code, label in targets:
+                if current.lower() in label.lower() or current.lower() in code.lower():
+                    choices.append(app_commands.Choice(name=label,value=code))
+
+            return choices[:25]
+    except Exception:
+        return []
+
+
+# ==============================================================================
+# COMANDO /mach cmd
+# ==============================================================================
+
+@game_group.command(name="cmd", description="Registra una nueva orden para tus unidades")
+@app_commands.describe(
+    actor="Unidad o recurso que ejecutará la acción",
+    command="Acción u orden a realizar",
+    target="Objetivo de la orden (Provincia, ciudad, unidad, facción, etc)"
+)
+@app_commands.autocomplete(
+    actor=cmd_actor_autocomplete,
+    command=cmd_command_autocomplete,
+    target=cmd_target_autocomplete
+)
+async def cmd(
+    interaction: discord.Interaction,
+    actor: str,
+    command: str,
+    target: str = None
+):
+    await interaction.response.defer(ephemeral=True)
+
+    try:
+        with sqlite3.connect(game_group.db_path) as conn:
+            game = Game.load_game(conn, channel_id=interaction.channel_id)
+            player = next((p for p in game.players if p.discord_id == interaction.user.id), None)
+
+            if not player:
+                await interaction.followup.send(
+                    "**Error:** No se identificó al jugador.",
+                    ephemeral=True
+                )
+                return
+            
+            valid_actor = [code for code, _ in player.cmd_available_actors()]
+            if actor not in valid_actor:
+                await interaction.followup.send(
+                    f"**Error:** `{actor}` no es un actor válido.",
+                    ephemeral=True,
+                )
+                return
+
+            valid_command = [code for code, _ in player.cmd_available_commands(actor)]
+            if command not in valid_command:
+                await interaction.followup.send(
+                    f"**Error:** `{command}` no es una orden válida.",
+                    ephemeral=True,
+                )
+                return
+
+            valid_target = [code for code, _ in player.cmd_available_targets(actor, command)]
+            if valid_target and valid_target[0] != '' and target not in valid_target:
+                await interaction.followup.send(
+                    f"**Error:** `{target}` no es un objetivo válido.",
+                    ephemeral=True,
+                )
+                return
+
+            cmd = Command(game, player, actor, command, target)
+            lines = player.cmd_add_command(cmd)
+
+            player.save(conn)
+
+        report = "\n".join(lines)
+
+        await interaction.followup.send(report, ephemeral=True)
+
+    except GameNotFoundException:
+        await interaction.followup.send(
+            "**Error:** No hay ninguna partida activa en este canal.",
+            ephemeral=True
+        )
+    except Exception as e:
+        error_detallado = format_error_with_location(e)
+        await interaction.followup.send(
+            f"**Error inesperado:** {error_detallado}",
+            ephemeral=True
+        )

@@ -11,13 +11,18 @@ def test_player_constructor():
     player_id = "username"
     discord_id = 10
 
-    player = Player(player_id)
+    game = MagicMock(spec=Game)
+    game.database_id = 111
 
+    player = Player(game, player_id)
+
+    assert player.game == game
     assert player.player_id == player_id
     assert player.discord_id is None
 
-    player = Player(player_id, discord_id)
+    player = Player(game, player_id, discord_id)
 
+    assert player.game == game
     assert player.player_id == player_id
     assert player.discord_id == discord_id
 
@@ -40,6 +45,9 @@ def test_load_players_success():
     mock_cursor = MagicMock(spec=sqlite3.Cursor)
     mock_conn.cursor.return_value = mock_cursor
 
+    mock_game = MagicMock(spec=Game)
+    mock_game.database_id = 42
+
     mock_cursor.fetchall.return_value = [
         (
             "carlos_id", 1111, '["rome", "bari"]', '["veron", "messi"]',
@@ -48,15 +56,17 @@ def test_load_players_success():
         ("sofia_id", None, None, None, None, None, None, 0, None, None, None, None),
     ]
 
-    players = Player.load_players(mock_conn, game_id=42)
+    players = Player.load_players(mock_conn, mock_game)
 
-    mock_cursor.execute.assert_called_once_with(
-            """
+    mock_cursor.execute.assert_has_calls([
+            call("""
             SELECT player_id, discord_id, controlled_locations, armies, fleets, garrisons,
                 ass_counters, ducats, rebelled_provinces, rebelled_cities, home_countries, power
             FROM players WHERE game_id = ?
-            """, (42,)
-    )
+            """, (42,)),
+            call('SELECT actor, command, target FROM commands WHERE game_id = ? AND player_id = ?', (42, 'carlos_id')),
+            call('SELECT actor, command, target FROM commands WHERE game_id = ? AND player_id = ?', (42, 'sofia_id'))
+    ])
 
     assert len(players) == 2
     assert isinstance(players[0], Player)
@@ -159,15 +169,13 @@ def test_load_game_success():
         '["venic", "bari"]', '["rome", "parma"]', '["turin"]'
     )
 
-    lista_jugadores_simulados = [
-        Player(player_id="fake_carlos", discord_id=111),
-        Player(player_id="fake_sofia", discord_id=222),
-    ]
-
     with patch.object(
         Player, "load_players"
     ) as mock_load_players:
-        mock_load_players.return_value = lista_jugadores_simulados
+        mock_load_players.side_effect = lambda conn, game: [
+            Player(game, player_id="fake_carlos", discord_id=111),
+            Player(game, player_id="fake_sofia", discord_id=222),
+        ]
 
         game = Game.load_game(mock_conn, game_id=7)
 
@@ -175,7 +183,9 @@ def test_load_game_success():
         assert game.database_id == 7
         assert game.name == "Campaña de Milán"
         assert game.channel_id == 987654
-        assert game.players == lista_jugadores_simulados
+        assert len(game.players) == 2
+        assert game.players[0].player_id == "fake_carlos"
+        assert game.players[1].discord_id == 222
         assert "venic" in game.famine
         assert "parma" in game.independent_garrisons
         assert "turin" in game.besieges
@@ -188,7 +198,7 @@ def test_load_game_success():
             call("SELECT message FROM game_events WHERE game_id = ? ORDER BY id ASC", (7,))
         ])
 
-        mock_load_players.assert_called_once_with(mock_conn, 7)
+        mock_load_players.assert_called_once_with(mock_conn, game)
 
 
 def test_load_game_raises_not_found_and_never_loads_players():
