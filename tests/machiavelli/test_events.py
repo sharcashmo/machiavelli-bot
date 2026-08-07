@@ -169,8 +169,8 @@ def test_closed_values_are_rejected(
         TurnEvent(event_type, payload)
 
 
-def test_military_resolution_accepts_six_empty_collections() -> None:
-    event = TurnEvent.military_resolution([], [], [], [], [], [])
+def test_military_resolution_accepts_seven_empty_collections() -> None:
+    event = TurnEvent.military_resolution([], [], [], [], [], [], [])
     assert event.type is EventType.MILITARY_RESOLUTION
     assert all(event.data[key] == () for key in event.data)
 
@@ -184,6 +184,7 @@ def test_military_resolution_accepts_non_empty_tuples() -> None:
         (unit,),
         (("Milan", "province", "mil", "subdued"),),
         ((unit, "mil", "started"),),
+        ((unit, "retreat", "ven"),),
     )
 
     assert event.type is EventType.MILITARY_RESOLUTION
@@ -200,6 +201,7 @@ def test_military_resolution_accepts_non_empty_tuples() -> None:
         ("dislodgements", [["Milan", "A"]]),
         ("rebellions", [["Milan", "fortress", "mil", "subdued"]]),
         ("sieges", [["Milan", "mil", "started"]]),
+        ("decisiones", [[["Milan", "A", "mil"], "retreat", "mil"]]),
     ],
 )
 def test_military_collections_are_validated(
@@ -281,10 +283,12 @@ def test_json_is_compact_deterministic_and_native() -> None:
         (unit,),
         (("Milan", "province", "mil", "subdued"),),
         ((unit, "mil", "started"),),
+        ((unit, "retreat", "mil"),),
     )
     assert military.to_json() == (
         '{"broken_convoys":[["Milan","A","mil"]],'
         '"cancelled_orders":[["Milan","A","mil"]],'
+        '"decisions":[[["Milan","A","mil"],"retreat","mil"]],'
         '"dislodgements":[["Milan","A","mil"]],'
         '"outcomes":[[["Milan","A","mil"],"A","ven",false]],'
         '"rebellions":[["Milan","province","mil","subdued"]],'

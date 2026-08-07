@@ -107,6 +107,7 @@ def valid_event_payloads() -> Mapping[EventType, dict[str, JSONValue]]:
             "dislodgements": [unit],
             "rebellions": [["Milan", "province", "mil", "subdued"]],
             "sieges": [[unit, "mil", "started"]],
+            "decisions": [[unit, "retreat", "ven"]],
         },
     }
 
