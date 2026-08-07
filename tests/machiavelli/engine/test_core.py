@@ -655,7 +655,8 @@ ACTIVE_CAMPAIGN_SNAPSHOT_V1 = {
     "events": (
         (
             "military_resolution",
-            '{"broken_convoys":[],"cancelled_orders":[],"dislodgements":[],'
+            '{"broken_convoys":[],"cancelled_orders":[],"decisions":[],'
+            '"dislodgements":[],'
             '"outcomes":[[["P0","A","fort"],"A","fort",false],'
             '[["P1","A","other"],"A","other",false],'
             '[[null,"G","fort"],"G","fort",false],'
