@@ -16,6 +16,8 @@ from ..game.player import Player
 type ResolutionValue = str | int | bool | None | tuple[ResolutionValue, ...]
 type ResolutionSignature = tuple[ResolutionValue, ...]
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass(frozen=True, slots=True)
 class UnitKey:
@@ -113,7 +115,17 @@ class DislodgementResolverRequired(MilitaryResolutionError):
     """Hay desalojos y falta el gestor externo de retiradas."""
 
 
-type DislodgementResolver = Callable[[MilitaryResolution], Mapping[UnitKey, str | None]]
+@dataclass(frozen=True, slots=True)
+class DislodgementDecision:
+    """Define el resultado operativo y el destino opcional de una unidad desalojada."""
+
+    result_type: str  # Valores ("garrison", "retreat", "disband")
+    destination: str | None
+
+
+type DislodgementResolver = Callable[
+    [MilitaryResolution], Mapping[UnitKey, DislodgementDecision]
+]
 
 
 def _key_sort(key: UnitKey) -> tuple[str, str, str]:
@@ -1576,7 +1588,7 @@ class MilitaryResolver:
         resolution: MilitaryResolution,
         dislodgement_resolver: DislodgementResolver | None,
         siege_dislodged: frozenset[UnitKey],
-    ) -> dict[UnitKey, str | None]:
+    ) -> dict[UnitKey, DislodgementDecision]:
         """Solicita y valida una decisión exacta para cada unidad desalojada."""
         dislodged = {
             outcome.unit for outcome in resolution.outcomes if outcome.dislodged
@@ -1601,7 +1613,8 @@ class MilitaryResolver:
                 "El gestor de desalojos no cubre exactamente las unidades desalojadas"
             )
         outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
-        for key, destination in decisions.items():
+        for key, decision in decisions.items():
+            destination = decision.destination
             if destination is not None and (
                 not isinstance(destination, str) or not destination
             ):
@@ -1623,18 +1636,24 @@ class MilitaryResolver:
     def _apply_dislodgement_decisions(
         self,
         resolution: MilitaryResolution,
-        decisions: Mapping[UnitKey, str | None],
+        decisions: Mapping[UnitKey, DislodgementDecision],
         player_collections: dict[str, dict[str, list[str]]],
         independent: list[str],
     ) -> None:
         """Integra retiradas válidas en las colecciones locales ya consolidadas."""
         outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
         for key in sorted(decisions, key=_key_sort):
-            destination = decisions[key]
-            if destination is None:
-                continue
+            decision = decisions[key]
+            result_type = decision.result_type
+            destination = decision.destination
+
             outcome = outcomes[key]
-            unit_type = outcome.final_unit_type
+
+            unit_type = outcome.unit.unit_type if result_type == "retreat" else "G"
+
+            if decision.result_type == "disband" or decision.destination is None:
+                continue
+
             if unit_type == "A" and destination not in self.map.provinces:
                 raise MilitaryResolutionError("Retirada de ejército fuera de provincia")
             if unit_type == "F" and not self._valid_fleet_location(destination):
@@ -1643,6 +1662,7 @@ class MilitaryResolver:
                 raise MilitaryResolutionError(
                     "Retirada de guarnición fuera de provincia"
                 )
+
             if key.player_id is None:
                 if unit_type != "G":
                     raise MilitaryResolutionError(
@@ -1724,7 +1744,7 @@ class MilitaryResolver:
                     try:
                         setattr(player, name, value)
                     except Exception:
-                        logging.getLogger(__name__).exception(
+                        logger.exception(
                             "No se pudo restaurar %s del jugador %s",
                             name,
                             player.player_id,
@@ -1737,9 +1757,7 @@ class MilitaryResolver:
                 try:
                     setattr(self.game, name, game_value)
                 except Exception:
-                    logging.getLogger(__name__).exception(
-                        "No se pudo restaurar %s del juego", name
-                    )
+                    logger.exception("No se pudo restaurar %s del juego", name)
             raise MilitaryResolutionError("Falló el commit militar") from error
 
     def run(
@@ -1782,6 +1800,7 @@ class MilitaryResolver:
             dislodgement_resolver,
             siege_dislodged,
         )
+        logger.debug("Resolving dislodgements. Decisions: %s", decisions)
         self._apply_dislodgement_decisions(
             resolution,
             decisions,
@@ -1802,12 +1821,13 @@ class MilitaryResolver:
                 state,
                 rebellions=rebellion_events,
                 sieges=siege_events,
+                decisions=decisions,
             )
         except Exception as error:
             raise MilitaryResolutionError(
                 "No se pudo construir el evento militar"
             ) from error
-        logging.getLogger(__name__).info(
+        logger.info(
             "Resolución militar: outcomes=%s cancelled=%s",
             len(resolution.outcomes),
             len(state.cancelled_orders),
@@ -1830,6 +1850,7 @@ class MilitaryResolver:
         *,
         rebellions: list[list[object]] | None = None,
         sieges: list[list[object]] | None = None,
+        decisions: dict[UnitKey, DislodgementDecision] | None = None,
     ) -> TurnEvent:
         """Construye el único evento canónico de la resolución militar."""
         outcomes: list[list[object]] = [
@@ -1841,6 +1862,19 @@ class MilitaryResolver:
             ]
             for outcome in resolution.outcomes
         ]
+
+        decision_list: list[list[object]] = (
+            [
+                [
+                    [unit.player_id, unit.unit_type, unit.origin],
+                    decision.result_type,
+                    decision.destination,
+                ]
+                for unit, decision in decisions.items()
+            ]
+            if decisions
+            else None
+        )
 
         def primitive_keys(items: Iterable[UnitKey]) -> list[list[object]]:
             """Ordena y serializa una colección de identidades militares."""
@@ -1859,6 +1893,7 @@ class MilitaryResolver:
                 ),
                 rebellions if rebellions is not None else [],
                 sieges if sieges is not None else [],
+                decision_list if decision_list is not None else [],
             )
         except Exception as error:
             raise MilitaryResolutionError(
