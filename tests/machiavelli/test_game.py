@@ -51,7 +51,7 @@ def test_game_constructor():
     assert game.channel_id is None
 
 
-def test_military_event_round_trip_preserves_six_lists(tmp_path):
+def test_military_event_round_trip_preserves_seven_lists(tmp_path):
     """Comprueba que el evento militar completo sobrevive al ciclo SQLite."""
     db_path = tmp_path / "game.db"
     database.upgrade(str(db_path))
@@ -62,6 +62,7 @@ def test_military_event_round_trip_preserves_six_lists(tmp_path):
         [],
         [["P1", "province", "rome", "subdued"]],
         [],
+        [[["P1", "A", "rome"], "retreat", "pisa"]],
     )
     with closing(sqlite3.connect(db_path)) as conn:
         game = Game("Evento militar")
@@ -90,6 +91,10 @@ def test_military_event_is_canonical_compact_and_keeps_previous_records():
             [["V", "A", "zeta"], "ñ", "started"],
             [["M", "F", "alfa"], "beta", "lifted"],
         ],
+        [
+            [["V", "A", "zeta"], "retreat", "alfa"],
+            [["M", "F", "alfa"], "disband", None],
+        ],
     )
     assert event.data["outcomes"][0][0] == ("M", "F", "alfa")
     assert event.data["cancelled_orders"] == (
@@ -99,6 +104,8 @@ def test_military_event_is_canonical_compact_and_keeps_previous_records():
     assert event.to_json() == (
         '{"broken_convoys":[["V","A","zeta"]],'
         '"cancelled_orders":[["M","F","alfa"],["V","A","zeta"]],'
+        '"decisions":[[["M","F","alfa"],"disband",null],'
+        '[["V","A","zeta"],"retreat","alfa"]],'
         '"dislodgements":[["M","F","alfa"]],'
         '"outcomes":[[["M","F","alfa"],"F","beta",false],'
         '[["V","A","zeta"],"A","ñ",false]],'
@@ -116,22 +123,23 @@ def test_military_event_is_canonical_compact_and_keeps_previous_records():
 def test_military_event_rejects_non_primitive_or_malformed_lists():
     """Rechaza payloads que no respetan el contrato serializable."""
     malformed_lists = (
-        ([[["P", "X", "a"], "A", "b", False]], [], [], [], [], []),
-        ([[["P", "A", "a"], "X", "b", False]], [], [], [], [], []),
-        ([[["P", "A", "a"], "A", None, False]], [], [], [], [], []),
-        ([[["P", "A", "a"], "A", "b", True]], [], [], [], [], []),
-        ([], [["P", "X", "a"]], [], [], [], []),
-        ([], [], [["P", "A"]], [], [], []),
-        ([], [], [], [["P", "A", "a", "extra"]], [], []),
-        ([], [], [], [], [["P", "county", "a", "subdued"]], []),
-        ([], [], [], [], [["P", "province", "a", "invalid"]], []),
-        ([], [], [], [], [], [[["P", "X", "a"], "a", "started"]]),
-        ([], [], [], [], [], [[["P", "A", "a"], "a", ["started"]]]),
+        ([[["P", "X", "a"], "A", "b", False]], [], [], [], [], [], []),
+        ([[["P", "A", "a"], "X", "b", False]], [], [], [], [], [], []),
+        ([[["P", "A", "a"], "A", None, False]], [], [], [], [], [], []),
+        ([[["P", "A", "a"], "A", "b", True]], [], [], [], [], [], []),
+        ([], [["P", "X", "a"]], [], [], [], [], []),
+        ([], [], [["P", "A"]], [], [], [], []),
+        ([], [], [], [["P", "A", "a", "extra"]], [], [], []),
+        ([], [], [], [], [["P", "county", "a", "subdued"]], [], []),
+        ([], [], [], [], [["P", "province", "a", "invalid"]], [], []),
+        ([], [], [], [], [], [[["P", "X", "a"], "a", "started"]], []),
+        ([], [], [], [], [], [[["P", "A", "a"], "a", ["started"]]], []),
+        ([], [], [], [], [], [], [[["P", "X", "a"], "invalid", None]]),
     )
     for values in malformed_lists:
         with pytest.raises(ValueError):
             TurnEvent.military_resolution(*values)
-    tuple_event = TurnEvent.military_resolution((), (), (), (), (), ())
+    tuple_event = TurnEvent.military_resolution((), (), (), (), (), (), ())
     assert all(value == () for value in tuple_event.data.values())
 
 
