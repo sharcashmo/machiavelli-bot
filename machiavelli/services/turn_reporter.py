@@ -23,6 +23,7 @@ type UnitKeyRecord = tuple[str | None, str, str]
 type OutcomeRecord = tuple[UnitKeyRecord, str, str | None, bool]
 type RebellionRecord = tuple[str | None, str, str, str]
 type SiegeRecord = tuple[UnitKeyRecord, str, str]
+type DislodgementRecord = tuple[UnitKeyRecord, str, str | None]
 
 _SEASONS = (
     "Primavera (mantenimiento)",
@@ -413,8 +414,17 @@ class TurnReporter:
         dislodgements = cast(tuple[UnitKeyRecord, ...], data["dislodgements"])
         rebellions = cast(tuple[RebellionRecord, ...], data["rebellions"])
         sieges = cast(tuple[SiegeRecord, ...], data["sieges"])
+        decisions = cast(tuple[DislodgementRecord, ...], data["decisions"])
         if not any(
-            (outcomes, cancelled, broken_convoys, dislodgements, rebellions, sieges)
+            (
+                outcomes,
+                cancelled,
+                broken_convoys,
+                dislodgements,
+                rebellions,
+                sieges,
+                decisions,
+            )
         ):
             return ["Sin cambios militares."]
 
@@ -453,6 +463,12 @@ class TurnReporter:
             lines.extend(
                 TurnReporter._military_siege_line(game, siege) for siege in sieges
             )
+        if decisions:
+            lines.append("**Retiradas:**")
+            lines.extend(
+                TurnReporter._military_dislodgement_line(game, decision)
+                for decision in decisions
+            )
         return lines
 
     @staticmethod
@@ -480,6 +496,20 @@ class TurnReporter:
             f"- {original} terminó como {final_actor} {destination}; "
             f"desalojada: {dislodged_text}."
         )
+
+    @staticmethod
+    def _military_dislodgement_line(game: Game, decision: DislodgementRecord) -> str:
+        unit, result_type, destination = decision
+        original = TurnReporter._military_unit(game, unit)
+        final_destination = (
+            TurnReporter._location(game, destination) if destination else None
+        )
+        if result_type == "retreat":
+            return f"- {original} se retiró a {final_destination}."
+        elif result_type == "garrison":
+            return f"- {original} se refugió en la fortaleza de {final_destination}."
+        else:  # disbanded
+            return f"- {original} no pudo retirarse y se desbandó."
 
     @staticmethod
     def _military_rebellion_line(game: Game, rebellion: RebellionRecord) -> str:

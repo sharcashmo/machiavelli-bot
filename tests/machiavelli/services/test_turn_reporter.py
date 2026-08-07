@@ -232,6 +232,10 @@ def test_military_resolution_renders_every_item_in_group_order() -> None:
                 ],
                 "cancelled_orders": [["player-2", "A", "pavia"]],
                 "broken_convoys": [[None, "G", "milan"]],
+                "decisions": [
+                    [["player-1", "F", "venic S"], "retreat", "milan"],
+                    [["player-2", "A", "pavia"], "disband", None],
+                ],
                 "dislodgements": [["player-2", "F", "venic S"]],
                 "rebellions": [["player-1", "city", "venic", "liberated"]],
                 "sieges": [[["player-2", "A", "pavia"], "milan", "completed"]],
@@ -257,6 +261,9 @@ def test_military_resolution_renders_every_item_in_group_order() -> None:
         "- Rebelión urbana de Venice para <@123>: liberada.",
         "**Asedios:**",
         "- Ejército de Pavia de <@456> en Milan: completado.",
+        "**Retiradas:**",
+        "- Flota de Venice (S) de <@123> se retiró a Milan.",
+        "- Ejército de Pavia de <@456> no pudo retirarse y se desbandó.",
     ]
 
 
@@ -272,6 +279,7 @@ def test_military_resolution_omits_only_empty_groups() -> None:
                 "dislodgements": [],
                 "rebellions": [],
                 "sieges": [[["player-2", "F", "venic S"], "milan", "started"]],
+                "decisions": [],
             },
         )
     ]
@@ -289,6 +297,7 @@ def test_military_resolution_omits_only_empty_groups() -> None:
         "**Convoyes rotos:**",
         "**Desalojos:**",
         "**Rebeliones:**",
+        "**Retiradas:**",
     }.intersection(rendered)
 
 
@@ -301,6 +310,7 @@ def test_empty_military_resolution_has_exactly_one_line() -> None:
                 "outcomes": [],
                 "cancelled_orders": [],
                 "broken_convoys": [],
+                "decisions": [],
                 "dislodgements": [],
                 "rebellions": [],
                 "sieges": [],
