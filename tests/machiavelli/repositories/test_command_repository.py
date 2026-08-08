@@ -1,4 +1,4 @@
-"""Tests for canonical command persistence."""
+"""Pruebas de la persistencia de comandos canónicos."""
 
 import sqlite3
 from unittest.mock import MagicMock
@@ -46,7 +46,9 @@ def repo(db_conn: sqlite3.Connection) -> CommandRepository:
 
 
 def test_get_by_player_orders_query_by_command_id() -> None:
-    """Lock the persisted ordering contract to the existing command primary key."""
+    """Fija el contrato de ordenación persistida a la clave primaria de comando
+    existente.
+    """
     conn = MagicMock(spec=sqlite3.Connection)
     cursor = MagicMock(spec=sqlite3.Cursor)
     cursor.fetchall.return_value = []

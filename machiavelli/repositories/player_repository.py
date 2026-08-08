@@ -1,4 +1,4 @@
-"""SQLite persistence for canonical :class:`Player` domain objects."""
+"""Persistencia SQLite de objetos de dominio canónicos :class:`Player`."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class PlayerRepository:
-    """Translate between canonical players and SQLite rows."""
+    """Traduce entre jugadores canónicos y filas de SQLite."""
 
     def __init__(self, conn: sqlite3.Connection) -> None:
         self.conn = conn
@@ -86,7 +86,7 @@ class PlayerRepository:
         self.command_repo._save_many(player.commands)
 
     def _replace_for_game(self, game: Game) -> None:
-        """Synchronize the complete persisted player collection for one game."""
+        """Sincroniza la colección completa de jugadores persistida para una partida."""
         if game.database_id is None:
             raise ValueError("No se puede persistir una partida sin ID")
 
@@ -135,7 +135,9 @@ class PlayerRepository:
             self._replace_commands(player)
 
     def replace_for_game(self, game: Game) -> None:
-        """Persist the authoritative player collection without partial commits."""
+        """Guarda la colección canónica de jugadores sin realizar confirmaciones
+        parciales.
+        """
         if self.conn.in_transaction:
             self._replace_for_game(game)
             return
@@ -143,7 +145,9 @@ class PlayerRepository:
             self._replace_for_game(game)
 
     def save(self, player: Player) -> None:
-        """Upsert a player and commands without committing an outer transaction."""
+        """Actualiza o inserta un jugador y sus comandos sin confirmar una transacción
+        externa.
+        """
         if self.conn.in_transaction:
             self._upsert(player)
             self._replace_commands(player)
@@ -153,7 +157,7 @@ class PlayerRepository:
             self._replace_commands(player)
 
     def save_commands(self, player: Player) -> None:
-        """Replace commands without committing an outer transaction."""
+        """Sustituye los comandos sin confirmar una transacción externa."""
         if self.conn.in_transaction:
             self._replace_commands(player)
             return
@@ -161,7 +165,7 @@ class PlayerRepository:
             self._replace_commands(player)
 
     def get_by_game(self, game: Game) -> list[Player]:
-        """Load all players and their commands for a persisted game."""
+        """Carga todos los jugadores y sus comandos de una partida persistida."""
         if game.database_id is None:
             raise ValueError("No se pueden cargar jugadores de una partida sin ID")
 

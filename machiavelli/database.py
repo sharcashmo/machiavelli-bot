@@ -1,4 +1,4 @@
-"""Backward-compatible public SQLite API."""
+"""API pública de SQLite compatible con versiones anteriores."""
 
 from machiavelli.db.database import (
     DatabaseManager,

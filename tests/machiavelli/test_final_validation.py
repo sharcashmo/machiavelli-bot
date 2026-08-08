@@ -1,4 +1,6 @@
-"""Final clean-state integration checks for the completed modular migration."""
+"""Comprobaciones finales de integración en un estado limpio para la migración modular
+completada.
+"""
 
 from __future__ import annotations
 
@@ -16,7 +18,8 @@ from machiavelli.services import GameService
 
 
 def _state(game: Game) -> dict[str, object]:
-    """Return the persisted state relevant to the final round-trip contract."""
+    """Devuelve el estado persistido relevante para el contrato final de ida y vuelta.
+    """
     return {
         "database_id": game.database_id,
         "name": game.name,
@@ -54,7 +57,9 @@ def _state(game: Game) -> dict[str, object]:
 
 
 def test_temporary_database_survives_orders_turn_and_repeated_reloads() -> None:
-    """Exercise the complete persisted application lifecycle in an isolated DB."""
+    """Prueba el ciclo de vida completo de la aplicación persistida en una base de datos
+    aislada.
+    """
     with TemporaryDirectory() as directory:
         db_path = Path(directory) / "final-validation.db"
         database.upgrade(str(db_path))

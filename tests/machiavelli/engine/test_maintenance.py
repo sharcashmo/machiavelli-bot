@@ -1,4 +1,4 @@
-"""Tests for per-order maintenance events."""
+"""Pruebas de eventos de mantenimiento por orden."""
 
 from unittest.mock import MagicMock
 

@@ -1,4 +1,4 @@
-"""Domain rules for direct resource transfers."""
+"""Reglas de dominio para transferencias directas de recursos."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ TradeKind = Literal["ducats", "assassin"]
 
 @dataclass(frozen=True, slots=True)
 class TradeResource:
-    """Represent one transferable resource and its value."""
+    """Representa un recurso transferible y su valor."""
 
     kind: TradeKind
     value: int | str
@@ -41,7 +41,7 @@ class TradeResource:
 
 @dataclass(frozen=True, slots=True)
 class ExchangeProposal:
-    """Represent one pending bilateral exchange proposal."""
+    """Representa una propuesta bilateral de intercambio pendiente."""
 
     proposer_power: str
     counterparty_power: str
@@ -60,7 +60,7 @@ class ExchangeProposal:
         return power_a, power_b
 
     def is_exact_inverse(self, other: ExchangeProposal) -> bool:
-        """Return whether another proposal exactly reverses this one."""
+        """Devuelve si otra propuesta es la inversa exacta de esta."""
         return (
             self.proposer_power == other.counterparty_power
             and self.counterparty_power == other.proposer_power
@@ -72,7 +72,7 @@ class ExchangeProposal:
 def find_exchange_proposal_index(
     proposals: list[ExchangeProposal], pair_key: tuple[str, str]
 ) -> int | None:
-    """Find the first pending proposal for one unordered power pair."""
+    """Encuentra la primera propuesta pendiente para un par de potencias sin orden."""
     # ponytail: O(n) para 21 parejas de carga objetivo; añadir índice si cambia la escala  # noqa: E501
     for index, proposal in enumerate(proposals):
         if proposal.pair_key == pair_key:
@@ -85,7 +85,7 @@ def parse_trade_resource(
     kind: str,
     raw_value: str,
 ) -> TradeResource:
-    """Parse and validate one resource against the active scenario."""
+    """Interpreta y valida un recurso respecto al escenario activo."""
     if kind not in ("ducats", "assassin"):
         raise TradeRuleException("Tipo de recurso inválido. Usa 'ducats' o 'assassin'.")
 
@@ -115,7 +115,7 @@ def parse_trade_resource(
 
 
 def player_has_trade_resource(player: Player, resource: TradeResource) -> bool:
-    """Return whether a player currently owns the requested resource."""
+    """Devuelve si un jugador posee actualmente el recurso solicitado."""
     if resource.kind == "ducats":
         assert isinstance(resource.value, int)
         return player.ducats >= resource.value
@@ -128,7 +128,7 @@ def transfer_trade_resource(
     receiver: Player,
     resource: TradeResource,
 ) -> None:
-    """Move one resource from sender to receiver after checking ownership."""
+    """Mueve un recurso del remitente al receptor tras comprobar la propiedad."""
     if not player_has_trade_resource(sender, resource):
         if resource.kind == "ducats":
             raise TradeRuleException("No tienes suficientes ducados.")

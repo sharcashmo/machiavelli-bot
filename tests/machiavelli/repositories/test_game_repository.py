@@ -1,4 +1,4 @@
-"""Tests for aggregate persistence through GameRepository."""
+"""Pruebas de persistencia de agregados mediante `GameRepository`."""
 
 import sqlite3
 from collections.abc import Mapping

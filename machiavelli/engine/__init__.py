@@ -1,4 +1,4 @@
-"""Public entry points for the Machiavelli game engine."""
+"""Puntos de entrada públicos del motor de juego de Machiavelli."""
 
 from .core import GameEngine
 

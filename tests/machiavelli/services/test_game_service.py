@@ -1,4 +1,4 @@
-"""Integration tests for the phase-7 game application service."""
+"""Pruebas de integración del servicio de aplicación de partidas de la fase 7."""
 
 from __future__ import annotations
 

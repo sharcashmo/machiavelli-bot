@@ -1,8 +1,9 @@
-"""Exceptions raised by the game domain lifecycle."""
+"""Excepciones generadas durante el ciclo de vida del dominio de la partida."""
 
 
 class FailedToStartError(Exception):
-    """Raised when a game cannot start because prerequisites are missing."""
+    """Se lanza cuando una partida no puede comenzar porque faltan requisitos previos.
+    """
 
     def __init__(self, message: str) -> None:
         self.message = message
@@ -10,27 +11,33 @@ class FailedToStartError(Exception):
 
 
 class DuplicatedGameException(Exception):
-    """Raised when a game name or channel is already registered."""
+    """Se lanza cuando el nombre o el canal de una partida ya están registrados."""
 
 
 class GameNotFoundException(Exception):
-    """Raised when a requested game does not exist in persistence."""
+    """Se lanza cuando la partida solicitada no existe en la persistencia."""
 
 
 class GameRuleException(Exception):
-    """Base class for invalid aggregate operations requested by a caller."""
+    """Clase base para las operaciones no válidas del agregado solicitadas por el
+    llamador.
+    """
 
 
 class DuplicatePlayerException(GameRuleException):
-    """Raised when a player identifier or Discord account is already registered."""
+    """Se lanza cuando el identificador de un jugador o su cuenta de Discord ya están
+    registrados.
+    """
 
 
 class PlayerNotFoundException(GameRuleException):
-    """Raised when a requested player does not belong to a game."""
+    """Se lanza cuando el jugador solicitado no pertenece a una partida."""
 
 
 class TradeRuleException(GameRuleException):
-    """Raised when a trading rule rejects a requested resource operation."""
+    """Se lanza cuando una regla de intercambio rechaza una operación de recursos
+    solicitada.
+    """
 
 
 __all__ = [

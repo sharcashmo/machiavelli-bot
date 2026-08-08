@@ -1,4 +1,4 @@
-"""Canonical game aggregate and persistence compatibility facade."""
+"""Agregado canónico de partida y fachada de compatibilidad de persistencia."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ from .trading import ExchangeProposal
 
 @dataclass
 class Game:
-    """Represent a complete Machiavelli game aggregate."""
+    """Representa un agregado completo de partida de Machiavelli."""
 
     name: str
     channel_id: int | None = None
@@ -46,21 +46,25 @@ class Game:
     pending_exchanges: list[ExchangeProposal] = field(default_factory=list)
 
     def require_map(self) -> Map:
-        """Return the loaded map or fail fast for an invalid game state."""
+        """Devuelve el mapa cargado o lanza un error inmediatamente si el estado de la
+        partida no es válido.
+        """
         game_map = self.map
         if game_map is None:
             raise RuntimeError("La partida requiere un mapa cargado")
         return game_map
 
     def require_scenario(self) -> Scenario:
-        """Return the loaded scenario or fail fast for an invalid game state."""
+        """Devuelve el escenario cargado o lanza un error inmediatamente si el estado de
+        la partida no es válido.
+        """
         scenario = self.scenario
         if scenario is None:
             raise RuntimeError("La partida requiere un escenario cargado")
         return scenario
 
     def add_player(self, player_id: str, discord_id: int | None = None) -> Player:
-        """Create and register one canonical player in this game aggregate."""
+        """Crea y registra un jugador canónico en este agregado de partida."""
         if any(player.player_id == player_id for player in self.players):
             raise DuplicatePlayerException(
                 f"El jugador '{player_id}' ya está inscrito en la partida."
@@ -77,7 +81,7 @@ class Game:
         return player
 
     def remove_player(self, discord_id: int) -> Player:
-        """Remove and return the player linked to a Discord account."""
+        """Elimina y devuelve el jugador vinculado a una cuenta de Discord."""
         player = next(
             (
                 candidate
@@ -94,7 +98,9 @@ class Game:
         return player
 
     def advance_turn(self) -> None:
-        """Advance lifecycle metadata after a successfully completed engine run."""
+        """Actualiza los metadatos del ciclo de vida tras una ejecución del motor
+        completada correctamente.
+        """
         self.turn_number += 1
         if self.next_deadline:
             deadline = datetime.fromisoformat(self.next_deadline)
@@ -106,7 +112,7 @@ class Game:
         self.pending_exchanges.clear()
 
     def save(self, conn: sqlite3.Connection) -> None:
-        """Persist the complete aggregate using the caller's transaction."""
+        """Guarda el agregado completo utilizando la transacción del llamador."""
         cursor = conn.cursor()
         columns = [
             item.name
@@ -178,7 +184,7 @@ class Game:
         self,
         safe_text: Callable[[str], str] = str,
     ) -> list[str]:
-        """Return the current public game status as report lines."""
+        """Devuelve el estado público actual de la partida como líneas de informe."""
         report = [f"## __**Partida**: {safe_text(self.name)}__"]
         report.append(
             f"**Escenario:** {self.scenario.name if self.scenario else 'Por definir'}."
@@ -229,7 +235,7 @@ class Game:
 
     @classmethod
     def create_game(cls, name: str, channel_id: int, conn: sqlite3.Connection) -> Self:
-        """Create and insert a game through the historical persistence facade."""
+        """Crea e inserta una partida mediante la fachada histórica de persistencia."""
         cursor = conn.cursor()
         try:
             cursor.execute(
@@ -252,7 +258,7 @@ class Game:
         name: str | None = None,
         channel_id: int | None = None,
     ) -> Self:
-        """Load a complete and internally consistent aggregate from SQLite."""
+        """Carga un agregado completo e internamente coherente desde SQLite."""
         cursor = conn.cursor()
         columns = [
             item.name
@@ -336,13 +342,15 @@ class Game:
         return game
 
     def add_event(self, turn_event: TurnEvent) -> None:
-        """Append one validated event without serializing or rendering it."""
+        """Añade un evento validado sin serializarlo ni renderizarlo."""
         if not isinstance(turn_event, TurnEvent):
             raise TypeError("El historial solo admite TurnEvent")
         self.turn_events.append(turn_event)
 
     def get_unit_owner(self, unit_id: str) -> Player | None:
-        """Return the owner of a unit, or None for an independent garrison."""
+        """Devuelve el propietario de una unidad o None para una guarnición
+        independiente.
+        """
         parts = unit_id.split(" ", 1)
         if len(parts) != 2:
             raise ValueError(
@@ -367,7 +375,9 @@ class Game:
 
 
 def __getattr__(name: str) -> object:
-    """Resolve temporary compatibility exports without creating import cycles."""
+    """Resuelve exportaciones temporales de compatibilidad sin crear ciclos de
+    importación.
+    """
     if name == "TooManyExpenses":
         from machiavelli.engine.exceptions import TooManyExpenses
 

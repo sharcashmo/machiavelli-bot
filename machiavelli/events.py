@@ -1,4 +1,4 @@
-"""Typed, validated, and immutable turn events."""
+"""Eventos de turno tipados, validados e inmutables."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ type FrozenJSONValue = (
 
 
 class EventType(StrEnum):
-    """Closed catalog of facts emitted during a turn."""
+    """Catálogo cerrado de hechos emitidos durante un turno."""
 
     START_GAME = "start_game"
     START_GAME_POWER_ASSIGNED = "start_game_power_assigned"
@@ -55,7 +55,7 @@ class EventType(StrEnum):
 
 
 class InvalidTurnEventError(ValueError):
-    """A turn event does not satisfy the public event contract."""
+    """Un evento de turno no cumple el contrato de eventos públicos."""
 
     def __init__(
         self,
@@ -86,7 +86,7 @@ _MAINTENANCE_RESULTS = {
 
 @dataclass(frozen=True, slots=True, init=False)
 class TurnEvent:
-    """One validated domain fact in the current turn history."""
+    """Un hecho de dominio validado en el historial del turno actual."""
 
     type: EventType
     data: Mapping[str, FrozenJSONValue]
@@ -116,7 +116,9 @@ class TurnEvent:
         target: str | None,
         amount: int | str,
     ) -> Self:
-        """Build one expense or executed-bribe event through the common validator."""
+        """Construye un evento de gasto o de soborno ejecutado mediante el validador
+        común.
+        """
         allowed = {
             EventType.EXPENSE,
             EventType.EXPENSE_NO_FUNDS,
@@ -149,7 +151,8 @@ class TurnEvent:
         sieges: Sequence[Sequence[object]],
         decisions: Sequence[Sequence[object]],
     ) -> Self:
-        """Build the canonical military event from resolver primitives."""
+        """Construye el evento militar canónico a partir de primitivas del resolvedor.
+        """
         return cls(
             EventType.MILITARY_RESOLUTION,
             {
@@ -164,7 +167,7 @@ class TurnEvent:
         )
 
     def to_json(self) -> str:
-        """Serialize a fresh native JSON tree deterministically."""
+        """Serializa de forma determinista un árbol JSON nativo nuevo."""
         return json.dumps(
             _thaw(self.data),
             ensure_ascii=False,
@@ -180,7 +183,9 @@ class TurnEvent:
         event_type: str,
         data_json: str,
     ) -> Self:
-        """Reconstruct and validate one persisted row with row context on failure."""
+        """Reconstruye y valida una fila persistida, incluyendo el contexto de la fila
+        si falla.
+        """
         try:
             parsed_type = EventType(event_type)
             payload = json.loads(data_json)

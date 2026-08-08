@@ -1,4 +1,4 @@
-"""SQLite persistence for pending exchange proposals."""
+"""Persistencia SQLite de propuestas de intercambio pendientes."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 class ExchangeRepository:
-    """Persist the authoritative pending proposals of one game."""
+    """Guarda las propuestas pendientes canónicas de una partida."""
 
     def __init__(self, conn: sqlite3.Connection) -> None:
         self.conn = conn
@@ -52,7 +52,9 @@ class ExchangeRepository:
             )
 
     def replace_for_game(self, game: Game) -> None:
-        """Replace all persisted proposals without owning an outer transaction."""
+        """Sustituye todas las propuestas persistidas sin hacerse cargo de una
+        transacción externa.
+        """
         if self.conn.in_transaction:
             self._replace_for_game(game)
             return
@@ -60,7 +62,7 @@ class ExchangeRepository:
             self._replace_for_game(game)
 
     def get_by_game(self, game: Game) -> list[ExchangeProposal]:
-        """Load pending proposals ordered by their canonical pair."""
+        """Carga las propuestas pendientes ordenadas por su par canónico."""
         game_id = self._game_id(game)
         rows = self.conn.execute(
             """

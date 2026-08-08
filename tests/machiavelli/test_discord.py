@@ -1,4 +1,4 @@
-"""Tests for the Discord adapter and its application-service boundary."""
+"""Pruebas del adaptador de Discord y de su frontera con el servicio de aplicación."""
 
 from __future__ import annotations
 
@@ -68,7 +68,9 @@ from machiavelli.services import game_service_session
 
 
 def make_interaction(*, channel_id: int = 321, discord_id: int = 654) -> Mock:
-    """Build a network-free interaction mock with all response surfaces."""
+    """Construye un mock de interacción sin acceso a red con todas las superficies de
+    respuesta.
+    """
     interaction = Mock(name="interaction")
     interaction.channel_id = channel_id
     interaction.user = Mock(id=discord_id)
@@ -82,7 +84,9 @@ def make_interaction(*, channel_id: int = 321, discord_id: int = 654) -> Mock:
 
 
 class TestServiceWorkers(unittest.TestCase):
-    """Verify that synchronous workers stay behind the service boundary."""
+    """Verifica que los trabajadores síncronos permanezcan detrás de la frontera del
+    servicio.
+    """
 
     def test_all_synchronous_database_helpers_use_one_service_session(self) -> None:
         module = ast.parse(Path("machiavelli/discord.py").read_text(encoding="utf-8"))
@@ -201,7 +205,8 @@ class TestServiceWorkers(unittest.TestCase):
 
 
 class TestPlayerCommands(unittest.IsolatedAsyncioTestCase):
-    """Exercise player registration and order submission without Discord network I/O."""
+    """Prueba el registro de jugadores y el envío de órdenes sin E/S de red de Discord.
+    """
 
     async def test_add_player_uses_service_and_keeps_public_response(self) -> None:
         interaction = make_interaction()
@@ -324,7 +329,9 @@ class TestPlayerCommands(unittest.IsolatedAsyncioTestCase):
 
 
 class TestReports(unittest.IsolatedAsyncioTestCase):
-    """Verify public/private response semantics and safe message partitioning."""
+    """Verifica la semántica de las respuestas públicas y privadas y la división segura
+    de mensajes.
+    """
 
     async def test_game_status_is_public(self) -> None:
         interaction = make_interaction()
@@ -442,7 +449,9 @@ class TestReports(unittest.IsolatedAsyncioTestCase):
 
 
 class TestRunGame(unittest.IsolatedAsyncioTestCase):
-    """Verify successful publication and safe atomic military failures."""
+    """Verifica la publicación correcta y el tratamiento atómico seguro de los fallos
+    militares.
+    """
 
     async def test_run_game_success_publishes_public_report(self) -> None:
         interaction = make_interaction()
@@ -634,7 +643,9 @@ class TestRunGame(unittest.IsolatedAsyncioTestCase):
 
 
 class TestImportSafety(unittest.TestCase):
-    """Ensure importing adapters does not require a token or create a database."""
+    """Garantiza que importar los adaptadores no requiera un token ni cree una base de
+    datos.
+    """
 
     def test_imports_have_no_database_or_network_side_effects(self) -> None:
         project_root = Path(__file__).resolve().parents[2]
@@ -677,7 +688,7 @@ class TestImportSafety(unittest.TestCase):
 
 
 class TestGiveCommand(unittest.IsolatedAsyncioTestCase):
-    """Verify the private direct-transfer Discord boundary."""
+    """Verifica la frontera privada de Discord para transferencias directas."""
 
     def test_metadata_and_signature(self) -> None:
         self.assertEqual(
@@ -889,7 +900,7 @@ class TestGiveCommand(unittest.IsolatedAsyncioTestCase):
 
 
 class TestExchangeCommand(unittest.IsolatedAsyncioTestCase):
-    """Verify the complete private exchange Discord boundary."""
+    """Verifica la frontera privada completa de Discord para intercambios."""
 
     def test_metadata_and_signature(self) -> None:
         self.assertEqual(

@@ -1,4 +1,4 @@
-"""Tests for the direct trading domain rules."""
+"""Pruebas de las reglas de dominio del comercio directo."""
 
 from __future__ import annotations
 

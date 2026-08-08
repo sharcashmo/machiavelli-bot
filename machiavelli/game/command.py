@@ -1,4 +1,4 @@
-"""Domain model for player commands."""
+"""Modelo de dominio para los comandos de los jugadores."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True)
 class Command:
-    """Represent an order issued by a player in a game."""
+    """Representa una orden emitida por un jugador en una partida."""
 
     game: Game
     player: Player
@@ -25,16 +25,18 @@ class Command:
 
     @property
     def game_id(self) -> int | None:
-        """Return the persisted game identifier derived from the domain object."""
+        """Devuelve el identificador persistido de la partida, derivado del objeto de
+        dominio.
+        """
         return self.game.database_id
 
     @property
     def player_id(self) -> str:
-        """Return the player identifier derived from the domain object."""
+        """Devuelve el identificador del jugador, derivado del objeto de dominio."""
         return self.player.player_id
 
     def save(self, conn: sqlite3.Connection) -> None:
-        """Persist this command through the repository compatibility facade."""
+        """Guarda este comando mediante la fachada de compatibilidad del repositorio."""
         from machiavelli.repositories.command_repository import CommandRepository
 
         CommandRepository(conn).save(self)

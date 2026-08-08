@@ -1,4 +1,4 @@
-"""Order submission and replacement rules."""
+"""Reglas de envío y sustitución de órdenes."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class OrderProcessor:
-    """Validate and register orders according to the active turn type."""
+    """Valida y registra las órdenes según el tipo de turno activo."""
 
     def __init__(self, game: Game) -> None:
         self.game = game
@@ -26,7 +26,9 @@ class OrderProcessor:
         turn_type: TurnType,
         command: Command,
     ) -> list[str]:
-        """Register one order and return its user-facing report in stable order."""
+        """Registra una orden y devuelve su informe visible para el usuario en un orden
+        estable.
+        """
         report = [f"Orden `{command}` enviada."]
 
         if turn_type == TurnType.MAINTENANCE:
@@ -43,7 +45,9 @@ class OrderProcessor:
         player: Player,
         command: Command,
     ) -> list[str]:
-        """Register a maintenance order, keeping at most one row per actor."""
+        """Registra una orden de mantenimiento, conservando como máximo una fila por
+        actor.
+        """
         current_commands = [
             current for current in player.commands if current.actor == command.actor
         ]
@@ -80,7 +84,8 @@ class OrderProcessor:
         player: Player,
         command: Command,
     ) -> list[str]:
-        """Register a campaign order, expense update, or convoy segment."""
+        """Registra una orden de campaña, actualiza un gasto o añade un tramo de convoy.
+        """
         actor_type, _actor_id = command.actor.split(maxsplit=1)
         if actor_type == "E":
             return self._handle_expense_command(player, command)
@@ -109,7 +114,7 @@ class OrderProcessor:
         player: Player,
         command: Command,
     ) -> list[str]:
-        """Create, update, or remove one campaign expense."""
+        """Crea, actualiza o elimina un gasto de campaña."""
         expense = next(
             (
                 current
@@ -144,7 +149,7 @@ class OrderProcessor:
         actor_type: str,
         current_commands: list[Command],
     ) -> bool:
-        """Return whether ``command`` extends a syntactically valid convoy route."""
+        """Devuelve si ``command`` amplía una ruta de convoy sintácticamente válida."""
         if actor_type != "A" or command.command != "A" or command.target is None:
             return False
 

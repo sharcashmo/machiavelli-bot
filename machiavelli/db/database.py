@@ -1,4 +1,4 @@
-"""Canonical SQLite schema, migration, and connection management."""
+"""Esquema canónico de SQLite, migraciones y gestión de conexiones."""
 
 import logging
 import sqlite3
@@ -100,7 +100,7 @@ CREATE TABLE exchange_proposals (
 
 
 def upgrade_connection(conn: sqlite3.Connection) -> None:
-    """Apply pending migrations without taking ownership of the connection."""
+    """Aplica las migraciones pendientes sin hacerse cargo de la conexión."""
     cursor = conn.cursor()
     cursor.execute("PRAGMA user_version;")
     row = cursor.fetchone()
@@ -153,7 +153,9 @@ def upgrade_connection(conn: sqlite3.Connection) -> None:
 
 
 def upgrade(db_path: str | Path) -> None:
-    """Open a SQLite database, apply pending migrations, and always close it."""
+    """Abre una base de datos SQLite, aplica las migraciones pendientes y la cierra
+    siempre.
+    """
     conn = sqlite3.connect(db_path)
     try:
         upgrade_connection(conn)
@@ -162,13 +164,13 @@ def upgrade(db_path: str | Path) -> None:
 
 
 class DatabaseManager:
-    """Configure SQLite connections and initialize the canonical schema."""
+    """Configura las conexiones SQLite e inicializa el esquema canónico."""
 
     def __init__(self, db_path: str | Path) -> None:
         self.db_path = Path(db_path)
 
     def get_connection(self) -> sqlite3.Connection:
-        """Open a connection and apply the required per-session configuration."""
+        """Abre una conexión y aplica la configuración necesaria para la sesión."""
         if not self.db_path.parent.exists():
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -179,7 +181,9 @@ class DatabaseManager:
         return conn
 
     def init_db(self) -> None:
-        """Initialize or upgrade the database through the canonical migration path."""
+        """Inicializa o actualiza la base de datos mediante la ruta canónica de
+        migración.
+        """
         conn = self.get_connection()
         try:
             upgrade_connection(conn)

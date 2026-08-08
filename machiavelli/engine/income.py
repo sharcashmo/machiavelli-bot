@@ -1,4 +1,4 @@
-"""Income phase and its auditable turn events."""
+"""Fase de ingresos y sus eventos de turno auditables."""
 
 from random import Random
 
@@ -9,14 +9,14 @@ from ..game.tables import GameTables
 
 
 class IncomeManager:
-    """Calculate and apply each player's spring income."""
+    """Calcula y aplica los ingresos de primavera de cada jugador."""
 
     def __init__(self, game: Game, rng: Random | None = None):
         self.game = game
         self.rng = rng if rng is not None else Random()
 
     def _collect_player_income(self, player: Player) -> None:
-        """Apply one player's complete deterministic income calculation."""
+        """Aplica el cálculo determinista completo de los ingresos de un jugador."""
         game_map = self.game.require_map()
         scenario = self.game.require_scenario()
 
@@ -98,6 +98,6 @@ class IncomeManager:
         )
 
     def run(self) -> None:
-        """Apply income to every player in assignment order."""
+        """Aplica los ingresos a cada jugador en el orden de asignación."""
         for player in self.game.players:
             self._collect_player_income(player)

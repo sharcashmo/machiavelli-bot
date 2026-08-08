@@ -1,4 +1,4 @@
-"""Contract tests for centralized order processing."""
+"""Pruebas de contrato para el procesamiento centralizado de órdenes."""
 
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ def make_command(
     command: str,
     target: str | None = None,
 ) -> Command:
-    """Build a command using the canonical domain relationships."""
+    """Construye un comando utilizando las relaciones canónicas del dominio."""
     return Command(
         game=game,
         player=player,

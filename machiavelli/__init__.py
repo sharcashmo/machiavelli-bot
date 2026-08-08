@@ -1,4 +1,4 @@
-"""Top-level package metadata for Machiavelli."""
+"""Metadatos del paquete principal de Machiavelli."""
 
 import logging
 from importlib.metadata import PackageNotFoundError, version

@@ -157,11 +157,11 @@ class MilitaryResolver:
 
     @property
     def map(self) -> Map:
-        """Return the map required by every military resolution."""
+        """Devuelve el mapa necesario para cada resolución militar."""
         return self.game.require_map()
 
     def _player_power(self, key: UnitKey) -> str | None:
-        """Return the controlling power for a unit, if it has an owner."""
+        """Devuelve la potencia que controla una unidad, si tiene propietario."""
         player = self.units_by_key[key].player
         return player.power if player is not None else None
 

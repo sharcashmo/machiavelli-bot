@@ -1,4 +1,4 @@
-"""Public domain API for Machiavelli games."""
+"""API pública del dominio de las partidas de Machiavelli."""
 
 from .command import Command
 from .exceptions import (
