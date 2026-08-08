@@ -56,10 +56,10 @@ class TurnReporter:
         scenario = game.require_scenario()
         game.require_map()
         year = scenario.year + (game.turn_number - 1) // 4
-        season = _SEASONS[(game.turn_number - 1) % 4]
+        previous_season = _SEASONS[(game.turn_number - 2) % 4]
         report = [
             f"## 📜 {TurnReporter._safe(game.name)}, turno {game.turn_number}",
-            f"### 🗓️ {season} de {year}",
+            f"### 🗓️ {previous_season} de {year}",
             "> ⚠️ **EVENTOS DEL TURNO ANTERIOR**",
         ]
         for event in game.turn_events:
@@ -111,7 +111,7 @@ class TurnReporter:
                 return [f"{player} recibió la potencia {power}."]
             case EventType.START_SEASON:
                 season = _SEASONS[cast(int, data["season"])]
-                return [f"Comenzó {season} de {cast(int, data['year'])}."]
+                return [f"### 🗓️ Comenzó {season} de {cast(int, data['year'])}."]
             case EventType.FAMINE_SPAWN:
                 provinces = TurnReporter._locations(
                     game, cast(tuple[str, ...], data["provinces"])
