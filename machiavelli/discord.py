@@ -21,6 +21,7 @@ from machiavelli.game import (
     DuplicatePlayerException,
     GameNotFoundException,
     PlayerNotFoundException,
+    TradeRuleException,
 )
 from machiavelli.game.scenario import Scenario
 from machiavelli.game.tables import GameTables
@@ -349,6 +350,76 @@ def _submit_expense_record(
                 selected_power=selected_power,
             )
         )
+
+
+def _give_resource_record(
+    db_path: str,
+    channel_id: int,
+    discord_id: int,
+    give_to: str,
+    give_type: str,
+    give_value: str,
+) -> str:
+    """Validate and persist one direct transfer through the service boundary."""
+    with game_service_session(db_path) as service:
+        return service.give_resource(
+            channel_id,
+            discord_id,
+            give_to=give_to,
+            give_type=give_type,
+            give_value=give_value,
+        )
+
+
+def _exchange_resources_record(
+    db_path: str,
+    channel_id: int,
+    discord_id: int,
+    give_to: str,
+    give_type: str,
+    give_value: str,
+    receive_type: str,
+    receive_value: str,
+) -> str:
+    """Validate and persist one exchange through the service boundary."""
+    with game_service_session(db_path) as service:
+        return service.exchange_resources(
+            channel_id,
+            discord_id,
+            give_to=give_to,
+            give_type=give_type,
+            give_value=give_value,
+            receive_type=receive_type,
+            receive_value=receive_value,
+        )
+
+
+def _get_trade_counterparties(
+    db_path: str,
+    channel_id: int,
+    discord_id: int,
+) -> tuple[tuple[str, str], ...]:
+    """Load direct-transfer counterparties through the service boundary."""
+    with game_service_session(db_path) as service:
+        return tuple(service.get_trade_counterparties(channel_id, discord_id))
+
+
+def _get_trade_resource_types(
+    db_path: str,
+    channel_id: int,
+) -> tuple[tuple[str, str], ...]:
+    """Load enabled direct-transfer resource types through the service boundary."""
+    with game_service_session(db_path) as service:
+        return tuple(service.get_trade_resource_types(channel_id))
+
+
+def _get_trade_assassin_targets(
+    db_path: str,
+    channel_id: int,
+) -> tuple[tuple[str, str], ...]:
+    """Load assassin targets through the service boundary."""
+    with game_service_session(db_path) as service:
+        return tuple(service.get_trade_assassin_targets(channel_id))
 
 
 def _chunk_lines(lines: tuple[str, ...] | list[str], limit: int = 1950) -> list[str]:
@@ -1029,9 +1100,255 @@ async def exp_amount_autocomplete(
         return []
 
 
+# ============================================================================
+# COMANDOS DE TRADING
+# ============================================================================
+
+
+async def trade_give_to_autocomplete(
+    interaction: discord.Interaction, current: str
+) -> list[app_commands.Choice[str]]:
+    """Suggest assigned counterparties for a direct transfer."""
+    try:
+        counterparties = await asyncio.to_thread(
+            _get_trade_counterparties,
+            game_group.db_path,
+            _require_channel_id(interaction),
+            interaction.user.id,
+        )
+        current_folded = current.casefold()
+        return [
+            app_commands.Choice(name=label, value=code)
+            for code, label in counterparties
+            if current_folded in label.casefold() or current_folded in code.casefold()
+        ][:25]
+    except Exception:
+        return []
+
+
+async def trade_give_type_autocomplete(
+    interaction: discord.Interaction, current: str
+) -> list[app_commands.Choice[str]]:
+    """Suggest resource types enabled by the current scenario."""
+    try:
+        resource_types = await asyncio.to_thread(
+            _get_trade_resource_types,
+            game_group.db_path,
+            _require_channel_id(interaction),
+        )
+        current_folded = current.casefold()
+        return [
+            app_commands.Choice(name=label, value=code)
+            for code, label in resource_types
+            if current_folded in label.casefold() or current_folded in code.casefold()
+        ][:25]
+    except Exception:
+        return []
+
+
+async def trade_give_value_autocomplete(
+    interaction: discord.Interaction, current: str
+) -> list[app_commands.Choice[str]]:
+    """Suggest scenario powers when the direct transfer is an assassination."""
+    if getattr(interaction.namespace, "give_type", None) != "assassin":
+        return []
+
+    try:
+        targets = await asyncio.to_thread(
+            _get_trade_assassin_targets,
+            game_group.db_path,
+            _require_channel_id(interaction),
+        )
+        current_folded = current.casefold()
+        return [
+            app_commands.Choice(name=label, value=code)
+            for code, label in targets
+            if current_folded in label.casefold() or current_folded in code.casefold()
+        ][:25]
+    except Exception:
+        return []
+
+
+async def _trade_exchange_value_autocomplete(
+    interaction: discord.Interaction,
+    current: str,
+    resource_attribute: str,
+) -> list[app_commands.Choice[str]]:
+    """Suggest cancellation and scenario targets for one exchange value."""
+    try:
+        cancel = app_commands.Choice(name="0 — Cancelar intercambio", value="0")
+        resource_type = getattr(
+            getattr(interaction, "namespace", None), resource_attribute, None
+        )
+        if not isinstance(resource_type, str):
+            return []
+
+        current_folded = current.casefold()
+
+        def matches(choice: app_commands.Choice[str]) -> bool:
+            return (
+                current_folded in choice.name.casefold()
+                or current_folded in choice.value.casefold()
+            )
+
+        if resource_type != "assassin":
+            return [cancel] if matches(cancel) else []
+
+        targets = await asyncio.to_thread(
+            _get_trade_assassin_targets,
+            game_group.db_path,
+            _require_channel_id(interaction),
+        )
+        choices = [cancel] + [
+            app_commands.Choice(name=label, value=code) for code, label in targets
+        ]
+        return [choice for choice in choices if matches(choice)][:25]
+    except Exception:
+        return []
+
+
+async def trade_exchange_give_value_autocomplete(
+    interaction: discord.Interaction, current: str
+) -> list[app_commands.Choice[str]]:
+    """Suggest exchange cancellation and offered assassin targets."""
+    return await _trade_exchange_value_autocomplete(interaction, current, "give_type")
+
+
+async def trade_exchange_receive_value_autocomplete(
+    interaction: discord.Interaction, current: str
+) -> list[app_commands.Choice[str]]:
+    """Suggest exchange cancellation and requested assassin targets."""
+    return await _trade_exchange_value_autocomplete(
+        interaction, current, "receive_type"
+    )
+
+
 # ==============================================================================
 # COMANDO /mach cmd
 # ==============================================================================
+
+
+@game_group.command(
+    name="give", description="Da ducados o una ficha de asesinato a otra facción."
+)
+@app_commands.describe(
+    give_to="Facción que recibirá el recurso",
+    give_type="Recurso que quieres dar",
+    give_value="Cantidad de ducados o facción objetivo de la ficha",
+)
+@app_commands.autocomplete(
+    give_to=trade_give_to_autocomplete,
+    give_type=trade_give_type_autocomplete,
+    give_value=trade_give_value_autocomplete,
+)
+async def give(
+    interaction: discord.Interaction,
+    give_to: str,
+    give_type: str,
+    give_value: str,
+):
+    await interaction.response.defer(ephemeral=True)
+    channel_id = _require_channel_id(interaction)
+
+    try:
+        result = await asyncio.to_thread(
+            _give_resource_record,
+            game_group.db_path,
+            channel_id,
+            interaction.user.id,
+            give_to,
+            give_type,
+            give_value,
+        )
+        await interaction.followup.send(result, ephemeral=True)
+    except GameNotFoundException:
+        await interaction.followup.send(
+            "**Error:** No hay ninguna partida activa en este canal.",
+            ephemeral=True,
+        )
+    except PlayerNotFoundException:
+        await interaction.followup.send(
+            "**Error:** No se identificó al jugador o no tiene una facción asignada.",
+            ephemeral=True,
+        )
+    except TradeRuleException as error:
+        await interaction.followup.send(f"**Error:** {error}", ephemeral=True)
+    except Exception:
+        logger.exception(
+            "Fallo inesperado en /mach give",
+            extra={"operation": "trade_give", "channel_id": channel_id},
+        )
+        await interaction.followup.send(
+            "**Error inesperado:** No se pudo completar la operación. "
+            "Inténtalo de nuevo.",
+            ephemeral=True,
+        )
+
+
+@game_group.command(
+    name="exchange",
+    description="Propón, cancela o completa un intercambio con otra facción.",
+)
+@app_commands.describe(
+    give_to="Facción con la que quieres intercambiar",
+    give_type="Recurso que ofreces",
+    give_value="Cantidad u objetivo que ofreces; 0 cancela",
+    receive_type="Recurso que solicitas",
+    receive_value="Cantidad u objetivo que solicitas; 0 cancela",
+)
+@app_commands.autocomplete(
+    give_to=trade_give_to_autocomplete,
+    give_type=trade_give_type_autocomplete,
+    give_value=trade_exchange_give_value_autocomplete,
+    receive_type=trade_give_type_autocomplete,
+    receive_value=trade_exchange_receive_value_autocomplete,
+)
+async def exchange(
+    interaction: discord.Interaction,
+    give_to: str,
+    give_type: str,
+    give_value: str,
+    receive_type: str,
+    receive_value: str,
+):
+    await interaction.response.defer(ephemeral=True)
+    channel_id = _require_channel_id(interaction)
+
+    try:
+        result = await asyncio.to_thread(
+            _exchange_resources_record,
+            game_group.db_path,
+            channel_id,
+            interaction.user.id,
+            give_to,
+            give_type,
+            give_value,
+            receive_type,
+            receive_value,
+        )
+        await interaction.followup.send(result, ephemeral=True)
+    except GameNotFoundException:
+        await interaction.followup.send(
+            "**Error:** No hay ninguna partida activa en este canal.",
+            ephemeral=True,
+        )
+    except PlayerNotFoundException:
+        await interaction.followup.send(
+            "**Error:** No se identificó al jugador o no tiene una facción asignada.",
+            ephemeral=True,
+        )
+    except TradeRuleException as error:
+        await interaction.followup.send(f"**Error:** {error}", ephemeral=True)
+    except Exception:
+        logger.exception(
+            "Fallo inesperado en /mach exchange",
+            extra={"operation": "exchange", "channel_id": channel_id},
+        )
+        await interaction.followup.send(
+            "**Error inesperado:** No se pudo completar la operación. "
+            "Inténtalo de nuevo.",
+            ephemeral=True,
+        )
 
 
 @game_group.command(

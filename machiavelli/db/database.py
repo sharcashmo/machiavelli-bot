@@ -6,7 +6,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-_SCHEMA_VERSION = 4
+_SCHEMA_VERSION = 5
 
 _UPGRADES: tuple[str, ...] = (
     # SCHEMA 1
@@ -79,6 +79,25 @@ CREATE TABLE game_events (
 )
 """
 
+_EXCHANGE_PROPOSALS_V5_SQL = """\
+CREATE TABLE exchange_proposals (
+    game_id INTEGER NOT NULL,
+    power_a TEXT NOT NULL,
+    power_b TEXT NOT NULL,
+    proposer_power TEXT NOT NULL,
+    give_type TEXT NOT NULL,
+    give_value TEXT NOT NULL,
+    receive_type TEXT NOT NULL,
+    receive_value TEXT NOT NULL,
+    PRIMARY KEY (game_id, power_a, power_b),
+    CHECK (power_a < power_b),
+    CHECK (proposer_power = power_a OR proposer_power = power_b),
+    CHECK (give_type IN ('ducats', 'assassin')),
+    CHECK (receive_type IN ('ducats', 'assassin')),
+    FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
+);
+"""
+
 
 def upgrade_connection(conn: sqlite3.Connection) -> None:
     """Apply pending migrations without taking ownership of the connection."""
@@ -113,6 +132,14 @@ def upgrade_connection(conn: sqlite3.Connection) -> None:
             cursor.execute("DROP TABLE game_events")
             cursor.execute(_GAME_EVENTS_V4_SQL)
             cursor.execute("PRAGMA user_version = 4")
+            conn.commit()
+
+        if current_version < 5 <= _SCHEMA_VERSION:
+            target_version = 5
+            logger.info("Aplicando migración a versión 5...")
+            cursor.execute("BEGIN IMMEDIATE")
+            cursor.execute(_EXCHANGE_PROPOSALS_V5_SQL)
+            cursor.execute("PRAGMA user_version = 5")
             conn.commit()
     except Exception:
         conn.rollback()

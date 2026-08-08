@@ -39,4 +39,5 @@ jobs:
       - name: Run military performance gate
         run: >-
           python -m pytest -q tests/machiavelli/engine/test_military.py
-          -k "representative_resolution_budget"
+          tests/machiavelli/services/test_game_service.py
+          -k "representative_resolution_budget or trade_operations_budget"
