@@ -7,7 +7,13 @@ from collections.abc import Mapping
 from ..game.game import Game
 from ..game.map import Map, MovementMode
 from ..game.player import Player
-from .military import MilitaryResolution, UnitKey, UnitOutcome, conflict_location
+from .military import (
+    DislodgementDecision,
+    MilitaryResolution,
+    UnitKey,
+    UnitOutcome,
+    conflict_location,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -24,14 +30,22 @@ class RetreatHandler:
 
     def _preferred_retreat(
         self, outcome: UnitOutcome, invalid_destinations: set[str]
-    ) -> str | None:
+    ) -> DislodgementDecision:
         """Devuelve la retirada preferida por la unidad."""
         unit: UnitKey = outcome.unit
+
+        decision: DislodgementDecision = DislodgementDecision("disband", None)
         destination = None
 
-        # Independent garrisons do not reatreat
+        logger.debug(
+            "Preferred retreat. Outcome: %s. Invalid destionations: %s",
+            outcome,
+            invalid_destinations,
+        )
+
+        # Las guarniciones independientes no se retiran
         if unit.player_id is None:
-            return None
+            return decision
 
         player: Player = self.players[unit.player_id]
 
@@ -96,6 +110,9 @@ class RetreatHandler:
                 # Una cualquiera adyacente
                 destination = adjacent_locations[0]
 
+            decision = DislodgementDecision("retreat", destination)
+            invalid_destinations.add(conflict_location(destination, unit.unit_type))
+
         elif unit.origin in self.map.provinces:
             # No tenemos, pero quizá podamos retirarnos a la ciudad
             province = self.map.provinces[unit.origin]
@@ -113,22 +130,30 @@ class RetreatHandler:
             ):
                 if unit.unit_type == "A" or unit.unit_type == "F" and province.has_port:
                     # Nos retiramos al fuerte
-                    outcome.final_unit_type = "G"
                     destination = conflict_location(unit.origin, unit.unit_type)
+                    decision = DislodgementDecision("garrison", destination)
+                    invalid_destinations.add(conflict_location(destination, "G"))
+
+        logger.debug(
+            "Output. Outcome: %s. Invalid destionations: %s. Destination: %s",
+            outcome,
+            invalid_destinations,
+            decision,
+        )
 
         if destination:
             invalid_destinations.add(
                 conflict_location(destination, outcome.final_unit_type)
             )
-            return destination
-        else:
-            return None
+
+        return decision
 
     def __call__(self, resolution: MilitaryResolution) -> Mapping[UnitKey, str | None]:
         """Resuelve las retiradas del combate."""
-        retreats: dict[UnitKey, str | None] = {}
+        retreats: dict[UnitKey, DislodgementDecision] = {}
 
         # Comenzamos haciendo la lista de localizaciones no válidas para retiradas
+        logger.debug("Dislodgement handler. resolution: %s", resolution)
         invalid_destinations = {
             conflict_location(outcome.final_location, outcome.final_unit_type)
             for outcome in resolution.outcomes

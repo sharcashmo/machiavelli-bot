@@ -4,6 +4,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from machiavelli.engine.dislodgement import RetreatHandler
+from machiavelli.engine.military import DislodgementDecision
 
 
 class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
@@ -27,7 +28,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
         outcome.unit.player_id = None
 
         result = self.handler._preferred_retreat(outcome, set())
-        self.assertIsNone(result)
+        self.assertEqual(result, DislodgementDecision("disband", None))
 
     def test_invalid_unit_type_returns_none(self):
         """Las guarniciones no pueden retirarse."""
@@ -36,10 +37,10 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
         outcome.unit.unit_type = "G"
         outcome.unit.origin = "rome"
 
-        self.mock_map.adjacent_locations.return_value = None
+        self.mock_map.adjacent_locations.return_value = {"rome", "flore", "naple"}
 
         result = self.handler._preferred_retreat(outcome, set())
-        self.assertIsNone(result)
+        self.assertEqual(result, DislodgementDecision("disband", None))
 
     def test_retreat_priority_controlled_and_home_country(self):
         """Prioridad 1: Se escoge un destino adyacente controlado y del país natal."""
@@ -59,7 +60,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         result = self.handler._preferred_retreat(outcome, invalid_destinations)
 
-        self.assertEqual(result, "rome")
+        self.assertEqual(result, DislodgementDecision("retreat", "rome"))
 
     def test_retreat_priority_controlled_only(self):
         """Prioridad 2: Si no hay de país natal, se escoge una controlada no natal."""
@@ -79,7 +80,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         result = self.handler._preferred_retreat(outcome, invalid_destinations)
 
-        self.assertEqual(result, "naple")
+        self.assertEqual(result, DislodgementDecision("retreat", "naple"))
 
     def test_retreat_priority_home_country_only(self):
         """Prioridad 3: Si no hay controladas, se escoge país natal no controlada."""
@@ -99,7 +100,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         result = self.handler._preferred_retreat(outcome, invalid_destinations)
 
-        self.assertEqual(result, "rome")
+        self.assertEqual(result, DislodgementDecision("retreat", "rome"))
 
     def test_retreat_priority_random_adjacent(self):
         """Prioridad 4: Si no cumple ninguna condición preferente, una adyacente."""
@@ -119,7 +120,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         result = self.handler._preferred_retreat(outcome, invalid_destinations)
 
-        self.assertEqual(result, "naple")
+        self.assertEqual(result, DislodgementDecision("retreat", "naple"))
 
     def test_retreat_filters_invalid_destinations(self):
         """Verifica que se descartan los destinos presentes en invalid_destinations."""
@@ -140,7 +141,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         result = self.handler._preferred_retreat(outcome, invalid_destinations)
 
-        self.assertEqual(result, "naple")
+        self.assertEqual(result, DislodgementDecision("retreat", "naple"))
 
     @patch("machiavelli.engine.dislodgement.conflict_location")
     def test_retreat_transforms_to_garrison_in_fortified_city(
@@ -167,8 +168,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         result = self.handler._preferred_retreat(outcome, invalid_destinations)
 
-        self.assertEqual(result, "rome")
-        self.assertEqual(outcome.final_unit_type, "G")
+        self.assertEqual(result, DislodgementDecision("garrison", "rome"))
         self.assertIn("G rome", invalid_destinations)
 
     @patch("machiavelli.engine.dislodgement.conflict_location")
@@ -193,8 +193,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         result = self.handler._preferred_retreat(outcome, set())
 
-        self.assertIsNone(result)
-        self.assertEqual(outcome.final_unit_type, "F")
+        self.assertEqual(result, DislodgementDecision("disband", None))
 
     @patch("machiavelli.engine.dislodgement.conflict_location")
     def test_no_retreat_places_no_garrison_allowed(self, mock_conflict_location):
@@ -218,8 +217,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         result = self.handler._preferred_retreat(outcome, set())
 
-        self.assertIsNone(result)
-        self.assertEqual(outcome.final_unit_type, "A")
+        self.assertEqual(result, DislodgementDecision("disband", None))
 
     @patch("machiavelli.engine.dislodgement.conflict_location")
     def test_no_retreat_places_no_garrison_city_full(self, mock_conflict_location):
@@ -248,5 +246,4 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
             },
         )
 
-        self.assertIsNone(result)
-        self.assertEqual(outcome.final_unit_type, "A")
+        self.assertEqual(result, DislodgementDecision("disband", None))

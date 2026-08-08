@@ -147,6 +147,7 @@ class TurnEvent:
         dislodgements: Sequence[Sequence[object]],
         rebellions: Sequence[Sequence[object]],
         sieges: Sequence[Sequence[object]],
+        decisions: Sequence[Sequence[object]],
     ) -> Self:
         """Build the canonical military event from resolver primitives."""
         return cls(
@@ -158,6 +159,7 @@ class TurnEvent:
                 "dislodgements": list(dislodgements),
                 "rebellions": list(rebellions),
                 "sieges": list(sieges),
+                "decisions": list(decisions),
             },
         )
 
@@ -472,6 +474,14 @@ def _siege(value: object) -> list[JSONValue]:
     ]
 
 
+def _decisions(value: object) -> list[JSONValue]:
+    item = _sequence(value, 3)
+    unit = _unit_key(item[0])
+    result_type = _choice(item[1], {"retreat", "garrison", "disband"})
+    destination = _nullable_string(item[2])
+    return [unit, result_type, destination]
+
+
 def _canonicalize(
     value: object,
     validator: Callable[[object], list[JSONValue]],
@@ -494,6 +504,7 @@ def _military_resolution(data: Mapping[str, object]) -> dict[str, JSONValue]:
         "dislodgements",
         "rebellions",
         "sieges",
+        "decisions",
     }
     _keys(data, expected)
     return {
@@ -503,6 +514,7 @@ def _military_resolution(data: Mapping[str, object]) -> dict[str, JSONValue]:
         "dislodgements": _canonicalize(data["dislodgements"], _unit_key),
         "rebellions": _canonicalize(data["rebellions"], _rebellion),
         "sieges": _canonicalize(data["sieges"], _siege),
+        "decisions": _canonicalize(data["decisions"], _decisions),
     }
 
 

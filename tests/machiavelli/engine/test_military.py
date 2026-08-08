@@ -14,6 +14,7 @@ from unittest.mock import Mock, patch
 
 from machiavelli.database import upgrade
 from machiavelli.engine.military import (
+    DislodgementDecision,
     DislodgementResolverRequired,
     InvalidMilitaryState,
     MilitaryOrder,
@@ -1112,6 +1113,7 @@ class TestConflictConstructionAndSupport(unittest.TestCase):
             ("b", "f"),
         ):
             provinces[origin].land_routes.append(Route(destination))
+
         game = create_military_game(
             Map(provinces=provinces, seas={}),
             [
@@ -1843,7 +1845,9 @@ class TestRebellions(unittest.TestCase):
     @staticmethod
     def _remove_all_dislodged(resolution):
         return {
-            outcome.unit: None for outcome in resolution.outcomes if outcome.dislodged
+            outcome.unit: DislodgementDecision("disband", None)
+            for outcome in resolution.outcomes
+            if outcome.dislodged
         }
 
     @staticmethod
@@ -2250,7 +2254,9 @@ class TestSiegesAndRestrictedConversions(unittest.TestCase):
     @staticmethod
     def _remove_all_dislodged(resolution):
         return {
-            outcome.unit: None for outcome in resolution.outcomes if outcome.dislodged
+            outcome.unit: DislodgementDecision("disband", None)
+            for outcome in resolution.outcomes
+            if outcome.dislodged
         }
 
     @staticmethod
@@ -3041,7 +3047,7 @@ class TestDislodgementContract(unittest.TestCase):
         game = self._single_dislodgement_game()
         before = military_snapshot(game)
         dislodged = UnitKey("P2", "A", "b")
-        manager = Mock(return_value={dislodged: "b"})
+        manager = Mock(return_value={dislodged: DislodgementDecision("retreat", "b")})
 
         with self.assertRaises(MilitaryResolutionError):
             MilitaryResolver(game).run(manager)
@@ -3055,8 +3061,8 @@ class TestDislodgementContract(unittest.TestCase):
         game = self._two_dislodgement_game()
         before = military_snapshot(game)
         decisions = {
-            UnitKey("P2", "A", "b"): "c",
-            UnitKey("P4", "A", "fort"): "c",
+            UnitKey("P2", "A", "b"): DislodgementDecision("retreat", "c"),
+            UnitKey("P4", "A", "fort"): DislodgementDecision("retreat", "c"),
         }
         manager = Mock(return_value=decisions)
 
@@ -3068,8 +3074,8 @@ class TestDislodgementContract(unittest.TestCase):
 
     def test_elimination_and_valid_retreat_commit_after_one_manager_call(self):
         cases = (
-            ("elimination", None, []),
-            ("retreat", "c", ["c"]),
+            ("elimination", DislodgementDecision("disband", None), []),
+            ("retreat", DislodgementDecision("retreat", "c"), ["c"]),
         )
         for label, destination, expected_armies in cases:
             with self.subTest(label=label):
@@ -3119,7 +3125,9 @@ class TestDislodgementContract(unittest.TestCase):
         )
         before = military_snapshot(game)
         dislodged = UnitKey("P2", "F", "Y")
-        manager = Mock(return_value={dislodged: "inland"})
+        manager = Mock(
+            return_value={dislodged: DislodgementDecision("retreat", "inland")}
+        )
 
         with self.assertRaises(MilitaryResolutionError):
             MilitaryResolver(game).run(manager)
@@ -3147,7 +3155,9 @@ class TestDislodgementContract(unittest.TestCase):
         self.assertEqual(military_snapshot(incomplete), incomplete_before)
 
         completed = self._completed_independent_siege()
-        manager = Mock(return_value={independent: None})
+        manager = Mock(
+            return_value={independent: DislodgementDecision("disband", None)}
+        )
         resolution = MilitaryResolver(completed).run(manager)
         manager.assert_called_once_with(resolution)
         self.assertEqual(completed.independent_garrisons, [])
@@ -3156,17 +3166,19 @@ class TestDislodgementContract(unittest.TestCase):
         self.assertEqual(event["dislodgements"], [[None, "G", "fort"]])
 
 
-REPRESENTATIVE_DISLODGEMENT_DECISIONS: Mapping[UnitKey, str | None] = MappingProxyType(
-    {
-        UnitKey("P2", "A", "cross00b"): "retreat",
-        UnitKey("P2", "A", "cross01b"): None,
-    }
+REPRESENTATIVE_DISLODGEMENT_DECISIONS: Mapping[UnitKey, DislodgementDecision] = (
+    MappingProxyType(
+        {
+            UnitKey("P2", "A", "cross00b"): DislodgementDecision("retreat", "retreat"),
+            UnitKey("P2", "A", "cross01b"): DislodgementDecision("disband", None),
+        }
+    )
 )
 
 
 def representative_dislodgement_resolver(
     resolution: MilitaryResolution,
-) -> Mapping[UnitKey, str | None]:
+) -> Mapping[UnitKey, DislodgementDecision]:
     """Devuelve las dos decisiones fijas de la carga representativa."""
     dislodged = frozenset(
         outcome.unit for outcome in resolution.outcomes if outcome.dislodged
@@ -3470,8 +3482,8 @@ class TestIntegratedMilitaryAcceptance(unittest.TestCase):
             "rebellions",
             "sieges",
         )
-        decisions: Mapping[UnitKey, str | None] = MappingProxyType(
-            {UnitKey("P1", "A", "c"): "r"}
+        decisions: Mapping[UnitKey, DislodgementDecision] = MappingProxyType(
+            {UnitKey("P1", "A", "c"): DislodgementDecision("retreat", "r")}
         )
         observations = []
 
@@ -3547,7 +3559,3 @@ class TestIntegratedMilitaryAcceptance(unittest.TestCase):
         self.assertTrue(
             all(observation == observations[0] for observation in observations)
         )
-
-
-if __name__ == "__main__":
-    unittest.main()
