@@ -37,7 +37,7 @@ DATABASE_PATH=game.db
 
 ## Instalación
 
-Machiavelli requiere Python 3.13 o posterior. Para instalar el paquete en modo
+Machiavelli requiere Python 3.12 o posterior. Para instalar el paquete en modo
 desarrollo con sus herramientas de calidad:
 
 ```powershell
@@ -49,7 +49,7 @@ distribución wheel generada mediante `python -m build`.
 
 ## Versión
 
-Versión de desarrollo actual: 0.5.0.dev0. Última versión estable publicada: 0.4.2.
+Versión de desarrollo actual: 0.7.0. Última versión estable publicada: 0.6.0.
 
 ## Comandos disponibles
 
@@ -63,14 +63,16 @@ Sincroniza los comandos disponibles. Ejecutar cuando se deban registrar nuevos c
 
 > Versión 0.2.0
 
-Conjunto de comandos para su uso por los jugadores. Todos estos comandos son privados, es decir, la respuesta
-a los comandos es un mensaje privado solo visible por el jugador que los ejecuta.
+Conjunto de comandos para su uso por los jugadores. Todos estos comandos son privados,
+es decir, la respuesta a los comandos es un mensaje privado solo visible por el jugador
+que los ejecuta.
 
 #### `/mach game_status`
 
 > Versión 0.2.0
 
-Muestra el estado de la partida y los jugadores que han enviado sus órdenes hasta ese momento.
+Muestra las órdenes enviadas, el estado de la partida y los jugadores que han enviado
+sus órdenes hasta ese momento.
 
 #### `/mach game_report`
 
@@ -81,6 +83,8 @@ Muestra el último informe de la partida.
 #### `/mach cmdlist`
 
 > Versión 0.2.0
+
+*deprecado (v0.7.0)* Su contenido se traslada a `/mach game_status`.
 
 Muestra las órdenes enviadas hasta el momento por el jugador.
 
@@ -95,6 +99,19 @@ Añade una orden nueva al turno actual.
 > Versión 0.4.0
 
 Añade un gasto nuevo al turno actual.
+
+### `/mach exchange`
+
+> Versión 0.7.0
+
+Realiza un intercambio con otro jugador. Para que un intercambio tenga éxito los dos
+jugadores tienen que realizarlo.
+
+### `/mach give`
+
+> Versión 0.7.0
+
+Da recursos (ducados o fichas de asesinato) a otro jugador.
 
 ### `/shar` (administrador)
 
@@ -150,36 +167,15 @@ distinta al uso de `/mach expense`, por ejemplo enviando la plantilla rellena.
 
 Se prevén las siguientes versiones
 
-### Versión 0.6.0
+### Versión 0.7.0
 
-- [X] Ampliación de GameEngine para soportar las operaciones que los jugadores vayan incorporando a sus órdenes.
-  - [X] SetupManager, para el setup inicial de la partida (antes en Game)
-- [X] Reescritura y refactorización de prácticamente todo el código.
-  - [X] Creación del package db, para la gestión de la base de datos.
-  - [X] Creación del package repositories, encargado de la persistencia de los elementos del juego.
-    - [X] CommandRepository
-    - [X] PlayerRepository
-    - [X] GameRepository
-  - [X] Creación del package services, para servicios varios.
-    - [X] Clases de autocompletar comandos de Discord.
-    - [X] GameService, para exponer las operaciones sobre la partida a distintos interfaces.
-    - [X] Clases para generar el reporte de los distintos objetos.
-      - [X] CommandReporter
-      - [X] PlayerReporter
-      - [X] TurnReporter
-  - [X] Creación del package game, responsable de las clases de dominio del juego.
-    - [X] GameTables
-    - [X] Map
-    - [X] Scenario
-    - [X] Command
-    - [X] Player
-    - [X] Game
-    - [X] Events
-  - [X] Ampliación de GameEngine para soportar las operaciones que los jugadores vayan incorporando a sus órdenes.
-    - [X] SetupManager, para el setup inicial de la partida (antes en Game)
-    - [X] MaintenanceManager, para los turnos de mantenimiento (antes en Game)
-    - [X] MilitaryResolver, completado con el resto de acciones y gestión de conflictos.
-    - [X] RetreatManager, para gestionar las retiradas.
+- [ ] Mejora del reporte.
+  - [ ] Incluye las órdenes de los jugadores en el reporte.
+  - [ ] Mejora la representación de los eventos.
+  - [ ] Mejora general del formato del reporte.
+- [X] Nuevos comandos `/exchange` y `/give` para intercambiar o dar recursos a otro jugador.
+- [ ] Incorpora los resultados de `/mach cmdlist` en `/mach game_status`.
+- [X] Mejora el filtrado de comandos en `/mach cmd` en el caso de unidades en asedio.
 
 ### Desarrollos futuros
 
@@ -187,16 +183,9 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
 
 - [ ] Ejecutar todas las acciones del turno. Todavía faltan:
   - [ ] Asesinatos.
-  - [ ] Órdenes militares.
-    - [ ] Transporte de tropas.
-    - [ ] Apoyo.
-    - [ ] Asedios y levantamiento de asedios.
-    - [ ] Efectos de las rebeliones en los combates.
-  - [ ] Resolución de conflictos.
   - [ ] Tratamiento del fin de partida.
   - [ ] Tratamiento de eliminación de jugadores.
-- [ ] Desarrollar el Gestor de Mensajes.
-- [ ] Refactorizar el interfaz con Discord para vaciarlo de lógica de juego.
+  - [ ] Control de estrechos.
 - [ ] Incluir algún tipo de chequeo del turno para advertir de órdenes incorrectas, ilegales o inconsistentes.
 - [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades en él.
 
@@ -243,4 +232,5 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
   resolución de conflictos militares, y las retiradas; se comprueban las reglas activas; nuevos servicios de Reporter
   para separar el reporte de la lógica del juego; el módulo de discord se ha simplificado y apartado de allí la lógica
   del juego y de la base de datos; se ha mejorado la gestión de eventos y la generación de reportes, etc.
-  
+- Versión 0.7.0: nuevos comandos `/mach exchange` y `/mach give`. `/mach game_status` ahora incluye el listado de
+  órdenes enviadas por lo que `/mach cmdlist` queda *deprecada*.
