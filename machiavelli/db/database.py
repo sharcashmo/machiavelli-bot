@@ -101,7 +101,7 @@ _UPGRADES: tuple[str, ...] = (
 
 
 def upgrade_connection(conn: sqlite3.Connection) -> None:
-    """Aplica las migraciones pendientes de forma atómica y secuencial."""
+    """Aplica las migraciones pendientes de forma atómica por cada versión."""
     cursor = conn.cursor()
     cursor.execute("PRAGMA user_version;")
     row = cursor.fetchone()
@@ -119,16 +119,20 @@ def upgrade_connection(conn: sqlite3.Connection) -> None:
 
     target_version = current_version
     try:
-        cursor.execute("BEGIN IMMEDIATE;")
         for version in range(current_version, _SCHEMA_VERSION):
             target_version = version + 1
             logger.info("Aplicando migración a versión %d...", target_version)
-            cursor.executescript(_UPGRADES[version])
-            cursor.execute(f"PRAGMA user_version = {target_version};")
-        conn.commit()
+            try:
+                cursor.executescript(_UPGRADES[version])
+                cursor.execute(f"PRAGMA user_version = {target_version};")
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                logger.exception(
+                    "Falló la actualización a la versión %d.", target_version
+                )
+                raise
     except Exception:
-        conn.rollback()
-        logger.exception("Falló la actualización al esquema %d.", target_version)
         raise
 
     logger.info(
