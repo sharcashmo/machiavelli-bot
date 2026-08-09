@@ -205,8 +205,7 @@ class TestServiceWorkers(unittest.TestCase):
 
 
 class TestPlayerCommands(unittest.IsolatedAsyncioTestCase):
-    """Prueba el registro de jugadores y el envío de órdenes sin E/S de red de Discord.
-    """
+    """Prueba el registro de jugadores y el envío de órdenes sin E/S de Discord."""
 
     async def test_add_player_uses_service_and_keeps_public_response(self) -> None:
         interaction = make_interaction()
@@ -333,7 +332,7 @@ class TestReports(unittest.IsolatedAsyncioTestCase):
     de mensajes.
     """
 
-    async def test_game_status_is_public(self) -> None:
+    async def test_game_status_is_private(self) -> None:
         interaction = make_interaction()
 
         with patch(
@@ -343,7 +342,7 @@ class TestReports(unittest.IsolatedAsyncioTestCase):
         ) as mock_to_thread:
             await game_status.callback(interaction)
 
-        interaction.response.defer.assert_awaited_once_with(ephemeral=False)
+        interaction.response.defer.assert_awaited_once_with(ephemeral=True)
         mock_to_thread.assert_awaited_once_with(
             _get_status_report,
             game_group.db_path,
@@ -351,7 +350,7 @@ class TestReports(unittest.IsolatedAsyncioTestCase):
         )
         interaction.followup.send.assert_awaited_once_with(
             "status one\nstatus two",
-            ephemeral=False,
+            ephemeral=True,
         )
 
     async def test_game_report_is_private(self) -> None:
@@ -463,7 +462,7 @@ class TestRunGame(unittest.IsolatedAsyncioTestCase):
         ) as mock_to_thread:
             await run_game.callback(interaction)
 
-        interaction.response.defer.assert_awaited_once_with(ephemeral=True)
+        interaction.response.defer.assert_awaited_once_with(ephemeral=False)
         mock_to_thread.assert_awaited_once_with(
             _execute_game_turn,
             admin_group.db_path,
@@ -577,7 +576,7 @@ class TestRunGame(unittest.IsolatedAsyncioTestCase):
             await run_game.callback(interaction)
 
         mock_log.assert_called_once()
-        interaction.response.defer.assert_awaited_once_with(ephemeral=True)
+        interaction.response.defer.assert_awaited_once_with(ephemeral=False)
         message = interaction.edit_original_response.await_args.kwargs["content"]
         for forbidden in (
             "RuntimeError",
