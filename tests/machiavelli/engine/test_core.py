@@ -23,7 +23,7 @@ from tests.machiavelli.engine.helpers import create_military_game, military_snap
 
 
 class TrackingGame:
-    """Minimal game double that counts history-list replacements."""
+    """Doble mínimo de partida que cuenta las sustituciones de la lista de historial."""
 
     def __init__(self, turn_number: int, events: list[TurnEvent]):
         self.turn_number = turn_number
@@ -443,7 +443,9 @@ class TestGameEngineRun(unittest.TestCase):
                     mock_maintenance.assert_not_called()
 
     def test_run_replaces_history_once_before_each_turn_kind(self):
-        """Startup, maintenance and campaign share one history reset at entry."""
+        """El inicio, el mantenimiento y la campaña comparten un único reinicio del
+        historial al entrar.
+        """
         previous = TurnEvent(EventType.START_GAME, {"scenario": "previous"})
         current = TurnEvent(EventType.START_SEASON, {"year": 1454, "season": 1})
         cases = (
@@ -480,7 +482,9 @@ class TestGameEngineRun(unittest.TestCase):
                 self.assertEqual(game.advance_calls, 1)
 
     def test_run_resets_before_failure_and_does_not_advance(self):
-        """A failing phase sees the fresh history but cannot advance the lifecycle."""
+        """Una fase que falla ve el historial nuevo, pero no puede avanzar el ciclo de
+        vida.
+        """
         previous = TurnEvent(EventType.START_GAME, {"scenario": "previous"})
         game = TrackingGame(2, [previous])
         engine = GameEngine(game)  # type: ignore[arg-type]
@@ -527,7 +531,9 @@ class TestGameEngineRun(unittest.TestCase):
 
 
 def _turn_snapshot(game: Game) -> dict[str, object]:
-    """Return the complete primitive state used by the Phase 5 characterizations."""
+    """Devuelve el estado primitivo completo utilizado por las caracterizaciones de la
+    fase 5.
+    """
     return {
         "turn_number": game.turn_number,
         "famine": tuple(game.famine),
@@ -786,7 +792,9 @@ def test_real_turns_emit_only_ordered_reconstructible_events(
     ordered_anchors: tuple[EventType, ...],
     repeated_type: EventType | None,
 ) -> None:
-    """Real startup, maintenance and campaign keep only typed domain facts."""
+    """El inicio, el mantenimiento y la campaña reales conservan únicamente hechos de
+    dominio tipados.
+    """
     scenario = Scenario.load_scenarios()["Be"]
     scenario.rules = Rules()
     assert scenario.rules == Rules()

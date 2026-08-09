@@ -107,7 +107,7 @@ async def on_app_command_error(
 
 
 def main() -> None:
-    """Prepare local configuration and start the Discord client explicitly."""
+    """Prepara la configuración local e inicia explícitamente el cliente de Discord."""
     load_dotenv()
     token = os.getenv("DISCORD_TOKEN")
     db_path = os.getenv("DATABASE_PATH", "machiavelli.db")

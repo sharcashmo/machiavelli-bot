@@ -1,4 +1,4 @@
-"""Helpers for loading JSON resources shipped with the Machiavelli package."""
+"""Utilidades para cargar recursos JSON incluidos en el paquete de Machiavelli."""
 
 from __future__ import annotations
 
@@ -7,17 +7,19 @@ from importlib.resources import files
 
 
 class PackageResourceError(RuntimeError):
-    """Raised when a packaged JSON resource cannot be read or decoded."""
+    """Se lanza cuando no se puede leer o decodificar un recurso JSON empaquetado."""
 
 
 def read_package_json(filename: str) -> object:
-    """Read and decode a UTF-8 JSON resource from the installed package.
+    """Lee y decodifica un recurso JSON UTF-8 del paquete instalado.
 
-    Args:
-        filename: Resource name relative to the top-level ``machiavelli`` package.
+    Parámetros:
+        filename: Nombre del recurso relativo al paquete de nivel superior
+            ``machiavelli``.
 
-    Raises:
-        PackageResourceError: If the resource is missing, unreadable, or invalid JSON.
+    Excepciones:
+        PackageResourceError: Si el recurso falta, no se puede leer o contiene
+            JSON no válido.
     """
     resource = files("machiavelli").joinpath(filename)
 

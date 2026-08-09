@@ -1,4 +1,4 @@
-"""Tests for canonical player persistence."""
+"""Pruebas de la persistencia de jugadores canónicos."""
 
 import sqlite3
 

@@ -41,7 +41,7 @@ BEFORE_EVENT = TurnEvent(EventType.START_GAME, {"scenario": "before"})
 
 
 def _event_payload(game: Game) -> dict[str, list[object]]:
-    """Return a fresh native payload for the last typed military event."""
+    """Devuelve un `payload` nativo nuevo para el último evento militar tipado."""
     event = game.turn_events[-1]
     assert event.type is EventType.MILITARY_RESOLUTION
     return json.loads(event.to_json())

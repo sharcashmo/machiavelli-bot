@@ -1,4 +1,4 @@
-"""SQLite repository implementations."""
+"""Implementaciones de repositorios SQLite."""
 
 from .command_repository import CommandRepository
 from .game_repository import GameRepository

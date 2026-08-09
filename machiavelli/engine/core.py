@@ -53,7 +53,9 @@ class GameEngine:
         IncomeManager(self.game).run()
 
     def run_maintenance(self) -> None:
-        """Execute the established maintenance rules through the game domain."""
+        """Ejecuta las reglas de mantenimiento establecidas a través del dominio de la
+        partida.
+        """
         MaintenanceResolver(self.game).run()
 
     def run_campaign(self) -> None:

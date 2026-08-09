@@ -1,4 +1,4 @@
-"""Maintenance phase with one auditable result per attempted order."""
+"""Fase de mantenimiento con un resultado auditable por cada orden intentada."""
 
 from ..events import EventType, TurnEvent
 from ..game.command import Command
@@ -7,14 +7,16 @@ from ..game.player import Player
 
 
 class MaintenanceResolver:
-    """Resolve disband, maintenance, and recruitment orders."""
+    """Resuelve las órdenes de disolución, mantenimiento y reclutamiento."""
 
     def __init__(self, game: Game):
         self.game = game
 
     @staticmethod
     def _set_default_commands(player: Player) -> None:
-        """Add an effective maintain order for every unit without an explicit order."""
+        """Añade una orden efectiva de mantenimiento a cada unidad que no tenga una
+        orden explícita.
+        """
         actors = {command.actor for command in player.commands}
         for unit_type, locations in (
             ("A", player.armies),
@@ -61,7 +63,8 @@ class MaintenanceResolver:
             raise ValueError(f"Tipo de unidad desconocido: {unit_type}") from error
 
     def run(self) -> None:
-        """Resolve all maintenance attempts and emit one summary per player."""
+        """Resuelve todos los intentos de mantenimiento y emite un resumen por jugador.
+        """
         game_map = self.game.require_map()
         scenario = self.game.require_scenario()
 

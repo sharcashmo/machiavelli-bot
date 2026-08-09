@@ -1,4 +1,4 @@
-"""Tests for readable, context-aware turn reporting."""
+"""Pruebas de informes de turnos legibles y con contexto."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from machiavelli.services.turn_reporter import TurnReporter
 
 
 def make_report_game() -> Game:
-    """Build a loaded game with known public identifiers."""
+    """Construye una partida cargada con identificadores públicos conocidos."""
     scenario = Scenario.load_scenarios()["Be"]
     game = Game(
         name="Partida de prueba",
@@ -34,7 +34,7 @@ def make_report_game() -> Game:
 
 
 def event_lines(report: list[str]) -> list[str]:
-    """Return only the lines produced from turn events."""
+    """Devuelve únicamente las líneas generadas a partir de los eventos del turno."""
     situation_index = report.index("## 🗺️ REPORTE DE SITUACIÓN")
     return report[3:situation_index]
 

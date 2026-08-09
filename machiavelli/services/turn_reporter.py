@@ -1,4 +1,4 @@
-"""Readable reporting for validated turn events."""
+"""Informes legibles de eventos de turnos validados."""
 
 from __future__ import annotations
 
@@ -48,11 +48,13 @@ _REBELLION_KINDS = {"province": "provincial", "city": "urbana"}
 
 
 class TurnReporter:
-    """Generate the public report for one validated turn history."""
+    """Genera el informe público del historial validado de un turno."""
 
     @staticmethod
     def generate(game: Game) -> list[str]:
-        """Render headers, events, and the current situation without mutation."""
+        """Renderiza las cabeceras, los eventos y la situación actual sin mutar el
+        estado.
+        """
         scenario = game.require_scenario()
         game.require_map()
         year = scenario.year + (game.turn_number - 1) // 4

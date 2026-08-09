@@ -1,4 +1,4 @@
-"""Tests for auditable spring income."""
+"""Pruebas de los ingresos de primavera auditables."""
 
 from unittest.mock import Mock, patch
 

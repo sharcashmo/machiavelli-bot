@@ -1,4 +1,4 @@
-"""Repository facade for persisted :class:`Game` aggregates."""
+"""Fachada de repositorio para agregados :class:`Game` persistidos."""
 
 from __future__ import annotations
 
@@ -8,13 +8,15 @@ from machiavelli.game.game import Game
 
 
 class GameRepository:
-    """Persist and load games while keeping transaction ownership explicit."""
+    """Guarda y carga partidas manteniendo explícita la propiedad de la transacción."""
 
     def __init__(self, conn: sqlite3.Connection) -> None:
         self.conn = conn
 
     def save(self, game: Game) -> None:
-        """Persist a complete game atomically unless a caller owns the transaction."""
+        """Guarda una partida completa atómicamente, salvo que el llamador sea el
+        propietario de la transacción.
+        """
         original_database_id = game.database_id
         try:
             if self.conn.in_transaction:
@@ -27,13 +29,13 @@ class GameRepository:
             raise
 
     def get_by_id(self, game_id: int) -> Game:
-        """Load a game by its SQLite identifier."""
+        """Carga una partida mediante su identificador de SQLite."""
         return Game.load_game(self.conn, game_id=game_id)
 
     def get_by_name(self, name: str) -> Game:
-        """Load a game by its unique name."""
+        """Carga una partida mediante su nombre único."""
         return Game.load_game(self.conn, name=name)
 
     def get_by_channel(self, channel_id: int) -> Game:
-        """Load a game by its Discord channel identifier."""
+        """Carga una partida mediante el identificador de su canal de Discord."""
         return Game.load_game(self.conn, channel_id=channel_id)

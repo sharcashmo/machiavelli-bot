@@ -36,7 +36,9 @@ _INVALID_TURN_EVENT_MESSAGE = (
 
 
 def _log_invalid_turn_event(error: InvalidTurnEventError) -> None:
-    """Log only the persisted row context needed for administrative diagnosis."""
+    """Registra únicamente el contexto de la fila persistida necesario para el
+    diagnóstico administrativo.
+    """
     logger.error(
         "Historial de turno inválido",
         extra={"row_id": error.row_id, "event_type": error.event_type},
@@ -73,7 +75,7 @@ def format_error_with_location(e: Exception) -> str:
 
 
 class DatabaseGroup(app_commands.Group):
-    """Application command group carrying its configured SQLite path."""
+    """Grupo de comandos de aplicación que contiene la ruta SQLite configurada."""
 
     db_path: str
 
@@ -105,7 +107,9 @@ def init_game_commands(db_path: str) -> tuple[app_commands.Group, app_commands.G
 
 
 def _require_channel_id(interaction: discord.Interaction) -> int:
-    """Return the guild channel identifier required by game commands."""
+    """Devuelve el identificador del canal del servidor requerido por los comandos de
+    partida.
+    """
     channel_id = interaction.channel_id
     if channel_id is None:
         raise RuntimeError("Este comando solo puede ejecutarse dentro de un canal")
@@ -113,7 +117,7 @@ def _require_channel_id(interaction: discord.Interaction) -> int:
 
 
 def _create_game_record(db_path: str, name: str, channel_id: int) -> tuple[str, int]:
-    """Create one game through the application-service boundary."""
+    """Crea una partida a través de la capa del servicio de aplicación."""
     with game_service_session(db_path) as service:
         game = service.create_game(name=name, channel_id=channel_id)
         if game.database_id is None:
@@ -127,7 +131,9 @@ def _add_player_record(
     discord_id: int,
     player_id: str,
 ) -> tuple[str, list[tuple[str, int | None]]]:
-    """Add one player and return the game name plus the authoritative roster."""
+    """Añade un jugador y devuelve el nombre de la partida junto con la lista canónica
+    de jugadores.
+    """
     with game_service_session(db_path) as service:
         game_name = service.get_game(channel_id).name
         players = service.add_player(channel_id, discord_id, player_id)
@@ -139,7 +145,9 @@ def _remove_player_record(
     channel_id: int,
     discord_id: int,
 ) -> tuple[str, str, list[tuple[str, int | None]]]:
-    """Remove one player through the service and return the updated roster."""
+    """Elimina un jugador a través del servicio y devuelve la lista actualizada de
+    jugadores.
+    """
     with game_service_session(db_path) as service:
         game_name = service.get_game(channel_id).name
         player_id, players = service.remove_player(channel_id, discord_id)
@@ -151,7 +159,9 @@ def _set_scenario_record(
     channel_id: int,
     scenario_id: str,
 ) -> tuple[str, str]:
-    """Assign a scenario and return the game and scenario display names."""
+    """Asigna un escenario y devuelve los nombres mostrados de la partida y del
+    escenario.
+    """
     with game_service_session(db_path) as service:
         game_name = service.get_game(channel_id).name
         scenario_name = service.set_scenario(channel_id, scenario_id)
@@ -164,7 +174,8 @@ def _update_deadlines_record(
     weekly_deadline: str | None,
     next_deadline: str | None,
 ) -> str:
-    """Persist validated deadline strings through the service boundary."""
+    """Guarda las cadenas de fechas límite validadas a través de la capa del servicio.
+    """
     with game_service_session(db_path) as service:
         return service.update_deadlines(
             channel_id,
@@ -174,13 +185,13 @@ def _update_deadlines_record(
 
 
 def _get_status_report(db_path: str, channel_id: int) -> tuple[str, ...]:
-    """Load the public status report through the service boundary."""
+    """Carga el informe público de estado a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(service.get_status_report(channel_id))
 
 
 def _get_turn_report(db_path: str, channel_id: int) -> tuple[str, ...]:
-    """Load the latest turn report through the service boundary."""
+    """Carga el informe del último turno a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(service.get_turn_report(channel_id))
 
@@ -190,7 +201,9 @@ def _get_player_commands(
     channel_id: int,
     discord_id: int,
 ) -> tuple[str, tuple[str, ...]]:
-    """Load one player's current command strings through the service boundary."""
+    """Carga las cadenas de comandos actuales de un jugador a través de la capa del
+    servicio.
+    """
     with game_service_session(db_path) as service:
         player_id, commands = service.get_player_commands(channel_id, discord_id)
         return player_id, tuple(commands)
@@ -202,7 +215,7 @@ def _get_available_actors(
     discord_id: int,
     selected_power: str | None,
 ) -> tuple[tuple[str, str], ...]:
-    """Load actor choices through the service boundary."""
+    """Carga las opciones de actores a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(
             service.get_available_actors(channel_id, discord_id, selected_power)
@@ -216,7 +229,7 @@ def _get_available_commands(
     actor: str,
     selected_power: str | None,
 ) -> tuple[tuple[str, str], ...]:
-    """Load command choices through the service boundary."""
+    """Carga las opciones de comandos a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(
             service.get_available_commands(
@@ -236,7 +249,7 @@ def _get_available_targets(
     command: str,
     selected_power: str | None,
 ) -> tuple[tuple[str, str], ...]:
-    """Load target choices through the service boundary."""
+    """Carga las opciones de objetivos a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(
             service.get_available_targets(
@@ -255,7 +268,7 @@ def _get_available_expenses(
     discord_id: int,
     selected_power: str | None,
 ) -> tuple[tuple[str, str], ...]:
-    """Load expense choices through the service boundary."""
+    """Carga las opciones de gastos a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(
             service.get_available_expenses(channel_id, discord_id, selected_power)
@@ -269,7 +282,7 @@ def _get_expense_targets(
     expense: str,
     selected_power: str | None,
 ) -> tuple[tuple[str, str], ...]:
-    """Load expense target choices through the service boundary."""
+    """Carga las opciones de objetivos de gasto a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(
             service.get_expense_targets(
@@ -289,7 +302,7 @@ def _get_expense_amounts(
     target: str,
     selected_power: str | None,
 ) -> tuple[tuple[str, str], ...]:
-    """Load expense amount choices through the service boundary."""
+    """Carga las opciones de importes de gasto a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(
             service.get_expense_amounts(
@@ -303,7 +316,7 @@ def _get_expense_amounts(
 
 
 def _get_active_powers(db_path: str, channel_id: int) -> tuple[str, ...]:
-    """Load assigned powers through the service boundary."""
+    """Carga las potencias asignadas a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(service.get_active_powers(channel_id))
 
@@ -317,7 +330,7 @@ def _submit_command_record(
     target: str | None,
     selected_power: str | None = None,
 ) -> tuple[str, ...]:
-    """Validate and persist one order through the application service."""
+    """Valida y guarda una orden a través del servicio de aplicación."""
     with game_service_session(db_path) as service:
         return tuple(
             service.submit_command(
@@ -338,7 +351,7 @@ def _submit_expense_record(
     amount: str,
     selected_power: str | None = None,
 ) -> tuple[str, ...]:
-    """Validate and persist one expense through the application service."""
+    """Valida y guarda un gasto a través del servicio de aplicación."""
     with game_service_session(db_path) as service:
         return tuple(
             service.submit_expense(
@@ -360,7 +373,7 @@ def _give_resource_record(
     give_type: str,
     give_value: str,
 ) -> str:
-    """Validate and persist one direct transfer through the service boundary."""
+    """Valida y guarda una transferencia directa a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return service.give_resource(
             channel_id,
@@ -381,7 +394,7 @@ def _exchange_resources_record(
     receive_type: str,
     receive_value: str,
 ) -> str:
-    """Validate and persist one exchange through the service boundary."""
+    """Valida y guarda un intercambio a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return service.exchange_resources(
             channel_id,
@@ -399,7 +412,9 @@ def _get_trade_counterparties(
     channel_id: int,
     discord_id: int,
 ) -> tuple[tuple[str, str], ...]:
-    """Load direct-transfer counterparties through the service boundary."""
+    """Carga las contrapartes de una transferencia directa a través de la capa del
+    servicio.
+    """
     with game_service_session(db_path) as service:
         return tuple(service.get_trade_counterparties(channel_id, discord_id))
 
@@ -408,7 +423,9 @@ def _get_trade_resource_types(
     db_path: str,
     channel_id: int,
 ) -> tuple[tuple[str, str], ...]:
-    """Load enabled direct-transfer resource types through the service boundary."""
+    """Carga los tipos de recursos habilitados para transferencias directas a través de
+    la capa del servicio.
+    """
     with game_service_session(db_path) as service:
         return tuple(service.get_trade_resource_types(channel_id))
 
@@ -417,13 +434,13 @@ def _get_trade_assassin_targets(
     db_path: str,
     channel_id: int,
 ) -> tuple[tuple[str, str], ...]:
-    """Load assassin targets through the service boundary."""
+    """Carga los objetivos de asesinato a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(service.get_trade_assassin_targets(channel_id))
 
 
 def _chunk_lines(lines: tuple[str, ...] | list[str], limit: int = 1950) -> list[str]:
-    """Partition report lines without exceeding Discord's message limit."""
+    """Divide las líneas del informe sin superar el límite de mensajes de Discord."""
     chunks: list[str] = []
     current = ""
 
@@ -719,7 +736,7 @@ async def set_deadlines(
 
 
 def _execute_game_turn(db_path: str, channel_id: int) -> tuple[str, ...]:
-    """Execute and persist one turn through the application-service boundary."""
+    """Ejecuta y guarda un turno a través de la capa del servicio de aplicación."""
     with game_service_session(db_path) as service:
         return tuple(service.run_turn(channel_id))
 
@@ -922,7 +939,7 @@ async def cmdlist(interaction: discord.Interaction):
 
 
 def _selected_power(interaction: discord.Interaction) -> str | None:
-    """Return the optional administrative power selected in an interaction."""
+    """Devuelve la potencia administrativa opcional seleccionada en una interacción."""
     namespace = getattr(interaction, "namespace", None)
     return getattr(namespace, "power", None)
 
@@ -1108,7 +1125,7 @@ async def exp_amount_autocomplete(
 async def trade_give_to_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    """Suggest assigned counterparties for a direct transfer."""
+    """Sugiere las contrapartes asignadas para una transferencia directa."""
     try:
         counterparties = await asyncio.to_thread(
             _get_trade_counterparties,
@@ -1129,7 +1146,7 @@ async def trade_give_to_autocomplete(
 async def trade_give_type_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    """Suggest resource types enabled by the current scenario."""
+    """Sugiere los tipos de recursos habilitados por el escenario actual."""
     try:
         resource_types = await asyncio.to_thread(
             _get_trade_resource_types,
@@ -1149,7 +1166,9 @@ async def trade_give_type_autocomplete(
 async def trade_give_value_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    """Suggest scenario powers when the direct transfer is an assassination."""
+    """Sugiere las potencias del escenario cuando la transferencia directa es un
+    asesinato.
+    """
     if getattr(interaction.namespace, "give_type", None) != "assassin":
         return []
 
@@ -1174,7 +1193,9 @@ async def _trade_exchange_value_autocomplete(
     current: str,
     resource_attribute: str,
 ) -> list[app_commands.Choice[str]]:
-    """Suggest cancellation and scenario targets for one exchange value."""
+    """Sugiere la cancelación y los objetivos del escenario para uno de los valores del
+    intercambio.
+    """
     try:
         cancel = app_commands.Choice(name="0 — Cancelar intercambio", value="0")
         resource_type = getattr(
@@ -1210,14 +1231,15 @@ async def _trade_exchange_value_autocomplete(
 async def trade_exchange_give_value_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    """Suggest exchange cancellation and offered assassin targets."""
+    """Sugiere la cancelación del intercambio y los objetivos de asesinato ofrecidos."""
     return await _trade_exchange_value_autocomplete(interaction, current, "give_type")
 
 
 async def trade_exchange_receive_value_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    """Suggest exchange cancellation and requested assassin targets."""
+    """Sugiere la cancelación del intercambio y los objetivos de asesinato solicitados.
+    """
     return await _trade_exchange_value_autocomplete(
         interaction, current, "receive_type"
     )

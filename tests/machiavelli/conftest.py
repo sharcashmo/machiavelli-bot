@@ -1,4 +1,4 @@
-"""Shared fixtures for Machiavelli tests."""
+"""Fixtures compartidas para las pruebas de Machiavelli."""
 
 from collections.abc import Mapping
 from copy import deepcopy
@@ -10,7 +10,9 @@ from machiavelli.events import EventType, JSONValue
 
 @pytest.fixture
 def valid_event_payloads() -> Mapping[EventType, dict[str, JSONValue]]:
-    """Return exactly one valid payload for every public turn-event type."""
+    """Devuelve exactamente un `payload` válido para cada tipo de evento público de
+    turno.
+    """
     unit = ["Milan", "A", "mil"]
     return {
         EventType.START_GAME: {"scenario": "basic"},
@@ -116,7 +118,9 @@ def valid_event_payloads() -> Mapping[EventType, dict[str, JSONValue]]:
 def copied_event_payloads(
     valid_event_payloads: Mapping[EventType, dict[str, JSONValue]],
 ) -> dict[EventType, dict[str, JSONValue]]:
-    """Return mutable copies for tests that deliberately corrupt payloads."""
+    """Devuelve copias mutables para las pruebas que corrompen deliberadamente los
+    `payloads`.
+    """
     return {
         event_type: deepcopy(payload)
         for event_type, payload in valid_event_payloads.items()

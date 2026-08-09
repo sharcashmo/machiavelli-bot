@@ -1,4 +1,4 @@
-"""Domain model for Machiavelli players."""
+"""Modelo de dominio de los jugadores de Machiavelli."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class TurnType(Enum):
-    """Represent the kind of phase in which an order is submitted."""
+    """Representa el tipo de fase en la que se envía una orden."""
 
     MAINTENANCE = "maintenance"
     CAMPAIGN = "campaign"
@@ -24,7 +24,7 @@ class TurnType(Enum):
 
 @dataclass
 class Player:
-    """Represent a player and their complete in-game state."""
+    """Representa un jugador y todo su estado en la partida."""
 
     game: Game
     player_id: str
@@ -43,24 +43,24 @@ class Player:
 
     @property
     def game_id(self) -> int | None:
-        """Return the persisted game identifier derived from ``game``."""
+        """Devuelve el identificador persistido de la partida, derivado de ``game``."""
         return self.game.database_id
 
     @property
     def power_id(self) -> str | None:
-        """Compatibility alias for the canonical ``power`` state."""
+        """Alias de compatibilidad para el estado canónico ``power``."""
         return self.power
 
     def add_command(self, command: Command) -> None:
-        """Append exactly the command object received."""
+        """Añade exactamente el objeto de comando recibido."""
         self.commands.append(command)
 
     def remove_command(self, command: Command) -> None:
-        """Remove exactly the command object received."""
+        """Elimina exactamente el objeto de comando recibido."""
         self.commands.remove(command)
 
     def assign_power(self, power: Power) -> None:
-        """Assign a domain power and initialize the player's starting state."""
+        """Asigna una potencia de dominio e inicializa el estado inicial del jugador."""
         power_id = getattr(power, "id", None)
         if not power_id and self.game.scenario is not None:
             power_id = next(
@@ -85,7 +85,7 @@ class Player:
         power: Power,
         available_power_ids: Iterable[str],
     ) -> None:
-        """Assign a power when its scenario identifier is already known."""
+        """Asigna una potencia cuando ya se conoce su identificador de escenario."""
         self.assign_power(power)
         self.power = power_id
         self.ass_counters = [
@@ -93,7 +93,9 @@ class Player:
         ]
 
     def hc_provinces(self, scenario: Scenario | None = None) -> list[str]:
-        """Return controlled provinces belonging to the player's home countries."""
+        """Devuelve las provincias controladas que pertenecen a los países natales del
+        jugador.
+        """
         active_scenario = scenario or self.game.scenario
         if active_scenario is None:
             raise ValueError("El jugador no tiene un escenario activo")
@@ -103,7 +105,9 @@ class Player:
         ]
 
     def nonhc_provinces(self, scenario: Scenario | None = None) -> list[str]:
-        """Return controlled provinces outside the player's home countries."""
+        """Devuelve las provincias controladas que están fuera de los países natales del
+        jugador.
+        """
         active_scenario = scenario or self.game.scenario
         if active_scenario is None:
             raise ValueError("El jugador no tiene un escenario activo")
@@ -115,26 +119,27 @@ class Player:
         ]
 
     def save(self, conn: sqlite3.Connection) -> None:
-        """Persist the player through the repository compatibility facade."""
+        """Guarda el jugador mediante la fachada de compatibilidad del repositorio."""
         from machiavelli.repositories.player_repository import PlayerRepository
 
         PlayerRepository(conn).save(self)
 
     def save_commands(self, conn: sqlite3.Connection) -> None:
-        """Replace commands through the repository compatibility facade."""
+        """Sustituye los comandos mediante la fachada de compatibilidad del repositorio.
+        """
         from machiavelli.repositories.player_repository import PlayerRepository
 
         PlayerRepository(conn).save_commands(self)
 
     @classmethod
     def load_players(cls, conn: sqlite3.Connection, game: Game) -> list[Player]:
-        """Load players through the repository compatibility facade."""
+        """Carga los jugadores mediante la fachada de compatibilidad del repositorio."""
         from machiavelli.repositories.player_repository import PlayerRepository
 
         return PlayerRepository(conn).get_by_game(game)
 
     def player_report(self) -> list[str]:
-        """Generate the player's current public report."""
+        """Genera el informe público actual del jugador."""
         from machiavelli.services.player_reporter import PlayerReporter
 
         return PlayerReporter.generate_report(self)
@@ -194,7 +199,7 @@ class Player:
         turn_type: TurnType,
         command: Command,
     ) -> list[str]:
-        """Compatibility facade over the central order processor."""
+        """Fachada de compatibilidad sobre el procesador central de órdenes."""
         from machiavelli.engine.orders import OrderProcessor
 
         return OrderProcessor(self.game).process_command(self, turn_type, command)

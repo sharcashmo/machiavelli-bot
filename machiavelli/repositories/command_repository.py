@@ -1,4 +1,4 @@
-"""SQLite persistence for canonical :class:`Command` domain objects."""
+"""Persistencia SQLite de objetos de dominio canónicos :class:`Command`."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from machiavelli.game.player import Player
 
 
 class CommandRepository:
-    """Translate between canonical commands and SQLite rows."""
+    """Traduce entre comandos canónicos y filas de SQLite."""
 
     def __init__(self, conn: sqlite3.Connection) -> None:
         self.conn = conn
@@ -67,7 +67,7 @@ class CommandRepository:
         )
 
     def save(self, command: Command) -> None:
-        """Persist one command without committing an enclosing transaction."""
+        """Guarda un comando sin confirmar una transacción envolvente."""
         if self.conn.in_transaction:
             self._save(command)
             return
@@ -75,7 +75,7 @@ class CommandRepository:
             self._save(command)
 
     def save_many(self, commands: Iterable[Command]) -> None:
-        """Persist commands atomically and preserve iterable order."""
+        """Guarda los comandos atómicamente y conserva el orden del iterable."""
         if self.conn.in_transaction:
             self._save_many(commands)
             return
@@ -83,7 +83,7 @@ class CommandRepository:
             self._save_many(commands)
 
     def get_by_player(self, player: Player) -> list[Command]:
-        """Load a player's commands in their persisted relative order."""
+        """Carga los comandos de un jugador en su orden relativo persistido."""
         game_id, player_id = self._player_identity(player)
         rows = self.conn.execute(
             """
@@ -106,7 +106,7 @@ class CommandRepository:
         ]
 
     def delete_by_player(self, player: Player) -> None:
-        """Delete commands without committing an enclosing transaction."""
+        """Elimina comandos sin confirmar una transacción envolvente."""
         if self.conn.in_transaction:
             self._delete_by_player(player)
             return

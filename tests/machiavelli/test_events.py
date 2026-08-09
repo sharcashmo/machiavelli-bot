@@ -1,4 +1,4 @@
-"""Contract tests for typed, immutable turn events."""
+"""Pruebas de contrato para eventos de turno tipados e inmutables."""
 
 import json
 from collections.abc import Mapping

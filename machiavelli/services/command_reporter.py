@@ -1,4 +1,4 @@
-"""Readable command reporting."""
+"""Informes legibles de comandos."""
 
 from __future__ import annotations
 
@@ -12,11 +12,11 @@ if TYPE_CHECKING:
 
 
 class CommandReporter:
-    """Generate readable representations of player commands."""
+    """Genera representaciones legibles de los comandos de los jugadores."""
 
     @staticmethod
     def format_report(command: Command, game_map: Map, turn_number: int) -> str:
-        """Return a human-readable command description separated by ``|``."""
+        """Devuelve una descripción legible del comando, separada por ``|``."""
         locations: dict[str, Location] = dict(game_map.provinces)
         locations.update(game_map.seas)
         provinces = game_map.provinces
@@ -78,7 +78,7 @@ class CommandReporter:
         locations: dict[str, Location],
         provinces: dict[str, Province],
     ) -> None:
-        """Append the formatted command target when one is present."""
+        """Añade el objetivo formateado del comando cuando está presente."""
         target = command.target
         if target is None:
             return

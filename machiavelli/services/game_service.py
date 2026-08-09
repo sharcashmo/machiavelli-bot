@@ -1,4 +1,4 @@
-"""Application service for complete game use cases."""
+"""Servicio de aplicación para casos de uso completos de partidas."""
 
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ type GameStatusDict = dict[str, Any]
 
 @contextmanager
 def game_service_session(db_path: str | Path) -> Iterator[GameService]:
-    """Yield one service over one SQLite connection and always close it."""
+    """Proporciona un servicio sobre una conexión SQLite y la cierra siempre."""
     connection = DatabaseManager(db_path).get_connection()
     try:
         yield GameService(GameRepository(connection))
@@ -56,7 +56,7 @@ def game_service_session(db_path: str | Path) -> Iterator[GameService]:
 
 
 class GameService:
-    """Orchestrate game domain, engine, and repository operations."""
+    """Orquesta las operaciones del dominio de la partida, el motor y el repositorio."""
 
     def __init__(self, repository: GameRepository) -> None:
         self.repo = repository
@@ -107,7 +107,7 @@ class GameService:
         channel_id: int,
         scenario_name: str | None = None,
     ) -> Game:
-        """Create and persist a game, optionally initializing its scenario."""
+        """Crea y guarda una partida, inicializando opcionalmente su escenario."""
         if scenario_name is None:
             game = Game(name=name, channel_id=channel_id)
         else:
@@ -123,11 +123,13 @@ class GameService:
         return game
 
     def get_game(self, channel_id: int) -> Game:
-        """Load a complete game aggregate by Discord channel."""
+        """Carga un agregado completo de partida mediante el canal de Discord."""
         return self.repo.get_by_channel(channel_id)
 
     def get_game_status(self, channel_id: int) -> GameStatusDict:
-        """Return a structured summary using canonical game attributes."""
+        """Devuelve un resumen estructurado utilizando los atributos canónicos de la
+        partida.
+        """
         game = self.get_game(channel_id)
         return {
             "id": game.database_id,
@@ -147,7 +149,7 @@ class GameService:
         discord_id: int,
         player_id: str,
     ) -> list[PlayerInfo]:
-        """Register a player in the aggregate and persist the complete game."""
+        """Registra un jugador en el agregado y guarda la partida completa."""
         game = self.get_game(channel_id)
         game.add_player(player_id=player_id, discord_id=discord_id)
         self.repo.save(game)
@@ -158,7 +160,7 @@ class GameService:
         channel_id: int,
         discord_id: int,
     ) -> tuple[str, list[PlayerInfo]]:
-        """Remove a player and synchronize persisted players and commands."""
+        """Elimina un jugador y sincroniza los jugadores y comandos persistidos."""
         game = self.get_game(channel_id)
         removed_player = game.remove_player(discord_id=discord_id)
         self.repo.save(game)
@@ -166,7 +168,7 @@ class GameService:
         return removed_player.player_id, remaining
 
     def set_scenario(self, channel_id: int, scenario_name: str) -> str:
-        """Assign a known scenario and refresh the map before persisting."""
+        """Asigna un escenario conocido y actualiza el mapa antes de guardar."""
         scenario_id, scenario = self._resolve_scenario(scenario_name)
         game = self.get_game(channel_id)
         game.scenario_id = scenario_id
@@ -182,7 +184,9 @@ class GameService:
         weekly_deadline: str | None = None,
         next_deadline: str | None = None,
     ) -> str:
-        """Persist already validated deadline values and return the game name."""
+        """Guarda valores de fecha límite ya validados y devuelve el nombre de la
+        partida.
+        """
         game = self.get_game(channel_id)
         if weekly_deadline is not None:
             game.weekly_deadline = weekly_deadline
@@ -192,11 +196,13 @@ class GameService:
         return game.name
 
     def get_status_report(self, channel_id: int) -> list[str]:
-        """Return the public game-status report without exposing persistence."""
+        """Devuelve el informe público de estado de la partida sin exponer la
+        persistencia.
+        """
         return self.get_game(channel_id).report_status()
 
     def get_turn_report(self, channel_id: int) -> list[str]:
-        """Return the persisted report for the latest turn."""
+        """Devuelve el informe persistido del último turno."""
         return TurnReporter.generate(self.get_game(channel_id))
 
     def get_player_commands(
@@ -204,13 +210,15 @@ class GameService:
         channel_id: int,
         discord_id: int,
     ) -> tuple[str, list[str]]:
-        """Return a player's identifier and current commands as display strings."""
+        """Devuelve el identificador de un jugador y sus comandos actuales como cadenas
+        para mostrar.
+        """
         game = self.get_game(channel_id)
         player = self.resolve_player(game, discord_id)
         return player.player_id, [str(command) for command in player.commands]
 
     def run_turn(self, channel_id: int) -> list[str]:
-        """Execute one turn, then persist the resulting aggregate atomically."""
+        """Ejecuta un turno y después guarda atómicamente el agregado resultante."""
         game = self.get_game(channel_id)
         GameEngine(game).run()
         report_lines = TurnReporter.generate(game)
@@ -224,7 +232,7 @@ class GameService:
         command_payload: dict[str, Any],
         selected_power: str | None = None,
     ) -> list[str]:
-        """Validate, register, and persist an order through canonical services."""
+        """Valida, registra y guarda una orden mediante los servicios canónicos."""
         game = self.get_game(channel_id)
         player = self.resolve_player(game, discord_id, selected_power)
         command = self._command_from_payload(game, player, command_payload)
@@ -270,7 +278,7 @@ class GameService:
         amount: str,
         selected_power: str | None = None,
     ) -> list[str]:
-        """Validate, register, and persist one campaign expense."""
+        """Valida, registra y guarda un gasto de campaña."""
         game = self.get_game(channel_id)
         player = self.resolve_player(game, discord_id, selected_power)
 
@@ -305,7 +313,9 @@ class GameService:
         discord_id: int,
         selected_power: str | None = None,
     ) -> Player:
-        """Resolve a player by selected power/player ID or Discord account."""
+        """Resuelve un jugador mediante la potencia o el identificador de jugador
+        seleccionados, o mediante su cuenta de Discord.
+        """
         if selected_power:
             selected = selected_power.casefold()
             player = next(
@@ -346,7 +356,9 @@ class GameService:
         discord_id: int,
         selected_power: str | None = None,
     ) -> list[ActorOption]:
-        """Return actor choices without exposing lookup errors to autocomplete."""
+        """Devuelve opciones de actores sin exponer errores de búsqueda al
+        autocompletado.
+        """
         try:
             game = self.get_game(channel_id)
             player = self.resolve_player(game, discord_id, selected_power)
@@ -361,7 +373,9 @@ class GameService:
         actor: str,
         selected_power: str | None = None,
     ) -> list[ActorOption]:
-        """Return command choices for one actor, or no choices on lookup failure."""
+        """Devuelve opciones de comandos para un actor, o ninguna opción si falla la
+        búsqueda.
+        """
         try:
             game = self.get_game(channel_id)
             player = self.resolve_player(game, discord_id, selected_power)
@@ -377,7 +391,9 @@ class GameService:
         command: str,
         selected_power: str | None = None,
     ) -> list[ActorOption]:
-        """Return target choices for one order, or no choices on lookup failure."""
+        """Devuelve opciones de objetivos para una orden, o ninguna opción si falla la
+        búsqueda.
+        """
         try:
             game = self.get_game(channel_id)
             player = self.resolve_player(game, discord_id, selected_power)
@@ -391,7 +407,7 @@ class GameService:
         discord_id: int,
         selected_power: str | None = None,
     ) -> list[ActorOption]:
-        """Return expense choices, or no choices on lookup failure."""
+        """Devuelve opciones de gastos, o ninguna opción si falla la búsqueda."""
         try:
             game = self.get_game(channel_id)
             player = self.resolve_player(game, discord_id, selected_power)
@@ -406,7 +422,9 @@ class GameService:
         expense: str,
         selected_power: str | None = None,
     ) -> list[ActorOption]:
-        """Return target choices for one expense, or no choices on lookup failure."""
+        """Devuelve opciones de objetivos para un gasto, o ninguna opción si falla la
+        búsqueda.
+        """
         try:
             game = self.get_game(channel_id)
             player = self.resolve_player(game, discord_id, selected_power)
@@ -422,7 +440,9 @@ class GameService:
         target: str,
         selected_power: str | None = None,
     ) -> list[ActorOption]:
-        """Return amount choices for one expense, or no choices on lookup failure."""
+        """Devuelve opciones de importes para un gasto, o ninguna opción si falla la
+        búsqueda.
+        """
         try:
             game = self.get_game(channel_id)
             player = self.resolve_player(game, discord_id, selected_power)
@@ -431,7 +451,9 @@ class GameService:
             return []
 
     def get_active_powers(self, channel_id: int) -> list[str]:
-        """Return assigned power identifiers in authoritative player order."""
+        """Devuelve los identificadores de las potencias asignadas en el orden canónico
+        de los jugadores.
+        """
         return [
             player.power
             for player in self.get_game(channel_id).players
@@ -444,7 +466,7 @@ class GameService:
         discord_id: int,
         give_to: str,
     ) -> tuple[Player, str, Player, str]:
-        """Resolve the assigned actor and another assigned power."""
+        """Resuelve el actor asignado y otra potencia asignada."""
         actor = self.resolve_player(game, discord_id)
         actor_power = actor.power
         if actor_power is None:
@@ -471,7 +493,7 @@ class GameService:
 
     @staticmethod
     def _trade_resource_text(resource: TradeResource) -> str:
-        """Format one resource for a private service response."""
+        """Formatea un recurso para una respuesta privada del servicio."""
         if resource.kind == "ducats":
             assert isinstance(resource.value, int)
             unit = "ducado" if resource.value == 1 else "ducados"
@@ -488,7 +510,7 @@ class GameService:
         give_type: str,
         give_value: str,
     ) -> str:
-        """Transfer one resource directly between two assigned powers."""
+        """Transfiere directamente un recurso entre dos potencias asignadas."""
         with _trade_mutation_lock:
             game = self.get_game(channel_id)
             actor, actor_power, receiver, receiver_power = self._resolve_trade_parties(
@@ -528,7 +550,7 @@ class GameService:
         receive_type: str,
         receive_value: str,
     ) -> str:
-        """Create, cancel, replace, or execute one exchange proposal."""
+        """Crea, cancela, sustituye o ejecuta una propuesta de intercambio."""
         with _trade_mutation_lock:
             game = self.get_game(channel_id)
             actor, actor_power, _counterparty, counterparty_power = (
@@ -608,7 +630,7 @@ class GameService:
         actor_power: str,
         counterparty_power: str,
     ) -> str:
-        """Cancel the pending exchange for one unordered pair."""
+        """Cancela el intercambio pendiente para un par sin orden."""
         power_a, power_b = sorted((actor_power, counterparty_power))
         pair_key = (power_a, power_b)
         index = find_exchange_proposal_index(game.pending_exchanges, pair_key)
@@ -645,7 +667,9 @@ class GameService:
         proposal: ExchangeProposal,
         existing_index: int | None,
     ) -> str:
-        """Store or replace one proposal after checking its owner's offer."""
+        """Guarda o sustituye una propuesta después de comprobar la oferta de su
+        propietario.
+        """
         if not player_has_trade_resource(actor, proposal.give):
             if proposal.give.kind == "ducats":
                 raise TradeRuleException("No tienes suficientes ducados.")
@@ -691,7 +715,7 @@ class GameService:
         channel_id: int,
         discord_id: int,
     ) -> list[ActorOption]:
-        """Return assigned powers other than the requesting actor."""
+        """Devuelve las potencias asignadas distintas del actor solicitante."""
         try:
             game = self.get_game(channel_id)
             actor = self.resolve_player(game, discord_id)
@@ -706,7 +730,7 @@ class GameService:
             return []
 
     def get_trade_resource_types(self, channel_id: int) -> list[ActorOption]:
-        """Return resource types enabled by the active scenario."""
+        """Devuelve los tipos de recursos habilitados por el escenario activo."""
         try:
             scenario = self.get_game(channel_id).require_scenario()
             types: list[ActorOption] = [("ducats", "Ducados")]
@@ -720,7 +744,9 @@ class GameService:
         self,
         channel_id: int,
     ) -> list[ActorOption]:
-        """Return every scenario power as a possible assassin target."""
+        """Devuelve todas las potencias del escenario como posibles objetivos de
+        asesinato.
+        """
         try:
             scenario = self.get_game(channel_id).require_scenario()
             if not scenario.rules.assassinations_active:
