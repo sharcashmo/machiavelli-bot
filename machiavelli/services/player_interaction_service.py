@@ -177,10 +177,11 @@ class PlayerInteractionService:
             choices.append(("H", f"{GameTables.military_orders['H']['text']}"))
             if actor_type in ("A", "F") and is_besieging:
                 choices.append(("L", f"{GameTables.military_orders['L']['text']}"))
-            choices.append(("S", f"{GameTables.military_orders['S']['text']}"))
-            if actor_type == "F":
+            if not is_besieging:
+                choices.append(("S", f"{GameTables.military_orders['S']['text']}"))
+            if actor_type == "F" and not is_besieging:
                 choices.append(("T", f"{GameTables.military_orders['T']['text']}"))
-            if is_defensible:
+            if is_defensible and not is_besieging:
                 choices.append(("C", f"{GameTables.military_orders['C']['text']}"))
 
         return choices
