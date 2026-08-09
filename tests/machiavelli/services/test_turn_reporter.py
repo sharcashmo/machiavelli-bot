@@ -70,7 +70,7 @@ def test_report_preserves_general_order_event_order_and_repetitions() -> None:
 
     assert report[:3] == [
         "## 📜 Partida de prueba, turno 2",
-        "### 🗓️ Primavera (campaña) de 1454",
+        "### 🗓️ Primavera (mantenimiento) de 1454",
         "> ⚠️ **EVENTOS DEL TURNO ANTERIOR**",
     ]
     assert rendered == [
