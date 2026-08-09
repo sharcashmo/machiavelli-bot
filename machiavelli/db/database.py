@@ -67,40 +67,41 @@ _UPGRADES: tuple[str, ...] = (
             REFERENCES players(game_id, player_id) ON DELETE CASCADE
     );
     """,
+    # SCHEMA 4
+    """\
+    DROP TABLE game_events;
+    CREATE TABLE game_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        game_id INTEGER NOT NULL,
+        event_type TEXT NOT NULL,
+        data_json TEXT NOT NULL,
+        FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
+    );
+    """,
+    # SCHEMA 5
+    """\
+    CREATE TABLE exchange_proposals (
+        game_id INTEGER NOT NULL,
+        power_a TEXT NOT NULL,
+        power_b TEXT NOT NULL,
+        proposer_power TEXT NOT NULL,
+        give_type TEXT NOT NULL,
+        give_value TEXT NOT NULL,
+        receive_type TEXT NOT NULL,
+        receive_value TEXT NOT NULL,
+        PRIMARY KEY (game_id, power_a, power_b),
+        CHECK (power_a < power_b),
+        CHECK (proposer_power = power_a OR proposer_power = power_b),
+        CHECK (give_type IN ('ducats', 'assassin')),
+        CHECK (receive_type IN ('ducats', 'assassin')),
+        FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
+    );
+    """,
 )
-
-_GAME_EVENTS_V4_SQL = """\
-CREATE TABLE game_events (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    game_id INTEGER NOT NULL,
-    event_type TEXT NOT NULL,
-    data_json TEXT NOT NULL,
-    FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
-)
-"""
-
-_EXCHANGE_PROPOSALS_V5_SQL = """\
-CREATE TABLE exchange_proposals (
-    game_id INTEGER NOT NULL,
-    power_a TEXT NOT NULL,
-    power_b TEXT NOT NULL,
-    proposer_power TEXT NOT NULL,
-    give_type TEXT NOT NULL,
-    give_value TEXT NOT NULL,
-    receive_type TEXT NOT NULL,
-    receive_value TEXT NOT NULL,
-    PRIMARY KEY (game_id, power_a, power_b),
-    CHECK (power_a < power_b),
-    CHECK (proposer_power = power_a OR proposer_power = power_b),
-    CHECK (give_type IN ('ducats', 'assassin')),
-    CHECK (receive_type IN ('ducats', 'assassin')),
-    FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
-);
-"""
 
 
 def upgrade_connection(conn: sqlite3.Connection) -> None:
-    """Aplica las migraciones pendientes sin hacerse cargo de la conexión."""
+    """Aplica las migraciones pendientes de forma atómica y secuencial."""
     cursor = conn.cursor()
     cursor.execute("PRAGMA user_version;")
     row = cursor.fetchone()
@@ -118,29 +119,13 @@ def upgrade_connection(conn: sqlite3.Connection) -> None:
 
     target_version = current_version
     try:
-        for version in range(current_version, min(_SCHEMA_VERSION, 3)):
+        cursor.execute("BEGIN IMMEDIATE;")
+        for version in range(current_version, _SCHEMA_VERSION):
             target_version = version + 1
             logger.info("Aplicando migración a versión %d...", target_version)
             cursor.executescript(_UPGRADES[version])
             cursor.execute(f"PRAGMA user_version = {target_version};")
         conn.commit()
-
-        if current_version < 4 <= _SCHEMA_VERSION:
-            target_version = 4
-            logger.info("Aplicando migración a versión 4...")
-            cursor.execute("BEGIN IMMEDIATE")
-            cursor.execute("DROP TABLE game_events")
-            cursor.execute(_GAME_EVENTS_V4_SQL)
-            cursor.execute("PRAGMA user_version = 4")
-            conn.commit()
-
-        if current_version < 5 <= _SCHEMA_VERSION:
-            target_version = 5
-            logger.info("Aplicando migración a versión 5...")
-            cursor.execute("BEGIN IMMEDIATE")
-            cursor.execute(_EXCHANGE_PROPOSALS_V5_SQL)
-            cursor.execute("PRAGMA user_version = 5")
-            conn.commit()
     except Exception:
         conn.rollback()
         logger.exception("Falló la actualización al esquema %d.", target_version)
@@ -153,9 +138,7 @@ def upgrade_connection(conn: sqlite3.Connection) -> None:
 
 
 def upgrade(db_path: str | Path) -> None:
-    """Abre una base de datos SQLite, aplica las migraciones pendientes y la cierra
-    siempre.
-    """
+    """Abre una base de datos SQLite, aplica las migraciones pendientes y la cierra."""
     conn = sqlite3.connect(db_path)
     try:
         upgrade_connection(conn)
@@ -181,9 +164,7 @@ class DatabaseManager:
         return conn
 
     def init_db(self) -> None:
-        """Inicializa o actualiza la base de datos mediante la ruta canónica de
-        migración.
-        """
+        """Inicializa o actualiza la base de datos mediante migración canónica."""
         conn = self.get_connection()
         try:
             upgrade_connection(conn)
