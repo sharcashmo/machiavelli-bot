@@ -22,6 +22,7 @@ from .exceptions import (
 from .map import Map
 from .player import Player
 from .scenario import Scenario
+from .trading import ExchangeProposal
 
 
 @dataclass
@@ -42,6 +43,7 @@ class Game:
     independent_garrisons: list[str] = field(default_factory=list)
     besieges: list[str] = field(default_factory=list)
     turn_events: list[TurnEvent] = field(default_factory=list)
+    pending_exchanges: list[ExchangeProposal] = field(default_factory=list)
 
     def require_map(self) -> Map:
         """Return the loaded map or fail fast for an invalid game state."""
@@ -101,6 +103,7 @@ class Game:
             )
         for player in self.players:
             player.commands.clear()
+        self.pending_exchanges.clear()
 
     def save(self, conn: sqlite3.Connection) -> None:
         """Persist the complete aggregate using the caller's transaction."""
@@ -118,6 +121,7 @@ class Game:
                 "independent_garrisons",
                 "besieges",
                 "turn_events",
+                "pending_exchanges",
             )
         ]
         values = [getattr(self, column) for column in columns]
@@ -149,9 +153,11 @@ class Game:
             query = f"UPDATE games SET {set_clause} WHERE id = ?"
             cursor.execute(query, tuple(values) + (self.database_id,))
 
+        from machiavelli.repositories.exchange_repository import ExchangeRepository
         from machiavelli.repositories.player_repository import PlayerRepository
 
         PlayerRepository(conn).replace_for_game(self)
+        ExchangeRepository(conn).replace_for_game(self)
 
         cursor.execute("DELETE FROM game_events WHERE game_id = ?", (self.database_id,))
         if self.turn_events:
@@ -252,7 +258,14 @@ class Game:
             item.name
             for item in fields(cls)
             if item.name
-            not in ("database_id", "players", "scenario", "map", "turn_events")
+            not in (
+                "database_id",
+                "players",
+                "scenario",
+                "map",
+                "turn_events",
+                "pending_exchanges",
+            )
         ]
         select_clause = ", ".join(["id"] + columns)
 
@@ -284,9 +297,11 @@ class Game:
         game = cls(**init_kwargs)
         game.database_id = game_row[0]
 
+        from machiavelli.repositories.exchange_repository import ExchangeRepository
         from machiavelli.repositories.player_repository import PlayerRepository
 
         game.players = PlayerRepository(conn).get_by_game(game)
+        game.pending_exchanges = ExchangeRepository(conn).get_by_game(game)
         cursor.execute(
             """
             SELECT id, event_type, data_json

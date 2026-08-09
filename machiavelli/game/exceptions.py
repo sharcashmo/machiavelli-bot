@@ -29,6 +29,10 @@ class PlayerNotFoundException(GameRuleException):
     """Raised when a requested player does not belong to a game."""
 
 
+class TradeRuleException(GameRuleException):
+    """Raised when a trading rule rejects a requested resource operation."""
+
+
 __all__ = [
     "DuplicatePlayerException",
     "DuplicatedGameException",
@@ -36,4 +40,5 @@ __all__ = [
     "GameNotFoundException",
     "GameRuleException",
     "PlayerNotFoundException",
+    "TradeRuleException",
 ]

@@ -11,6 +11,7 @@ from machiavelli.events import EventType, JSONValue, TurnEvent
 from machiavelli.game.game import Game
 from machiavelli.game.map import Map
 from machiavelli.game.scenario import Scenario
+from machiavelli.game.trading import ExchangeProposal, TradeResource
 from machiavelli.services.turn_reporter import TurnReporter
 
 
@@ -218,6 +219,42 @@ def test_generate_does_not_mutate_game_or_events() -> None:
         for player in game.players
     ] == player_snapshot
     assert tuple(game.famine) == famine_snapshot
+
+
+def test_pending_exchange_does_not_change_public_turn_report() -> None:
+    game = make_report_game()
+    game.turn_events = [TurnEvent(EventType.START_GAME, {"scenario": "Be"})]
+    first, second = game.players
+    first.home_countries = ["M"]
+    first.ducats = 37
+    first.ass_counters = ["V"]
+    second.home_countries = ["V"]
+    second.ducats = 11
+    second.ass_counters = ["M"]
+
+    before = TurnReporter.generate(game)
+
+    game.pending_exchanges = [
+        ExchangeProposal(
+            "M",
+            "V",
+            TradeResource("ducats", 987654),
+            TradeResource("assassin", "N"),
+        )
+    ]
+
+    after = TurnReporter.generate(game)
+    rendered = "\n".join(after)
+
+    assert after == before
+    assert all(
+        message not in rendered
+        for message in (
+            "Intercambio propuesto",
+            "Intercambio completado",
+            "Has dado",
+        )
+    )
 
 
 def test_military_resolution_renders_every_item_in_group_order() -> None:

@@ -8,6 +8,7 @@ from .exceptions import (
     GameNotFoundException,
     GameRuleException,
     PlayerNotFoundException,
+    TradeRuleException,
 )
 from .game import Game
 from .player import Player, TurnType
@@ -22,5 +23,6 @@ __all__ = [
     "GameRuleException",
     "Player",
     "PlayerNotFoundException",
+    "TradeRuleException",
     "TurnType",
 ]
