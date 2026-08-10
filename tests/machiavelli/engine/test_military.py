@@ -1,6 +1,7 @@
 """Pruebas del adjudicador militar, sus reglas y su atomicidad."""
 
 import json
+import logging
 import os
 import platform
 import sqlite3
@@ -38,6 +39,11 @@ from tests.machiavelli.engine.helpers import (
 )
 
 BEFORE_EVENT = TurnEvent(EventType.START_GAME, {"scenario": "before"})
+EMPTY_ORDERS_EVENT = TurnEvent(
+    EventType.MILITARY_ORDERS_SUMMARY, {"orders": [], "invalid_orders": []}
+)
+
+logger = logging.getLogger(__name__)
 
 
 def _event_payload(game: Game) -> dict[str, list[object]]:
@@ -523,6 +529,32 @@ class TestAtomicResolution(unittest.TestCase):
             [["P1", "G", "fort"], ["P2", "A", "c"]],
         )
 
+    def test_orders_summary_precedes_resolution_and_serializes_compiled_orders(self):
+        game = create_military_game(
+            military_map(),
+            [{"player_id": "P1", "power": "M", "armies": ["a", "b"]}],
+            orders=[("A a", "A", "b"), ("A b", "X", "")],
+            turn_events=[BEFORE_EVENT],
+        )
+
+        MilitaryResolver(game).run()
+
+        summary = game.turn_events[-2]
+        self.assertIs(summary.type, EventType.MILITARY_ORDERS_SUMMARY)
+        self.assertIs(game.turn_events[-1].type, EventType.MILITARY_RESOLUTION)
+        self.assertEqual(
+            json.loads(summary.to_json()),
+            {
+                "orders": [
+                    [["P1", "A", "a"], "A", "b", ["a", "b"], None, None, False],
+                    [["P1", "A", "b"], "H", None, None, None, None, False],
+                ],
+                "invalid_orders": [
+                    [["P1", "A", "b"], "código de orden inválido"]
+                ],
+            },
+        )
+
     def test_corrupt_snapshot_and_event_failures_are_atomic(self):
         game = create_military_game(
             military_map(), [{"player_id": "P1", "armies": ["a", "a"]}]
@@ -663,7 +695,8 @@ class TestAtomicResolution(unittest.TestCase):
         self.assertEqual(game.players[1].garrisons, [])
         self.assertEqual(game.independent_garrisons, list(before[3]))
         self.assertEqual(game.besieges, list(before[4]))
-        self.assertEqual(game.turn_events, list(before[6]))
+        self.assertEqual(game.turn_events[:-1], list(before[6]))
+        self.assertIs(game.turn_events[-1].type, EventType.MILITARY_ORDERS_SUMMARY)
 
 
 class TestConvoyCompilationAndResolution(unittest.TestCase):
@@ -2228,7 +2261,6 @@ class TestRebellions(unittest.TestCase):
             scenario=fortress_scenario(active=False),
             turn_events=[BEFORE_EVENT],
         )
-        before = military_snapshot(game)
 
         with (
             patch.object(MilitaryResolver, "_build_rebellion_index"),
@@ -2236,8 +2268,7 @@ class TestRebellions(unittest.TestCase):
         ):
             MilitaryResolver(game).run(self._remove_all_dislodged)
 
-        self.assertEqual(military_snapshot(game), before)
-        self.assertEqual(game.turn_events, [BEFORE_EVENT])
+        self.assertEqual(game.turn_events, [BEFORE_EVENT, EMPTY_ORDERS_EVENT])
 
 
 class TestSiegesAndRestrictedConversions(unittest.TestCase):
@@ -2434,7 +2465,8 @@ class TestSiegesAndRestrictedConversions(unittest.TestCase):
             MilitaryResolver(game).run()
 
         self.assertEqual(military_snapshot(game), before)
-        self.assertEqual(game.turn_events, [BEFORE_EVENT])
+        self.assertEqual(game.turn_events[:-1], [BEFORE_EVENT])
+        self.assertIs(game.turn_events[-1].type, EventType.MILITARY_ORDERS_SUMMARY)
 
     def test_destroyed_garrison_hold_does_not_subdue_provincial_rebellion(self):
         cases = (
@@ -2662,7 +2694,10 @@ class TestSiegesAndRestrictedConversions(unittest.TestCase):
             MilitaryResolver(persistent).run()
 
         self.assertEqual(military_snapshot(persistent), before)
-        self.assertEqual(persistent.turn_events, [BEFORE_EVENT])
+        self.assertEqual(persistent.turn_events[:-1], [BEFORE_EVENT])
+        self.assertIs(
+            persistent.turn_events[-1].type, EventType.MILITARY_ORDERS_SUMMARY
+        )
 
     def test_active_fortress_allows_exact_city_rebellion_siege_cycle(self):
         first = create_military_game(
@@ -2974,7 +3009,8 @@ class TestDislodgementContract(unittest.TestCase):
         manager.assert_not_called()
         self.assertFalse(any(outcome.dislodged for outcome in resolution.outcomes))
         self.assertEqual(game.players[0].armies, ["a"])
-        self.assertEqual(len(game.turn_events), 2)
+        self.assertEqual(len(game.turn_events), 3)
+        self.assertIs(game.turn_events[-2].type, EventType.MILITARY_ORDERS_SUMMARY)
 
     def test_missing_manager_aborts_without_pending_collection(self):
         game = self._single_dislodgement_game()
@@ -3006,7 +3042,14 @@ class TestDislodgementContract(unittest.TestCase):
                 game = self._single_dislodgement_game()
                 before = military_snapshot(game)
 
-                with self.assertRaises(expected_error) as caught:
+                with (
+                    patch.object(
+                        MilitaryResolver,
+                        "_event_from_military_orders",
+                        return_value=EMPTY_ORDERS_EVENT,
+                    ),
+                    self.assertRaises(expected_error) as caught,
+                ):
                     MilitaryResolver(game).run(manager)
 
                 manager.assert_called_once()
@@ -3041,7 +3084,8 @@ class TestDislodgementContract(unittest.TestCase):
         manager.assert_called_once()
         self.assertIs(caught.exception.__cause__, external_error)
         self.assertEqual(military_snapshot(game), before)
-        self.assertEqual(game.turn_events, [BEFORE_EVENT])
+        self.assertEqual(game.turn_events[:-1], [BEFORE_EVENT])
+        self.assertIs(game.turn_events[-1].type, EventType.MILITARY_ORDERS_SUMMARY)
 
     def test_contested_destination_aborts_atomically(self):
         game = self._single_dislodgement_game()
@@ -3084,7 +3128,12 @@ class TestDislodgementContract(unittest.TestCase):
                 dislodged = UnitKey("P2", "A", "b")
                 manager = Mock(return_value={dislodged: destination})
 
-                resolution = MilitaryResolver(game).run(manager)
+                with patch.object(
+                    MilitaryResolver,
+                    "_event_from_military_orders",
+                    return_value=EMPTY_ORDERS_EVENT,
+                ):
+                    resolution = MilitaryResolver(game).run(manager)
 
                 manager.assert_called_once_with(resolution)
                 outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
@@ -3134,7 +3183,8 @@ class TestDislodgementContract(unittest.TestCase):
 
         manager.assert_called_once()
         self.assertEqual(military_snapshot(game), before)
-        self.assertEqual(game.turn_events, [BEFORE_EVENT])
+        self.assertEqual(game.turn_events[:-1], [BEFORE_EVENT])
+        self.assertIs(game.turn_events[-1].type, EventType.MILITARY_ORDERS_SUMMARY)
 
     def test_independent_garrison_requires_an_explicit_decision(self):
         independent = UnitKey(None, "G", "fort")

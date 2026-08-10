@@ -108,6 +108,10 @@ class Map:
     provinces: dict[str, Province] = field(default_factory=dict)
     seas: dict[str, Sea] = field(default_factory=dict)
 
+    def __post_init__(self):
+        """Realiza algunas operaciones para completar la inicialización"""
+        self.locations = self.provinces | self.seas
+
     @classmethod
     def load_map(
         cls, exclude_ids: list[str] | None = None, json_path: Path | str | None = None
@@ -188,7 +192,7 @@ class Map:
         Raises:
             KeyError: Si el ID `origin` no existe entre las localizaciones del mapa.
         """
-        locations = self.provinces | self.seas
+        locations = self.locations if self.locations else self.provinces | self.seas
         adjacent = set()
         origin_base = origin.split()[0]
 

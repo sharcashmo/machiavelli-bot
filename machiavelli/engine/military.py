@@ -1727,7 +1727,7 @@ class MilitaryResolver:
                 player.rebelled_cities = player_rebellions["city"]
             self.game.independent_garrisons = independent
             self.game.besieges = besieges
-            self.game.turn_events = [*self.game.turn_events, event]
+            self.game.turn_events.append(event)
         except Exception as error:
             # El rollback es defensivo y restaura cada colección por separado.
             for player in self.game.players:
@@ -1764,18 +1764,27 @@ class MilitaryResolver:
         self, dislodgement_resolver: DislodgementResolver | None = None
     ) -> MilitaryResolution:
         """Resuelve el turno y solo entonces sustituye el estado del juego."""
-        # Fase 1: capturar el snapshot y compilar una intención por unidad.
+        # Fase 1: capturar el snapshot y compilar una intención por unidad
         self._build_unit_index()
         self._compile_orders()
         self._link_and_validate_orders()
 
-        # Fase 2: alcanzar un estado estable y verificar que no quedan conflictos.
+        # Fase 2: generar el evento con las órdenes válidas recibidas
+        try:
+            event = self._event_from_military_orders()
+        except Exception as error:
+            raise MilitaryResolutionError(
+                "No se pudo construir el evento de resumen de órdenes"
+            ) from error
+        self.game.turn_events.append(event)
+
+        # Fase 3: alcanzar un estado estable y verificar que no quedan conflictos
         state = self._resolve_conflicts()
         pending = self._effective_conflict_keys() - state.resolved_conflicts
         if pending:
             raise MilitaryResolutionError("Quedan conflictos efectivos pendientes")
 
-        # Fase 3: calcular transiciones derivadas sobre colecciones provisionales.
+        # Fase 4: calcular transiciones derivadas sobre colecciones provisionales
         provisional_resolution = self._build_resolution(state)
         provisional_collections, provisional_independent, _ = (
             self._build_final_collections(provisional_resolution)
@@ -1794,7 +1803,7 @@ class MilitaryResolver:
         resolution = self._build_resolution(state, siege_dislodged)
         collections, independent, _ = self._build_final_collections(resolution)
 
-        # Fase 4: resolver retiradas antes de validar el estado definitivo.
+        # Fase 5: resolver retiradas antes de validar el estado definitivo
         decisions = self._resolve_dislodgements(
             resolution,
             dislodgement_resolver,
@@ -1814,7 +1823,7 @@ class MilitaryResolver:
             besieges,
         )
 
-        # Fase 5: construir el evento validado antes del commit.
+        # Fase 6: construir el evento antes del commit
         try:
             event = self._event_from_resolution(
                 resolution,
@@ -1833,7 +1842,7 @@ class MilitaryResolver:
             len(state.cancelled_orders),
         )
 
-        # Fase 6: aplicar todas las colecciones validadas de forma atómica.
+        # Fase 7: aplicar todas las colecciones validadas de forma atómica.
         self._apply_final_collections(
             collections,
             independent,
@@ -1842,6 +1851,43 @@ class MilitaryResolver:
             rebellion_collections=rebellions,
         )
         return resolution
+
+    def _event_from_military_orders(self) -> TurnEvent:
+        """Construye el evento de compilación y resumen de órdenes."""
+        orders: list[list[object]] = [
+            [
+                [unit.player_id, unit.unit_type, unit.origin],
+                order.order_type,
+                order.target_location or None,
+                list(order.path) if order.path else None,
+                (
+                    [
+                        order.transported_army.player_id,
+                        order.transported_army.unit_type,
+                        order.transported_army.origin,
+                    ]
+                    if order.transported_army is not None
+                    else None
+                ),
+                order.supported_faction,
+                order.is_convoy,
+            ]
+            for unit, order in self.orders_by_unit.items()
+        ]
+        invalid_orders: list[list[object]] = (
+            [
+                [[unit.player_id, unit.unit_type, unit.origin], reason]
+                for unit, reason in self.invalid_orders.items()
+            ]
+            if self.invalid_orders
+            else []
+        )
+        try:
+            return TurnEvent.military_orders_summary(orders, invalid_orders)
+        except Exception as error:
+            raise MilitaryResolutionError(
+                "No se pudo construir el evento de resumen de órdenes"
+            ) from error
 
     def _event_from_resolution(
         self,

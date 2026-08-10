@@ -25,6 +25,17 @@ type RebellionRecord = tuple[str | None, str, str, str]
 type SiegeRecord = tuple[UnitKeyRecord, str, str]
 type DislodgementRecord = tuple[UnitKeyRecord, str, str | None]
 
+type MilitaryOrderRecord = tuple[
+    UnitKeyRecord,
+    str,
+    str | None,
+    tuple[str] | None,
+    UnitKeyRecord | None,
+    str | None,
+    bool,
+]
+type InvalidOrderRecord = tuple[UnitKeyRecord, str]
+
 _SEASONS = (
     "Primavera (mantenimiento)",
     "Primavera (campaña)",
@@ -201,6 +212,8 @@ class TurnReporter:
                 ]
             case EventType.MILITARY_RESOLUTION:
                 return TurnReporter._render_military(game, data)
+            case EventType.MILITARY_ORDERS_SUMMARY:
+                return TurnReporter._render_orders_summary(game, data)
             case _:
                 raise InvalidTurnEventError(event_type=str(event.type))
 
@@ -406,6 +419,28 @@ class TurnReporter:
         return f"{player} {action} el país natal {home_country}."
 
     @staticmethod
+    def _render_orders_summary(
+        game: Game, data: Mapping[str, FrozenJSONValue]
+    ) -> list[str]:
+        orders = cast(tuple[MilitaryOrderRecord, ...], data["orders"])
+        invalid_orders = cast(tuple[InvalidOrderRecord, ...], data["invalid_orders"])
+        if not any((orders, invalid_orders)):
+            return "Sin órdenes militares."
+        lines: list[str] = []
+        if orders:
+            lines.append("**Órdenes recibidas:**")
+            lines.extend(
+                TurnReporter._military_order_line(game, order) for order in orders
+            )
+        if invalid_orders:
+            lines.append("**Órdenes no válidas:**")
+            lines.extend(
+                TurnReporter._invalid_order_line(game, invalid_order)
+                for invalid_order in invalid_orders
+            )
+        return lines
+
+    @staticmethod
     def _render_military(
         game: Game,
         data: Mapping[str, FrozenJSONValue],
@@ -482,6 +517,92 @@ class TurnReporter:
             return f"{actor} independiente de {location}"
         player = TurnReporter._player(game, owner)
         return f"{actor} de {location} de {player}"
+
+    @staticmethod
+    def _military_order_line(game: Game, order: MilitaryOrderRecord) -> str:
+        (
+            unit,
+            order_type,
+            target_location,
+            path,
+            transported_unit,
+            supported_faction,
+            is_convoy,
+        ) = order
+        unit_text = TurnReporter._military_unit(game, unit)
+        order_type_texts = {
+            "A": "avanzar",
+            "B": "asediar",
+            "H": "mantener",
+            "L": "levantar asedio",
+            "S": "apoyar",
+            "T": "transportar",
+            "C": "convertir",
+        }
+        order_type_text = (
+            order_type_texts[order_type] if order_type in order_type_texts else None
+        )
+
+        if target_location and target_location in game.map.locations:
+            target_location_name = game.map.locations[target_location].name
+        else:
+            target_location_name = None
+
+        if is_convoy and path and target_location_name:
+            path_names = [
+                game.map.locations[location].name
+                for location in path
+                if location in game.map.locations
+            ]
+            path_names_text = TurnReporter._join(path_names)
+
+        if supported_faction and supported_faction in GameTables.powers:
+            supported_faction_text = GameTables.powers[supported_faction]
+        else:
+            supported_faction_text = None
+
+        if transported_unit:
+            transported_unit_text = TurnReporter._military_unit(game, transported_unit)
+        else:
+            transported_unit_text = None
+
+        order_description = None
+        if order_type == "A":
+            if is_convoy and path and target_location_name:
+                order_description = (
+                    f"{order_type_text} a {target_location_name} "
+                    f"(via {path_names_text})"
+                )
+            else:
+                order_description = f"{order_type_text} a {target_location_name}"
+        elif order_type in ("B", "H", "L"):
+            order_description = f"{order_type_text}"
+        elif order_type == "S":
+            if supported_faction_text:
+                order_description = (
+                    f"{order_type_text} a {target_location_name} "
+                    f"({supported_faction_text})"
+                )
+            else:
+                order_description = f"{order_type_text} a {target_location_name}"
+        elif order_type == "T" and transported_unit_text:
+            order_description = f"{order_type_text} a {transported_unit_text}"
+        elif order_type == "C":
+            target_unit_txt = (
+                GameTables.actors[target_location]
+                if target_location in GameTables.actors
+                else None
+            )
+            order_description = f"{order_type_text} a {target_unit_txt}"
+
+        if unit_text and order_description:
+            return f"- {unit_text} {order_description}"
+
+    @staticmethod
+    def _invalid_order_line(game, invalid_order: InvalidOrderRecord) -> str:
+        unit, reason = invalid_order
+        unit_txt = TurnReporter._military_unit(game, unit)
+        return f"- {unit_txt}, {reason}"
 
     @staticmethod
     def _military_outcome_line(game: Game, outcome: OutcomeRecord) -> str:

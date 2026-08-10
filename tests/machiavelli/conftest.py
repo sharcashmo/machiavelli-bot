@@ -102,6 +102,16 @@ def valid_event_payloads() -> Mapping[EventType, dict[str, JSONValue]]:
             "cities": 12,
             "home_countries": 3,
         },
+        EventType.MILITARY_ORDERS_SUMMARY: {
+            "invalid_orders": [[unit, "Invalid order reason"]],
+            "orders": [
+                [unit, "A", "ven", ["ETS", "WTS", "corsi"], None, None, True],
+                [unit, "A", "ven", None, None, None, False],
+                [unit, "B", None, None, None, None, False],
+                [unit, "S", "ven", None, None, "L", False],
+                [unit, "T", None, None, unit, None, False],
+            ],
+        },
         EventType.MILITARY_RESOLUTION: {
             "outcomes": [[unit, "A", "ven", False]],
             "cancelled_orders": [unit],

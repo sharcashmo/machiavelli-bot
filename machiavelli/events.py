@@ -51,6 +51,7 @@ class EventType(StrEnum):
     LOSE_HOME_COUNTRY = "lose_home_country"
     PLAYER_ELIMINATED = "player_eliminated"
     PLAYER_WON = "player_won"
+    MILITARY_ORDERS_SUMMARY = "military_orders_summary"
     MILITARY_RESOLUTION = "military_resolution"
 
 
@@ -86,7 +87,7 @@ _MAINTENANCE_RESULTS = {
 
 @dataclass(frozen=True, slots=True, init=False)
 class TurnEvent:
-    """Un hecho de dominio validado en el historial del turno actual."""
+    """Representa a un evento del turno actual que deba aparecer en el reporte."""
 
     type: EventType
     data: Mapping[str, FrozenJSONValue]
@@ -116,9 +117,7 @@ class TurnEvent:
         target: str | None,
         amount: int | str,
     ) -> Self:
-        """Construye un evento de gasto o de soborno ejecutado mediante el validador
-        común.
-        """
+        """Construye un evento de gasto o de soborno."""
         allowed = {
             EventType.EXPENSE,
             EventType.EXPENSE_NO_FUNDS,
@@ -151,8 +150,7 @@ class TurnEvent:
         sieges: Sequence[Sequence[object]],
         decisions: Sequence[Sequence[object]],
     ) -> Self:
-        """Construye el evento militar canónico a partir de primitivas del resolvedor.
-        """
+        """Construye un evento de sumario de la fase de resolución militar."""
         return cls(
             EventType.MILITARY_RESOLUTION,
             {
@@ -164,6 +162,18 @@ class TurnEvent:
                 "sieges": list(sieges),
                 "decisions": list(decisions),
             },
+        )
+
+    @classmethod
+    def military_orders_summary(
+        cls,
+        orders: Sequence[Sequence[object]],
+        invalid_orders: Sequence[Sequence[object]],
+    ) -> Self:
+        """Construye el evento de sumario de órdenes militares recibidas."""
+        return cls(
+            EventType.MILITARY_ORDERS_SUMMARY,
+            {"orders": list(orders), "invalid_orders": list(invalid_orders)},
         )
 
     def to_json(self) -> str:
@@ -487,6 +497,40 @@ def _decisions(value: object) -> list[JSONValue]:
     return [unit, result_type, destination]
 
 
+def _orders(value: object) -> list[JSONValue]:
+    item = _sequence(value, 7)
+    unit = _unit_key(item[0])
+    order_type = _choice(item[1], {"A", "B", "H", "L", "S", "T", "C"})
+    target_location = _nullable_string(item[2])
+    if item[3]:
+        path = _thaw(item[3])
+    else:
+        path = None
+    if item[4]:
+        transported_army = _unit_key(item[4])
+    else:
+        transported_army = None
+    supported_faction = _nullable_string(item[5])
+    is_convoy = item[6]
+
+    return [
+        unit,
+        order_type,
+        target_location,
+        path,
+        transported_army,
+        supported_faction,
+        is_convoy,
+    ]
+
+
+def _invalid_orders(value: object) -> list[JSONValue]:
+    item = _sequence(value, 2)
+    unit = _unit_key(item[0])
+    reason = item[1]
+    return [unit, reason]
+
+
 def _canonicalize(
     value: object,
     validator: Callable[[object], list[JSONValue]],
@@ -523,6 +567,15 @@ def _military_resolution(data: Mapping[str, object]) -> dict[str, JSONValue]:
     }
 
 
+def _military_orders_summary(data: Mapping[str, object]) -> dict[str, JSONValue]:
+    expected = {"orders", "invalid_orders"}
+    _keys(data, expected)
+    return {
+        "orders": _canonicalize(data["orders"], _orders),
+        "invalid_orders": _canonicalize(data["invalid_orders"], _invalid_orders),
+    }
+
+
 _VALIDATORS = {
     EventType.START_GAME: _simple_strings("scenario"),
     EventType.START_GAME_POWER_ASSIGNED: _start_game_power_assigned,
@@ -550,6 +603,7 @@ _VALIDATORS = {
     EventType.PLAYER_ELIMINATED: _simple_strings("player"),
     EventType.PLAYER_WON: _player_won,
     EventType.MILITARY_RESOLUTION: _military_resolution,
+    EventType.MILITARY_ORDERS_SUMMARY: _military_orders_summary,
 }
 
 

@@ -6,7 +6,7 @@ from random import Random
 from unittest.mock import Mock
 
 from machiavelli.engine.core import GameEngine
-from machiavelli.events import TurnEvent
+from machiavelli.events import EventType, TurnEvent
 from machiavelli.game.command import Command
 from machiavelli.game.game import Game
 from machiavelli.game.map import Map
@@ -150,7 +150,12 @@ def create_military_game(
 
 
 def military_snapshot(game: Game) -> tuple[tuple[object, ...], ...]:
-    """Devuelve las colecciones militares en una forma primitiva y estable."""
+    """Devuelve el estado militar, sin los eventos de recepción de órdenes.
+
+    Los resúmenes de órdenes son auditoría de entrada: se publican antes de que la
+    resolución alcance una frontera de commit. No forman parte del estado que las
+    pruebas de atomicidad deben comparar.
+    """
     armies = _snapshot_units(game, "armies")
     fleets = _snapshot_units(game, "fleets")
     garrisons = _snapshot_units(game, "garrisons")
@@ -172,7 +177,11 @@ def military_snapshot(game: Game) -> tuple[tuple[object, ...], ...]:
         tuple(sorted(game.independent_garrisons)),
         tuple(sorted(game.besieges)),
         rebellions,
-        tuple(game.turn_events),
+        tuple(
+            event
+            for event in game.turn_events
+            if event.type is not EventType.MILITARY_ORDERS_SUMMARY
+        ),
     )
 
 

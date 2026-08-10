@@ -557,9 +557,20 @@ def _turn_snapshot(game: Game) -> dict[str, object]:
             )
         ),
         "events": tuple(
-            (event.type.value, event.to_json()) for event in game.turn_events
+            (event.type.value, event.to_json())
+            for event in game.turn_events
+            if event.type is not EventType.MILITARY_ORDERS_SUMMARY
         ),
     }
+
+
+def _domain_event_types(events: list[TurnEvent]) -> tuple[EventType, ...]:
+    """Filtra el evento técnico de recepción al comprobar el orden del dominio."""
+    return tuple(
+        event.type
+        for event in events
+        if event.type is not EventType.MILITARY_ORDERS_SUMMARY
+    )
 
 
 ACTIVE_STARTUP_SNAPSHOT_V1 = {
@@ -816,7 +827,7 @@ def test_real_turns_emit_only_ordered_reconstructible_events(
     assert all(player.commands == [] for player in game.players)
 
     events = game.turn_events
-    event_types = tuple(event.type for event in events)
+    event_types = _domain_event_types(events)
     assert event_types[0] is ordered_anchors[0]
     anchor_positions = [event_types.index(anchor) for anchor in ordered_anchors]
     assert anchor_positions == sorted(anchor_positions)
@@ -908,8 +919,8 @@ def test_first_turn_famine_inactive_integrated_snapshot() -> None:
     assert inactive == {**active, "famine": (), "events": inactive["events"]}
     assert active["famine"] == ("free",)
     assert inactive["famine"] == ()
-    active_types = tuple(event.type for event in games[True].turn_events)
-    inactive_types = tuple(event.type for event in games[False].turn_events)
+    active_types = _domain_event_types(games[True].turn_events)
+    inactive_types = _domain_event_types(games[False].turn_events)
     assert active_types == (
         EventType.START_GAME,
         EventType.START_GAME_POWER_ASSIGNED,
@@ -967,8 +978,8 @@ def test_famine_inactive_integrated_snapshot_and_event_order() -> None:
         ),
         "events": inactive["events"],
     }
-    active_types = tuple(event.type for event in games[True].turn_events)
-    inactive_types = tuple(event.type for event in games[False].turn_events)
+    active_types = _domain_event_types(games[True].turn_events)
+    inactive_types = _domain_event_types(games[False].turn_events)
     assert active_types == (
         EventType.MILITARY_RESOLUTION,
         EventType.FAMINE_ATTRITION,
@@ -1033,8 +1044,8 @@ def test_assassinations_inactive_integrated_snapshot_and_event_order() -> None:
         ),
         "events": inactive["events"],
     }
-    active_types = tuple(event.type for event in games[True].turn_events)
-    inactive_types = tuple(event.type for event in games[False].turn_events)
+    active_types = _domain_event_types(games[True].turn_events)
+    inactive_types = _domain_event_types(games[False].turn_events)
     assert active_types == (
         EventType.EXPENSE,
         EventType.MILITARY_RESOLUTION,
@@ -1099,8 +1110,8 @@ def test_plague_inactive_integrated_snapshot_and_event_order() -> None:
         ),
         "events": inactive["events"],
     }
-    active_types = tuple(event.type for event in games[True].turn_events)
-    inactive_types = tuple(event.type for event in games[False].turn_events)
+    active_types = _domain_event_types(games[True].turn_events)
+    inactive_types = _domain_event_types(games[False].turn_events)
     assert active_types == (
         EventType.MILITARY_RESOLUTION,
         EventType.FAMINE_ATTRITION,
