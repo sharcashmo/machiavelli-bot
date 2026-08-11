@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from machiavelli.engine.dislodgement import RetreatHandler
+from machiavelli.engine.dislodgement import RetreatHandler, RetreatStep
 from machiavelli.engine.military import DislodgementDecision
 
 
@@ -27,7 +27,14 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
         outcome = Mock()
         outcome.unit.player_id = None
 
-        result = self.handler._preferred_retreat(outcome, set())
+        invalid_destinations = {}
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
+
         self.assertEqual(result, DislodgementDecision("disband", None))
 
     def test_invalid_unit_type_returns_none(self):
@@ -39,7 +46,14 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         self.mock_map.adjacent_locations.return_value = {"rome", "flore", "naple"}
 
-        result = self.handler._preferred_retreat(outcome, set())
+        invalid_destinations = {}
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
+
         self.assertEqual(result, DislodgementDecision("disband", None))
 
     def test_retreat_priority_controlled_and_home_country(self):
@@ -58,7 +72,12 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         invalid_destinations = set()
 
-        result = self.handler._preferred_retreat(outcome, invalid_destinations)
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
 
         self.assertEqual(result, DislodgementDecision("retreat", "rome"))
 
@@ -78,7 +97,12 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         invalid_destinations = set()
 
-        result = self.handler._preferred_retreat(outcome, invalid_destinations)
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
 
         self.assertEqual(result, DislodgementDecision("retreat", "naple"))
 
@@ -98,7 +122,12 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         invalid_destinations = set()
 
-        result = self.handler._preferred_retreat(outcome, invalid_destinations)
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
 
         self.assertEqual(result, DislodgementDecision("retreat", "rome"))
 
@@ -118,7 +147,12 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         invalid_destinations = set()
 
-        result = self.handler._preferred_retreat(outcome, invalid_destinations)
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
 
         self.assertEqual(result, DislodgementDecision("retreat", "naple"))
 
@@ -139,7 +173,12 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
         # 'rome' es ideal pero está bloqueado/invalidado
         invalid_destinations = {"rome"}
 
-        result = self.handler._preferred_retreat(outcome, invalid_destinations)
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
 
         self.assertEqual(result, DislodgementDecision("retreat", "naple"))
 
@@ -166,7 +205,12 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         invalid_destinations = set()
 
-        result = self.handler._preferred_retreat(outcome, invalid_destinations)
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
 
         self.assertEqual(result, DislodgementDecision("garrison", "rome"))
         self.assertIn("G rome", invalid_destinations)
@@ -191,7 +235,13 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
         outcome.unit.origin = "naple"
         outcome.final_unit_type = "F"
 
-        result = self.handler._preferred_retreat(outcome, set())
+        invalid_destinations = {}
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
 
         self.assertEqual(result, DislodgementDecision("disband", None))
 
@@ -215,7 +265,13 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
         outcome.unit.origin = "naple"
         outcome.final_unit_type = "A"
 
-        result = self.handler._preferred_retreat(outcome, set())
+        invalid_destinations = {}
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
 
         self.assertEqual(result, DislodgementDecision("disband", None))
 
@@ -239,11 +295,14 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
         outcome.unit.origin = "naple"
         outcome.final_unit_type = "A"
 
-        result = self.handler._preferred_retreat(
-            outcome,
-            {
-                "G naple",
-            },
-        )
+        invalid_destinations = {
+            "G naple",
+        }
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
 
         self.assertEqual(result, DislodgementDecision("disband", None))

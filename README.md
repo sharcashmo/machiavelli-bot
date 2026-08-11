@@ -172,9 +172,10 @@ Se prevén las siguientes versiones
   - [X] Mejora la representación de los eventos.
   - [X] Mejora general del formato del reporte.
 - [X] Nuevos comandos `/exchange` y `/give` para intercambiar o dar recursos a otro jugador.
-- [ ] Incorpora los resultados de `/mach cmdlist` en `/mach game_status`.
+- [X] Incorpora los resultados de `/mach cmdlist` en `/mach game_status`.
 - [X] Mejora el filtrado de comandos en `/mach cmd` en el caso de unidades en asedio.
-- [ ] Nuevo comando `/mach retreats`.
+- [X] Cambio en el algoritmo de retirada. Ahora se ejecuta por pasos y los unidades que tienen
+  una retirada "preferible" actúan primero.
 
 ### Desarrollos futuros
 
@@ -233,4 +234,5 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
   del juego y de la base de datos; se ha mejorado la gestión de eventos y la generación de reportes, etc.
 - Versión 0.7.0: nuevos comandos `/mach exchange` y `/mach give`. `/mach game_status` ahora incluye el listado de
   órdenes enviadas por lo que `/mach cmdlist` queda eliminada. Presentación del reporte de turno ordenada y mejorada.
-  Nuevo comando `/mach retreats`.
+  Nuevo comando `/mach retreats`. Cambio en el algoritmo de retiradas: ahora las unidades con una retirada preferible
+  (ie, hacia su propio territorio) actúan primero.

@@ -3,6 +3,7 @@
 import logging
 import random
 from collections.abc import Mapping
+from enum import IntEnum
 
 from ..game.game import Game
 from ..game.map import Map, MovementMode
@@ -18,6 +19,14 @@ from .military import (
 logger = logging.getLogger(__name__)
 
 
+class RetreatStep(IntEnum):
+    CONTROLLED_HOME_COUNTRY = 0
+    CONTROLLED = 1
+    HOME_COUNTRY = 2
+    ADJACENT = 3
+    GARRISON = 4
+
+
 class RetreatHandler:
     def __init__(self, game: Game):
         self.game = game
@@ -29,92 +38,28 @@ class RetreatHandler:
         return self.game.require_map()
 
     def _preferred_retreat(
-        self, outcome: UnitOutcome, invalid_destinations: set[str]
-    ) -> DislodgementDecision:
+        self,
+        retreat_step: RetreatStep,
+        outcome: UnitOutcome,
+        invalid_destinations: set[str],
+    ) -> DislodgementDecision | None:
         """Devuelve la retirada preferida por la unidad."""
         unit: UnitKey = outcome.unit
 
-        decision: DislodgementDecision = DislodgementDecision("disband", None)
-        destination = None
-
         logger.debug(
-            "Preferred retreat. Outcome: %s. Invalid destionations: %s",
+            "Preferred retreat. Step: %s- Outcome: %s. Invalid destionations: %s",
+            retreat_step,
             outcome,
             invalid_destinations,
         )
 
-        # Las guarniciones independientes no se retiran
-        if unit.player_id is None:
-            return decision
+        # Las guarniciones no se retiran
+        if unit.player_id is None or unit.unit_type == "G":
+            return DislodgementDecision("disband", None)
 
-        player: Player = self.players[unit.player_id]
-
-        if unit.unit_type == "A":
-            adjacent_locations = self.map.adjacent_locations(
-                origin=unit.origin, mode=MovementMode.LAND
-            )
-        elif unit.unit_type == "F":
-            adjacent_locations = self.map.adjacent_locations(
-                origin=unit.origin, mode=MovementMode.SEA
-            )
-        else:
-            adjacent_locations = set()
-
-        adjacent_locations: list[str] = [
-            location
-            for location in adjacent_locations
-            if location not in invalid_destinations
-        ]
-
-        if adjacent_locations:
-            # Tenemos lugares de retirada
-            # Ordenamos los lugares de retirada por
-            # 1. Está controlado
-            # 2. Es del país natal del jugador
-            random.shuffle(adjacent_locations)
-
-            hc_provinces = self.game.scenario.home_countries_provinces(
-                player.home_countries
-            )
-            controlled_provinces = player.controlled_locations
-
-            # Busco que esté controlada y sea del país natal
-            destination = next(
-                (
-                    d
-                    for d in adjacent_locations
-                    if d.split()[0] in hc_provinces
-                    and d.split()[0] in controlled_provinces
-                ),
-                None,
-            )
-
-            if not destination:
-                # Busco una controlada
-                destination = next(
-                    (
-                        d
-                        for d in adjacent_locations
-                        if d.split()[0] in controlled_provinces
-                    ),
-                    None,
-                )
-
-            if not destination:
-                # Busco una del país natal
-                destination = next(
-                    (d for d in adjacent_locations if d.split()[0] in hc_provinces),
-                    None,
-                )
-            if not destination:
-                # Una cualquiera adyacente
-                destination = adjacent_locations[0]
-
-            decision = DislodgementDecision("retreat", destination)
-            invalid_destinations.add(conflict_location(destination, unit.unit_type))
-
-        elif unit.origin in self.map.provinces:
-            # No tenemos, pero quizá podamos retirarnos a la ciudad
+        # Resolvemos según la fase
+        if retreat_step == RetreatStep.GARRISON:
+            # Quizá podamos retirarnos a la ciudad
             province = self.map.provinces[unit.origin]
             temptative_destination = conflict_location(unit.origin, "G")
             if (
@@ -131,22 +76,68 @@ class RetreatHandler:
                 if unit.unit_type == "A" or unit.unit_type == "F" and province.has_port:
                     # Nos retiramos al fuerte
                     destination = conflict_location(unit.origin, unit.unit_type)
-                    decision = DislodgementDecision("garrison", destination)
                     invalid_destinations.add(conflict_location(destination, "G"))
+                    return DislodgementDecision("garrison", destination)
 
-        logger.debug(
-            "Output. Outcome: %s. Invalid destionations: %s. Destination: %s",
-            outcome,
-            invalid_destinations,
-            decision,
-        )
+            return DislodgementDecision("disband", None)
+        else:
+            player: Player = self.players[unit.player_id]
 
-        if destination:
-            invalid_destinations.add(
-                conflict_location(destination, outcome.final_unit_type)
-            )
+            if unit.unit_type == "A":
+                adjacent_locations = self.map.adjacent_locations(
+                    origin=unit.origin, mode=MovementMode.LAND
+                )
+            elif unit.unit_type == "F":
+                adjacent_locations = self.map.adjacent_locations(
+                    origin=unit.origin, mode=MovementMode.SEA
+                )
+            else:
+                adjacent_locations = {}
 
-        return decision
+            adjacent_locations: list[str] = [
+                location
+                for location in adjacent_locations
+                if location not in invalid_destinations
+            ]
+
+            if adjacent_locations:
+                # Tenemos lugares de retirada
+                random.shuffle(adjacent_locations)
+
+                hc_provinces = self.game.scenario.home_countries_provinces(
+                    player.home_countries
+                )
+                controlled_provinces = player.controlled_locations
+
+                # Busco lugares apropiados según la fase
+                destination = next(
+                    (
+                        d
+                        for d in adjacent_locations
+                        if (
+                            retreat_step
+                            in (RetreatStep.CONTROLLED, RetreatStep.ADJACENT)
+                            or d.split()[0] in hc_provinces
+                        )
+                        and (
+                            retreat_step
+                            in (RetreatStep.HOME_COUNTRY, RetreatStep.ADJACENT)
+                            or d.split()[0] in controlled_provinces
+                        )
+                    ),
+                    None,
+                )
+
+                if destination:
+                    invalid_destinations.add(
+                        conflict_location(destination, unit.unit_type)
+                    )
+                    return DislodgementDecision("retreat", destination)
+                else:
+                    return None
+            else:
+                # No hay lugares de retirada; quizá podrá convertirse en garrison
+                return None
 
     def __call__(self, resolution: MilitaryResolution) -> Mapping[UnitKey, str | None]:
         """Resuelve las retiradas del combate."""
@@ -160,13 +151,19 @@ class RetreatHandler:
         }
         invalid_destinations |= resolution.contested_locations
 
-        # Ahora calculamos todas las retiradas
-        dislodges = [outcome for outcome in resolution.outcomes if outcome.dislodged]
-
         # Recorremos la tupla de unidades en retirada en orden aleatorio
-        for outcome in random.sample(dislodges, len(dislodges)):
-            retreats[outcome.unit] = self._preferred_retreat(
-                outcome, invalid_destinations
-            )
+        for retreat_step in RetreatStep:
+            # Ahora calculamos todas las retiradas pendientes de calcular
+            dislodges = [
+                outcome
+                for outcome in resolution.outcomes
+                if outcome.dislodged and outcome.unit not in retreats
+            ]
+            for outcome in random.sample(dislodges, len(dislodges)):
+                retreat = self._preferred_retreat(
+                    retreat_step, outcome, invalid_destinations
+                )
+                if retreat:
+                    retreats[outcome.unit] = retreat
 
         return retreats
