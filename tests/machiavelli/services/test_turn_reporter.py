@@ -36,7 +36,8 @@ def make_report_game() -> Game:
 def event_lines(report: list[str]) -> list[str]:
     """Devuelve únicamente las líneas generadas a partir de los eventos del turno."""
     situation_index = report.index("## 🗺️ REPORTE DE SITUACIÓN")
-    return report[3:situation_index]
+    events_index = report.index("⚠️ **EVENTOS DEL TURNO ANTERIOR**")
+    return report[events_index + 1 : situation_index]
 
 
 @pytest.mark.parametrize("event_type", list(EventType))
@@ -71,11 +72,11 @@ def test_report_preserves_general_order_event_order_and_repetitions() -> None:
     assert report[:3] == [
         "## 📜 Partida de prueba, turno 2",
         "### 🗓️ Primavera (mantenimiento) de 1454",
-        "> ⚠️ **EVENTOS DEL TURNO ANTERIOR**",
+        "⚠️ **EVENTOS DEL TURNO ANTERIOR**",
     ]
     assert rendered == [
         "Se inició la partida con el escenario Be.",
-        "<@456> fue eliminado de la partida.",
+        "Venice <@456> fue eliminado de la partida.",
         "Se inició la partida con el escenario Be.",
     ]
 
@@ -99,8 +100,8 @@ def test_report_resolves_known_player_power_province_and_unit_identifiers() -> N
 
     rendered = "\n".join(event_lines(TurnReporter.generate(game)))
 
-    assert "<@123>" in rendered
-    assert "<@456>" in rendered
+    assert "Milan <@123>" in rendered
+    assert "Venice <@456>" in rendered
     assert "Milan" in rendered
     assert "Flota" in rendered
     assert "Venice (S)" in rendered
@@ -108,7 +109,7 @@ def test_report_resolves_known_player_power_province_and_unit_identifiers() -> N
 
 @pytest.mark.parametrize(
     ("persisted_discord_id", "expected_player"),
-    [(999, "<@999>"), (None, "<@123>")],
+    [(999, "<@999>"), (123, "<@123>")],
 )
 def test_power_assignment_prefers_persisted_discord_id_with_safe_fallback(
     persisted_discord_id: int | None,
@@ -141,7 +142,7 @@ def test_power_expense_resolves_its_target_as_a_power() -> None:
     ]
 
     assert event_lines(TurnReporter.generate(game)) == [
-        "<@123> registró Ordenar asesinato sobre Venice por 12 ducados."
+        "> Milan <@123> registró Ordenar asesinato sobre Venice por 12 ducados."
     ]
 
 
@@ -257,6 +258,33 @@ def test_pending_exchange_does_not_change_public_turn_report() -> None:
     )
 
 
+def test_military_orders_are_grouped_by_player_with_their_presentation() -> None:
+    game = make_report_game()
+    game.turn_events = [
+        TurnEvent(
+            EventType.MILITARY_ORDERS_SUMMARY,
+            {
+                "orders": [
+                    [["player-2", "F", "venic S"], "H", None, None, None, None, False],
+                    [["player-1", "A", "milan"], "B", None, None, None, None, False],
+                ],
+                "invalid_orders": [
+                    [["player-1", "A", "milan"], "Orden inválida"],
+                ],
+            },
+        )
+    ]
+
+    assert event_lines(TurnReporter.generate(game)) == [
+        "### :scroll: **Órdenes recibidas:**",
+        "🏰 __**Milan <@123>**__",
+        "> Ejército de Milan asediar",
+        "> :exclamation: Ejército de Milan de Milan <@123>, Orden inválida",
+        "🏰 __**Venice <@456>**__",
+        "> Flota de Venice (S) mantener",
+    ]
+
+
 def test_military_resolution_renders_every_item_in_group_order() -> None:
     game = make_report_game()
     game.turn_events = [
@@ -268,7 +296,7 @@ def test_military_resolution_renders_every_item_in_group_order() -> None:
                     [["player-2", "A", "pavia"], "A", None, True],
                 ],
                 "cancelled_orders": [["player-2", "A", "pavia"]],
-                "broken_convoys": [[None, "G", "milan"]],
+                "broken_convoys": [["player-1", "G", "milan"]],
                 "decisions": [
                     [["player-1", "F", "venic S"], "retreat", "milan"],
                     [["player-2", "A", "pavia"], "disband", None],
@@ -283,24 +311,28 @@ def test_military_resolution_renders_every_item_in_group_order() -> None:
     rendered = event_lines(TurnReporter.generate(game))
 
     assert rendered == [
-        "**Resultados militares:**",
-        "- Flota de Venice (S) de <@123> terminó como Guarnición en Milan; "
-        "desalojada: no.",
-        "- Ejército de Pavia de <@456> terminó como Ejército sin destino; "
-        "desalojada: sí.",
-        "**Órdenes canceladas:**",
-        "- Ejército de Pavia de <@456>.",
-        "**Convoyes rotos:**",
-        "- Guarnición independiente de Milan.",
-        "**Desalojos:**",
-        "- Flota de Venice (S) de <@456>.",
-        "**Rebeliones:**",
-        "- Rebelión urbana de Venice para <@123>: liberada.",
-        "**Asedios:**",
-        "- Ejército de Pavia de <@456> en Milan: completado.",
-        "**Retiradas:**",
-        "- Flota de Venice (S) de <@123> se retiró a Milan.",
-        "- Ejército de Pavia de <@456> no pudo retirarse y se desbandó.",
+        "### :crossed_swords: **Resultados militares:**",
+        "### :fire: **Rebeliones:**",
+        "> Rebelión urbana de Venice para Milan <@123>: liberada.",
+        "🏰 __**Milan <@123>**__",
+        "> :crossed_swords: **Resultados**",
+        "> Flota de Venice (S) ➔ Guarnición en Milan. Desalojada: no.",
+        "> :broken_chain: **Transportes rotos:**",
+        "> Guarnición de Milan.",
+        "> ### :dash: **Retiradas:**",
+        "> Flota de Venice (S) de Milan <@123> se retiró a Milan.",
+        "🏰 __**Venice <@456>**__",
+        "> :crossed_swords: **Resultados**",
+        "> Ejército de Pavia ➔ Ejército sin destino. Desalojada: sí.",
+        "> :exclamation: **Órdenes canceladas:**",
+        "> Ejército de Pavia.",
+        "> ### :flag_white: **Desalojos:**",
+        "> Flota de Venice (S) de Venice <@456>.",
+        "> ### :shield: **Asedios:**",
+        "> Ejército de Pavia en Milan: completado.",
+        "> ### :dash: **Retiradas:**",
+        "> Ejército de Pavia de Venice <@456> no pudo retirarse y se desbandó.",
+        "### FIN DEL REPORTE MILITAR",
     ]
 
 
@@ -324,17 +356,21 @@ def test_military_resolution_omits_only_empty_groups() -> None:
     rendered = event_lines(TurnReporter.generate(game))
 
     assert rendered == [
-        "**Resultados militares:**",
-        "- Ejército de Milan de <@123> terminó como Ejército en Pavia; desalojada: no.",
-        "**Asedios:**",
-        "- Flota de Venice (S) de <@456> en Milan: iniciado.",
+        "### :crossed_swords: **Resultados militares:**",
+        "🏰 __**Milan <@123>**__",
+        "> :crossed_swords: **Resultados**",
+        "> Ejército de Milan ➔ Ejército en Pavia. Desalojada: no.",
+        "🏰 __**Venice <@456>**__",
+        "> ### :shield: **Asedios:**",
+        "> Flota de Venice (S) en Milan: iniciado.",
+        "### FIN DEL REPORTE MILITAR",
     ]
     assert not {
-        "**Órdenes canceladas:**",
-        "**Convoyes rotos:**",
-        "**Desalojos:**",
-        "**Rebeliones:**",
-        "**Retiradas:**",
+        "> :exclamation: **Órdenes canceladas:**",
+        "> :broken_chain: **Transportes rotos:**",
+        "> ### :flag_white: **Desalojos:**",
+        "### :fire: **Rebeliones:**",
+        "> ### :dash: **Retiradas:**",
     }.intersection(rendered)
 
 

@@ -153,7 +153,6 @@ class RetreatHandler:
         retreats: dict[UnitKey, DislodgementDecision] = {}
 
         # Comenzamos haciendo la lista de localizaciones no válidas para retiradas
-        logger.debug("Dislodgement handler. resolution: %s", resolution)
         invalid_destinations = {
             conflict_location(outcome.final_location, outcome.final_unit_type)
             for outcome in resolution.outcomes

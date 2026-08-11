@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, cast
 
@@ -18,6 +19,7 @@ from machiavelli.game.tables import GameTables
 if TYPE_CHECKING:
     from machiavelli.game.game import Game
 
+logger = logging.getLogger(__name__)
 
 type UnitKeyRecord = tuple[str | None, str, str]
 type OutcomeRecord = tuple[UnitKeyRecord, str, str | None, bool]
@@ -73,9 +75,13 @@ class TurnReporter:
         report = [
             f"## 📜 {TurnReporter._safe(game.name)}, turno {game.turn_number}",
             f"### 🗓️ {previous_season} de {year}",
-            "> ⚠️ **EVENTOS DEL TURNO ANTERIOR**",
+            "⚠️ **EVENTOS DEL TURNO ANTERIOR**",
         ]
+        if game.turn_number > 1 and ((game.turn_number - 2) % 4) > 0:
+            report.append("### 💰 **Gastos**")
+
         for event in game.turn_events:
+            logger.debug("Events %s", game.turn_events)
             report.extend(TurnReporter._render_event(game, event))
         report.append("## 🗺️ REPORTE DE SITUACIÓN")
 
@@ -114,6 +120,7 @@ class TurnReporter:
                 scenario = TurnReporter._safe(cast(str, data["scenario"]))
                 return [f"Se inició la partida con el escenario {scenario}."]
             case EventType.START_GAME_POWER_ASSIGNED:
+                logger.debug("data is %s", data)
                 discord_id = cast(int | None, data["discord_id"])
                 player = (
                     f"<@{discord_id}>"
@@ -121,6 +128,11 @@ class TurnReporter:
                     else TurnReporter._player(game, cast(str, data["player_id"]))
                 )
                 power = TurnReporter._power(game, cast(str, data["power_id"]))
+                logger.debug(
+                    "Se devolverá %s - %s",
+                    player,
+                    f"{player} recibió la potencia {power}.",
+                )
                 return [f"{player} recibió la potencia {power}."]
             case EventType.START_SEASON:
                 season = _SEASONS[cast(int, data["season"])]
@@ -227,7 +239,7 @@ class TurnReporter:
             power_name = GameTables.powers.get(player.power or "", player.power)
             if value in {player.player_id, player.power, power_name}:
                 if player.discord_id is not None:
-                    return f"<@{player.discord_id}>"
+                    return " ".join((power_name, f"<@{player.discord_id}>"))
                 if player.power is not None:
                     return TurnReporter._power(game, player.power)
                 return TurnReporter._safe(player.player_id)
@@ -344,7 +356,7 @@ class TurnReporter:
             else TurnReporter._safe(cast(str, raw_amount))
         )
         amount = f" por {rendered_amount} ducados" if include_amount else ""
-        return f"{player} {action} {expense}{target}{amount}."
+        return f"> {player} {action} {expense}{target}{amount}."
 
     @staticmethod
     def _income_line(game: Game, data: Mapping[str, FrozenJSONValue]) -> str:
@@ -404,7 +416,7 @@ class TurnReporter:
             game, cast(tuple[str, ...], data["provinces"])
         )
         action = "obtuvo el control de" if gained else "perdió el control de"
-        return f"{player} {action} {provinces}."
+        return f"> {player} {action} {provinces}."
 
     @staticmethod
     def _home_country_line(
@@ -416,7 +428,7 @@ class TurnReporter:
         player = TurnReporter._player(game, cast(str, data["player"]))
         home_country = TurnReporter._power(game, cast(str, data["home_country"]))
         action = "obtuvo" if gained else "perdió"
-        return f"{player} {action} el país natal {home_country}."
+        return f"> {player} {action} el país natal {home_country}."
 
     @staticmethod
     def _render_orders_summary(
@@ -424,20 +436,35 @@ class TurnReporter:
     ) -> list[str]:
         orders = cast(tuple[MilitaryOrderRecord, ...], data["orders"])
         invalid_orders = cast(tuple[InvalidOrderRecord, ...], data["invalid_orders"])
+        logger.debug(data)
         if not any((orders, invalid_orders)):
             return "Sin órdenes militares."
+
         lines: list[str] = []
-        if orders:
-            lines.append("**Órdenes recibidas:**")
-            lines.extend(
-                TurnReporter._military_order_line(game, order) for order in orders
-            )
-        if invalid_orders:
-            lines.append("**Órdenes no válidas:**")
-            lines.extend(
-                TurnReporter._invalid_order_line(game, invalid_order)
+        lines.append("### :scroll: **Órdenes recibidas:**")
+
+        for player in game.players:
+            player_orders = [
+                order for order in orders if order[0][0] == player.player_id
+            ]
+            player_invalid_orders = [
+                invalid_order
                 for invalid_order in invalid_orders
-            )
+                if invalid_order[0][0] == player.player_id
+            ]
+            if player_orders or player_invalid_orders:
+                player_txt = TurnReporter._player(game, player.player_id)
+                lines.append(f"🏰 __**{player_txt}**__")
+                if player_orders:
+                    lines.extend(
+                        TurnReporter._military_order_line(game, order)
+                        for order in player_orders
+                    )
+                if invalid_orders:
+                    lines.extend(
+                        TurnReporter._invalid_order_line(game, invalid_order)
+                        for invalid_order in player_invalid_orders
+                    )
         return lines
 
     @staticmethod
@@ -466,57 +493,102 @@ class TurnReporter:
             return ["Sin cambios militares."]
 
         lines: list[str] = []
-        if outcomes:
-            lines.append("**Resultados militares:**")
-            lines.extend(
-                TurnReporter._military_outcome_line(game, outcome)
-                for outcome in outcomes
-            )
-        if cancelled:
-            lines.append("**Órdenes canceladas:**")
-            lines.extend(
-                f"- {TurnReporter._military_unit(game, unit)}." for unit in cancelled
-            )
-        if broken_convoys:
-            lines.append("**Convoyes rotos:**")
-            lines.extend(
-                f"- {TurnReporter._military_unit(game, unit)}."
-                for unit in broken_convoys
-            )
-        if dislodgements:
-            lines.append("**Desalojos:**")
-            lines.extend(
-                f"- {TurnReporter._military_unit(game, unit)}."
-                for unit in dislodgements
-            )
+
+        lines.append("### :crossed_swords: **Resultados militares:**")
+
         if rebellions:
-            lines.append("**Rebeliones:**")
+            lines.append("### :fire: **Rebeliones:**")
             lines.extend(
                 TurnReporter._military_rebellion_line(game, rebellion)
                 for rebellion in rebellions
             )
-        if sieges:
-            lines.append("**Asedios:**")
-            lines.extend(
-                TurnReporter._military_siege_line(game, siege) for siege in sieges
-            )
-        if decisions:
-            lines.append("**Retiradas:**")
-            lines.extend(
-                TurnReporter._military_dislodgement_line(game, decision)
-                for decision in decisions
-            )
+
+        for player in game.players:
+            player_outcomes = [
+                outcome for outcome in outcomes if outcome[0][0] == player.player_id
+            ]
+            player_cancelled = [c for c in cancelled if c[0] == player.player_id]
+            player_broken_convoys = [
+                convoy for convoy in broken_convoys if convoy[0] == player.player_id
+            ]
+            player_dislodgements = [
+                dislodgement
+                for dislodgement in dislodgements
+                if dislodgement[0] == player.player_id
+            ]
+            player_sieges = [
+                siege for siege in sieges if siege[0][0] == player.player_id
+            ]
+            player_decisions = [
+                decision for decision in decisions if decision[0][0] == player.player_id
+            ]
+            if not any(
+                (
+                    player_outcomes,
+                    player_cancelled,
+                    player_broken_convoys,
+                    player_dislodgements,
+                    player_sieges,
+                    player_decisions,
+                )
+            ):
+                continue
+
+            player_txt = TurnReporter._player(game, player.player_id)
+            lines.append(f"🏰 __**{player_txt}**__")
+            if player_outcomes:
+                lines.append("> :crossed_swords: **Resultados**")
+                lines.extend(
+                    TurnReporter._military_outcome_line(game, outcome)
+                    for outcome in player_outcomes
+                )
+            if player_cancelled:
+                lines.append("> :exclamation: **Órdenes canceladas:**")
+                lines.extend(
+                    f"> {TurnReporter._military_unit(game, unit, False)}."
+                    for unit in player_cancelled
+                )
+            if player_broken_convoys:
+                lines.append("> :broken_chain: **Transportes rotos:**")
+                lines.extend(
+                    f"> {TurnReporter._military_unit(game, unit, False)}."
+                    for unit in player_broken_convoys
+                )
+            if player_dislodgements:
+                lines.append("> ### :flag_white: **Desalojos:**")
+                lines.extend(
+                    f"> {TurnReporter._military_unit(game, unit)}."
+                    for unit in player_dislodgements
+                )
+            if player_sieges:
+                lines.append("> ### :shield: **Asedios:**")
+                lines.extend(
+                    TurnReporter._military_siege_line(game, siege)
+                    for siege in player_sieges
+                )
+            if player_decisions:
+                lines.append("> ### :dash: **Retiradas:**")
+                lines.extend(
+                    TurnReporter._military_dislodgement_line(game, decision)
+                    for decision in player_decisions
+                )
+
+        lines.append("### FIN DEL REPORTE MILITAR")
+
         return lines
 
     @staticmethod
-    def _military_unit(game: Game, unit: UnitKeyRecord) -> str:
+    def _military_unit(game: Game, unit: UnitKeyRecord, show_owner: bool = True) -> str:
         owner, unit_type, origin = unit
         actor = GameTables.actors[unit_type]
         location = TurnReporter._location(game, origin)
         if owner is None:
             return f"{actor} independiente de {location}"
         player = TurnReporter._player(game, owner)
-        return f"{actor} de {location} de {player}"
+        if show_owner:
+            return f"{actor} de {location} de {player}"
+        else:
+            return f"{actor} de {location}"
 
     @staticmethod
     def _military_order_line(game: Game, order: MilitaryOrderRecord) -> str:
@@ -529,7 +601,7 @@ class TurnReporter:
             supported_faction,
             is_convoy,
         ) = order
-        unit_text = TurnReporter._military_unit(game, unit)
+        unit_text = TurnReporter._military_unit(game, unit, False)
         order_type_texts = {
             "A": "avanzar",
             "B": "asediar",
@@ -562,7 +634,9 @@ class TurnReporter:
             supported_faction_text = None
 
         if transported_unit:
-            transported_unit_text = TurnReporter._military_unit(game, transported_unit)
+            transported_unit_text = TurnReporter._military_unit(
+                game, transported_unit, False
+            )
         else:
             transported_unit_text = None
 
@@ -596,18 +670,18 @@ class TurnReporter:
             order_description = f"{order_type_text} a {target_unit_txt}"
 
         if unit_text and order_description:
-            return f"- {unit_text} {order_description}"
+            return f"> {unit_text} {order_description}"
 
     @staticmethod
     def _invalid_order_line(game, invalid_order: InvalidOrderRecord) -> str:
         unit, reason = invalid_order
         unit_txt = TurnReporter._military_unit(game, unit)
-        return f"- {unit_txt}, {reason}"
+        return f"> :exclamation: {unit_txt}, {reason}"
 
     @staticmethod
     def _military_outcome_line(game: Game, outcome: OutcomeRecord) -> str:
         unit, final_type, final_location, dislodged = outcome
-        original = TurnReporter._military_unit(game, unit)
+        original = TurnReporter._military_unit(game, unit, False)
         final_actor = GameTables.actors[final_type]
         destination = (
             f"en {TurnReporter._location(game, final_location)}"
@@ -616,8 +690,7 @@ class TurnReporter:
         )
         dislodged_text = "sí" if dislodged else "no"
         return (
-            f"- {original} terminó como {final_actor} {destination}; "
-            f"desalojada: {dislodged_text}."
+            f"> {original} ➔ {final_actor} {destination}. Desalojada: {dislodged_text}."
         )
 
     @staticmethod
@@ -628,11 +701,11 @@ class TurnReporter:
             TurnReporter._location(game, destination) if destination else None
         )
         if result_type == "retreat":
-            return f"- {original} se retiró a {final_destination}."
+            return f"> {original} se retiró a {final_destination}."
         elif result_type == "garrison":
-            return f"- {original} se refugió en la fortaleza de {final_destination}."
+            return f"> {original} se refugió en la fortaleza de {final_destination}."
         else:  # disbanded
-            return f"- {original} no pudo retirarse y se desbandó."
+            return f"> {original} no pudo retirarse y se desbandó."
 
     @staticmethod
     def _military_rebellion_line(game: Game, rebellion: RebellionRecord) -> str:
@@ -641,19 +714,19 @@ class TurnReporter:
         kind_name = _REBELLION_KINDS[kind]
         province = TurnReporter._location(game, province_id)
         state_name = {"subdued": "sometida", "liberated": "liberada"}[state]
-        return f"- Rebelión {kind_name} de {province} para {player}: {state_name}."
+        return f"> Rebelión {kind_name} de {province} para {player}: {state_name}."
 
     @staticmethod
     def _military_siege_line(game: Game, siege: SiegeRecord) -> str:
         unit, province_id, state = siege
-        rendered_unit = TurnReporter._military_unit(game, unit)
+        rendered_unit = TurnReporter._military_unit(game, unit, False)
         province = TurnReporter._location(game, province_id)
         state_name = {
             "started": "iniciado",
             "completed": "completado",
             "lifted": "levantado",
         }[state]
-        return f"- {rendered_unit} en {province}: {state_name}."
+        return f"> {rendered_unit} en {province}: {state_name}."
 
 
 __all__ = ["TurnReporter"]

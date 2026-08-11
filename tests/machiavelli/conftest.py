@@ -13,7 +13,7 @@ def valid_event_payloads() -> Mapping[EventType, dict[str, JSONValue]]:
     """Devuelve exactamente un `payload` válido para cada tipo de evento público de
     turno.
     """
-    unit = ["Milan", "A", "mil"]
+    unit = ["player-1", "A", "mil"]
     return {
         EventType.START_GAME: {"scenario": "basic"},
         EventType.START_GAME_POWER_ASSIGNED: {
