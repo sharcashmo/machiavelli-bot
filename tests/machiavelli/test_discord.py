@@ -22,7 +22,6 @@ from machiavelli.discord import (
     _create_game_record,
     _exchange_resources_record,
     _execute_game_turn,
-    _get_player_commands,
     _get_status_report,
     _get_trade_assassin_targets,
     _get_trade_counterparties,
@@ -171,13 +170,14 @@ class TestServiceWorkers(unittest.TestCase):
                 db_path,
                 8080,
                 4242,
-                "Florencia",
+                "P1",
             )
 
             with game_service_session(db_path) as service:
                 game = service.get_game(8080)
                 game.turn_number = 2
                 game.players[0].armies = ["milan"]
+                game.players[0].power = "L"
                 service.repo.save(game)
 
             report = _submit_command_record(
@@ -188,19 +188,15 @@ class TestServiceWorkers(unittest.TestCase):
                 "H",
                 None,
             )
-            player_id, commands = _get_player_commands(db_path, 8080, 4242)
-            status = _get_status_report(db_path, 8080)
+            status = _get_status_report(db_path, 8080, 4242)
 
             self.assertEqual(game_name, "Adapter")
             self.assertGreater(database_id, 0)
             self.assertEqual(scenario_game_name, "Adapter")
             self.assertIn("balance of power", scenario_name.casefold())
             self.assertEqual(persisted_name, "Adapter")
-            self.assertEqual(players, [("Florencia", 4242)])
+            self.assertEqual(players, [("P1", 4242)])
             self.assertTrue(report[0].startswith("Orden `"))
-            self.assertEqual(player_id, "Florencia")
-            self.assertEqual(len(commands), 1)
-            self.assertIn("Mantener", commands[0])
             self.assertTrue(any("Adapter" in line for line in status))
 
 
@@ -347,6 +343,7 @@ class TestReports(unittest.IsolatedAsyncioTestCase):
             _get_status_report,
             game_group.db_path,
             interaction.channel_id,
+            interaction.user.id,
         )
         interaction.followup.send.assert_awaited_once_with(
             "status one\nstatus two",

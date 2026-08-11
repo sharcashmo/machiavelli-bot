@@ -174,8 +174,7 @@ def _update_deadlines_record(
     weekly_deadline: str | None,
     next_deadline: str | None,
 ) -> str:
-    """Guarda las cadenas de fechas límite validadas a través de la capa del servicio.
-    """
+    """Guarda las cadenas de fechas límite validadas."""
     with game_service_session(db_path) as service:
         return service.update_deadlines(
             channel_id,
@@ -184,29 +183,20 @@ def _update_deadlines_record(
         )
 
 
-def _get_status_report(db_path: str, channel_id: int) -> tuple[str, ...]:
+def _get_status_report(
+    db_path: str,
+    channel_id: int,
+    discord_id: int,
+) -> tuple[str, ...]:
     """Carga el informe público de estado a través de la capa del servicio."""
     with game_service_session(db_path) as service:
-        return tuple(service.get_status_report(channel_id))
+        return tuple(service.get_status_report(channel_id, discord_id))
 
 
 def _get_turn_report(db_path: str, channel_id: int) -> tuple[str, ...]:
     """Carga el informe del último turno a través de la capa del servicio."""
     with game_service_session(db_path) as service:
         return tuple(service.get_turn_report(channel_id))
-
-
-def _get_player_commands(
-    db_path: str,
-    channel_id: int,
-    discord_id: int,
-) -> tuple[str, tuple[str, ...]]:
-    """Carga las cadenas de comandos actuales de un jugador a través de la capa del
-    servicio.
-    """
-    with game_service_session(db_path) as service:
-        player_id, commands = service.get_player_commands(channel_id, discord_id)
-        return player_id, tuple(commands)
 
 
 def _get_available_actors(
@@ -823,34 +813,6 @@ async def run_game(interaction: discord.Interaction):
 
 
 @game_group.command(
-    name="game_status",
-    description="Muestra el estado actual de la partida en este canal",
-)
-async def game_status(interaction: discord.Interaction):
-    # La lectura y preparación del estado puede tardar.
-    await interaction.response.defer(ephemeral=True)
-
-    try:
-        report = await asyncio.to_thread(
-            _get_status_report,
-            game_group.db_path,
-            _require_channel_id(interaction),
-        )
-        messages = _chunk_lines(report) or ["No hay datos de estado disponibles."]
-        for message in messages:
-            await interaction.followup.send(message, ephemeral=True)
-    except GameNotFoundException:
-        await interaction.followup.send(
-            "**Error:** No hay ninguna partida activa en este canal.\n"
-            "Crea una primero usando `/shar create`."
-        )
-    except Exception as error:
-        await interaction.followup.send(
-            f"**Error inesperado:** `{type(error).__name__}: {error}`"
-        )
-
-
-@game_group.command(
     name="game_report", description="Muestra el informe del último turno jugado"
 )
 async def game_report(interaction: discord.Interaction):
@@ -886,48 +848,28 @@ async def game_report(interaction: discord.Interaction):
         )
 
 
-@game_group.command(
-    name="cmdlist", description="Muestra la lista de tus órdenes registradas"
-)
-async def cmdlist(interaction: discord.Interaction):
+@game_group.command(name="game_status", description="Muestra el estado de la partida")
+async def game_status(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
 
     try:
-        player_id, commands = await asyncio.to_thread(
-            _get_player_commands,
+        report = await asyncio.to_thread(
+            _get_status_report,
             game_group.db_path,
             _require_channel_id(interaction),
             interaction.user.id,
         )
-        if not commands:
-            await interaction.followup.send(
-                f"**No hay comandos para {player_id}:**",
-                ephemeral=True,
-            )
-            return
-        lines = "\n".join(
-            f"**{index}.** `{command}`"
-            for index, command in enumerate(commands, start=1)
-        )
-        await interaction.followup.send(
-            f"**Comandos actuales para {player_id}:**\n{lines}",
-            ephemeral=True,
-        )
+        messages = _chunk_lines(report) or ["No hay datos de estado disponibles."]
+        for message in messages:
+            await interaction.followup.send(message, ephemeral=True)
     except GameNotFoundException:
         await interaction.followup.send(
-            "**Error:** No hay ninguna partida activa en este canal.",
-            ephemeral=True,
-        )
-    except PlayerNotFoundException:
-        await interaction.followup.send(
-            "**Error:** No estás inscrito en la partida de este canal.",
-            ephemeral=True,
+            "**Error:** No hay ninguna partida activa en este canal.\n"
+            "Crea una primero usando `/shar create`."
         )
     except Exception as error:
-        error_message = format_error_with_location(error)
         await interaction.followup.send(
-            f"**Error inesperado:** `{error_message}`",
-            ephemeral=True,
+            f"**Error inesperado:** `{type(error).__name__}: {error}`"
         )
 
 
@@ -1238,8 +1180,7 @@ async def trade_exchange_give_value_autocomplete(
 async def trade_exchange_receive_value_autocomplete(
     interaction: discord.Interaction, current: str
 ) -> list[app_commands.Choice[str]]:
-    """Sugiere la cancelación del intercambio y los objetivos de asesinato solicitados.
-    """
+    """Sugiere la cancelación del intercambio y los objetivos de asesinato."""
     return await _trade_exchange_value_autocomplete(
         interaction, current, "receive_type"
     )

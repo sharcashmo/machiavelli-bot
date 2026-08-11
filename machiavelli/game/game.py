@@ -22,6 +22,7 @@ from .exceptions import (
 from .map import Map
 from .player import Player
 from .scenario import Scenario
+from .tables import GameTables
 from .trading import ExchangeProposal
 
 
@@ -197,7 +198,7 @@ class Game:
             report.append("### __**Estado:** Por comenzar.__")
             if self.players:
                 players = ", ".join(
-                    f"<@{player.discord_id}> ({safe_text(player.player_id)})"
+                    f"{safe_text(player.player_id)} (<@{player.discord_id}>)"
                     for player in self.players
                 )
                 if self.scenario:
@@ -220,11 +221,12 @@ class Game:
                 "Otoño",
             )[(self.turn_number - 1) % 4]
             report.append(f"### __**Estado:** {season} de {year}__")
-            report.append("**Han enviado sus órdenes:**")
+            report.append("### :crossed_swords: **Han enviado sus órdenes:**")
             ordered_players = [player for player in self.players if player.commands]
             if ordered_players:
                 report.extend(
-                    f"- <@{player.discord_id}> ({safe_text(player.player_id)})"
+                    f"- {safe_text(GameTables.powers[player.power])} "
+                    f"(<@{player.discord_id}>)"
                     for player in ordered_players
                 )
             else:

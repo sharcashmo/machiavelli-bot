@@ -195,27 +195,27 @@ class GameService:
         self.repo.save(game)
         return game.name
 
-    def get_status_report(self, channel_id: int) -> list[str]:
+    def get_status_report(
+        self,
+        channel_id: int,
+        discord_id: int,
+    ) -> list[str]:
         """Devuelve el informe público de estado de la partida sin exponer la
         persistencia.
         """
-        return self.get_game(channel_id).report_status()
+        game = self.get_game(channel_id)
+        player = self.resolve_player(game, discord_id)
+        lines = self.get_game(channel_id).report_status()
+        lines.append(
+            f"### :scroll: **Comandos actuales para "
+            f"{GameTables.powers[player.power]}:**"
+        )
+        lines.extend([f"- {command}" for command in player.commands])
+        return lines
 
     def get_turn_report(self, channel_id: int) -> list[str]:
         """Devuelve el informe persistido del último turno."""
         return TurnReporter.generate(self.get_game(channel_id))
-
-    def get_player_commands(
-        self,
-        channel_id: int,
-        discord_id: int,
-    ) -> tuple[str, list[str]]:
-        """Devuelve el identificador de un jugador y sus comandos actuales como cadenas
-        para mostrar.
-        """
-        game = self.get_game(channel_id)
-        player = self.resolve_player(game, discord_id)
-        return player.player_id, [str(command) for command in player.commands]
 
     def run_turn(self, channel_id: int) -> list[str]:
         """Ejecuta un turno y después guarda atómicamente el agregado resultante."""

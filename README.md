@@ -80,14 +80,6 @@ sus órdenes hasta ese momento.
 
 Muestra el último informe de la partida.
 
-#### `/mach cmdlist`
-
-> Versión 0.2.0
-
-*deprecado (v0.7.0)* Su contenido se traslada a `/mach game_status`.
-
-Muestra las órdenes enviadas hasta el momento por el jugador.
-
 #### `/mach cmd`
 
 > Versión 0.2.0
@@ -112,6 +104,12 @@ jugadores tienen que realizarlo.
 > Versión 0.7.0
 
 Da recursos (ducados o fichas de asesinato) a otro jugador.
+
+### `/mach retreats`
+
+> Versión 0.7.0
+
+Da a una unidad sus provincias prioritarias de retirada.
 
 ### `/shar` (administrador)
 
@@ -169,13 +167,14 @@ Se prevén las siguientes versiones
 
 ### Versión 0.7.0
 
-- [ ] Mejora del reporte.
-  - [ ] Incluye las órdenes de los jugadores en el reporte.
-  - [ ] Mejora la representación de los eventos.
-  - [ ] Mejora general del formato del reporte.
+- [X] Mejora del reporte.
+  - [X] Incluye las órdenes de los jugadores en el reporte.
+  - [X] Mejora la representación de los eventos.
+  - [X] Mejora general del formato del reporte.
 - [X] Nuevos comandos `/exchange` y `/give` para intercambiar o dar recursos a otro jugador.
 - [ ] Incorpora los resultados de `/mach cmdlist` en `/mach game_status`.
 - [X] Mejora el filtrado de comandos en `/mach cmd` en el caso de unidades en asedio.
+- [ ] Nuevo comando `/mach retreats`.
 
 ### Desarrollos futuros
 
@@ -233,4 +232,5 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
   para separar el reporte de la lógica del juego; el módulo de discord se ha simplificado y apartado de allí la lógica
   del juego y de la base de datos; se ha mejorado la gestión de eventos y la generación de reportes, etc.
 - Versión 0.7.0: nuevos comandos `/mach exchange` y `/mach give`. `/mach game_status` ahora incluye el listado de
-  órdenes enviadas por lo que `/mach cmdlist` queda *deprecada*.
+  órdenes enviadas por lo que `/mach cmdlist` queda eliminada. Presentación del reporte de turno ordenada y mejorada.
+  Nuevo comando `/mach retreats`.
