@@ -128,8 +128,8 @@ class DisastersManager:
         if event_type not in (EventType.FAMINE_SPAWN, EventType.PLAGUE_SPAWN):
             return []
 
-        severity_roll = self.rng.randint(1, 6)
-        severity = GameTables.disasters[severity_roll - 1]
+        severity_roll = self.rng.randint(0, 5)
+        severity = GameTables.disasters[severity_roll]
         provinces_table = (
             GameTables.famine
             if event_type == EventType.FAMINE_SPAWN

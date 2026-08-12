@@ -73,7 +73,7 @@ class TurnReporter:
         year = scenario.year + (game.turn_number - 1) // 4
         previous_season = _SEASONS[(game.turn_number - 2) % 4]
         report = [
-            f"## 📜 {TurnReporter._safe(game.name)}, turno {game.turn_number}",
+            f"## 📜 {TurnReporter._safe(game.name)}, turno {game.turn_number - 1}",
             f"### 🗓️ {previous_season} de {year}",
             "⚠️ **EVENTOS DEL TURNO ANTERIOR**",
         ]
@@ -141,10 +141,8 @@ class TurnReporter:
                 provinces = TurnReporter._locations(
                     game, cast(tuple[str, ...], data["provinces"])
                 )
-                return [
-                    f"El hambre apareció tras una tirada de "
-                    f"{cast(int, data['severity_roll'])} en {provinces}."
-                ]
+                severity = GameTables.disasters[cast(int, data["severity_roll"])][1]
+                return [f"### 🌾 Hambre: {severity}.", f"> Apareció en {provinces}."]
             case EventType.FAMINE_RELIEF:
                 player = TurnReporter._player(game, cast(str, data["player"]))
                 province = TurnReporter._location(game, cast(str, data["province"]))
@@ -194,7 +192,7 @@ class TurnReporter:
             case EventType.BRIBE_EXECUTED:
                 return [TurnReporter._expense_line(game, data, "ejecutó")]
             case EventType.INCOME_COLLECTED:
-                return [TurnReporter._income_line(game, data)]
+                return TurnReporter._income_line(game, data)
             case EventType.MAINTENANCE_ORDER_RESOLVED:
                 return [TurnReporter._maintenance_order_line(game, data)]
             case EventType.MAINTENANCE_SUMMARY:
@@ -359,7 +357,7 @@ class TurnReporter:
         return f"> {player} {action} {expense}{target}{amount}."
 
     @staticmethod
-    def _income_line(game: Game, data: Mapping[str, FrozenJSONValue]) -> str:
+    def _income_line(game: Game, data: Mapping[str, FrozenJSONValue]) -> list[str]:
         player = TurnReporter._player(game, cast(str, data["player"]))
         provinces = TurnReporter._locations(
             game, cast(tuple[str, ...], data["provinces"])
@@ -371,24 +369,23 @@ class TurnReporter:
         variable = TurnReporter._join(
             [TurnReporter._variable_income(game, item) for item in variable_values]
         )
-        return (
-            f"{player} recaudó {cast(int, data['total_income'])} ducados: "
-            f"provincias {provinces} ({cast(int, data['province_income'])}), "
-            f"ciudades {cities} ({cast(int, data['city_income'])}) e ingresos "
-            f"variables {variable}."
-        )
+        amount = sum(var["amount"] for var in variable_values)
+        return [
+            f"💰 __**{player}**__",
+            f"> **Provincias ({cast(int, data['province_income'])}):** {provinces}",
+            f"> **Ciudades ({cast(int, data['city_income'])}):** {cities}",
+            f"> **Variable ({amount}):** {variable}",
+            f"> **Total:** {cast(int, data['total_income'])} ducados",
+        ]
 
     @staticmethod
     def _variable_income(game: Game, data: Mapping[str, FrozenJSONValue]) -> str:
         source = cast(str, data["source"])
         if data["source_type"] == "home_country":
-            source_name = TurnReporter._power(game, source)
+            source_name, source_type = TurnReporter._power(game, source), "país"
         else:
-            source_name = TurnReporter._location(game, source)
-        return (
-            f"{source_name}: tirada {cast(int, data['roll'])}, "
-            f"{cast(int, data['amount'])} ducados"
-        )
+            source_name, source_type = TurnReporter._location(game, source), "provincia"
+        return f"{source_name} ({source_type}), {cast(int, data['amount'])} ducados"
 
     @staticmethod
     def _maintenance_order_line(game: Game, data: Mapping[str, FrozenJSONValue]) -> str:
