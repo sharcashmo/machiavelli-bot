@@ -677,7 +677,7 @@ class TurnReporter:
 
     @staticmethod
     def _military_outcome_line(game: Game, outcome: OutcomeRecord) -> str:
-        unit, final_type, final_location, dislodged = outcome
+        unit, final_type, final_location, dislodged, attack_origin = outcome
         original = TurnReporter._military_unit(game, unit, False)
         final_actor = GameTables.actors[final_type]
         destination = (
@@ -685,7 +685,14 @@ class TurnReporter:
             if final_location is not None
             else "sin destino"
         )
-        dislodged_text = "sí" if dislodged else "no"
+        attack_origin_text = (
+            f"desde {TurnReporter._location(game, attack_origin)}"
+            if attack_origin
+            else None
+        )
+        dislodged_text = (
+            attack_origin_text if attack_origin_text else "sí" if dislodged else "no"
+        )
         return (
             f"> {original} ➔ {final_actor} {destination}. Desalojada: {dislodged_text}."
         )

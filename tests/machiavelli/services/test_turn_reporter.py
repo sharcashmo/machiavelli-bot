@@ -70,7 +70,7 @@ def test_report_preserves_general_order_event_order_and_repetitions() -> None:
     rendered = event_lines(report)
 
     assert report[:3] == [
-        "## 📜 Partida de prueba, turno 2",
+        "## 📜 Partida de prueba, turno 1",
         "### 🗓️ Primavera (mantenimiento) de 1454",
         "⚠️ **EVENTOS DEL TURNO ANTERIOR**",
     ]
@@ -292,8 +292,8 @@ def test_military_resolution_renders_every_item_in_group_order() -> None:
             EventType.MILITARY_RESOLUTION,
             {
                 "outcomes": [
-                    [["player-1", "F", "venic S"], "G", "milan", False],
-                    [["player-2", "A", "pavia"], "A", None, True],
+                    [["player-1", "F", "venic S"], "G", "milan", False, None],
+                    [["player-2", "A", "pavia"], "A", None, True, "milan"],
                 ],
                 "cancelled_orders": [["player-2", "A", "pavia"]],
                 "broken_convoys": [["player-1", "G", "milan"]],
@@ -323,7 +323,7 @@ def test_military_resolution_renders_every_item_in_group_order() -> None:
         "> Flota de Venice (S) de Milan <@123> se retiró a Milan.",
         "🏰 __**Venice <@456>**__",
         "> :crossed_swords: **Resultados**",
-        "> Ejército de Pavia ➔ Ejército sin destino. Desalojada: sí.",
+        "> Ejército de Pavia ➔ Ejército sin destino. Desalojada: desde Milan.",
         "> :exclamation: **Órdenes canceladas:**",
         "> Ejército de Pavia.",
         "> ### :flag_white: **Desalojos:**",
@@ -342,7 +342,7 @@ def test_military_resolution_omits_only_empty_groups() -> None:
         TurnEvent(
             EventType.MILITARY_RESOLUTION,
             {
-                "outcomes": [[["player-1", "A", "milan"], "A", "pavia", False]],
+                "outcomes": [[["player-1", "A", "milan"], "A", "pavia", False, None]],
                 "cancelled_orders": [],
                 "broken_convoys": [],
                 "dislodgements": [],

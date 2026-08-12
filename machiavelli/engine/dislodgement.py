@@ -46,6 +46,10 @@ class RetreatHandler:
         """Devuelve la retirada preferida por la unidad."""
         unit: UnitKey = outcome.unit
 
+        if outcome.attack_origin:
+            my_invalid_destinations = set(invalid_destinations)
+            my_invalid_destinations.add(outcome.attack_origin)
+
         logger.debug(
             "Preferred retreat. Step: %s- Outcome: %s. Invalid destionations: %s",
             retreat_step,
@@ -64,7 +68,7 @@ class RetreatHandler:
             temptative_destination = conflict_location(unit.origin, "G")
             if (
                 # No hay una guarnición en nuestra provincia
-                temptative_destination not in invalid_destinations
+                temptative_destination not in my_invalid_destinations
                 and
                 # Tiene una ciudad fortificada o un fuerte
                 (
@@ -97,7 +101,7 @@ class RetreatHandler:
             adjacent_locations: list[str] = [
                 location
                 for location in adjacent_locations
-                if location not in invalid_destinations
+                if location not in my_invalid_destinations
             ]
 
             if adjacent_locations:

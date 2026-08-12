@@ -51,6 +51,14 @@ class MilitaryOrder:
 
 
 @dataclass(frozen=True, slots=True)
+class DislodgementRecord:
+    """Relaciona un desalojo con la procedencia inmediata del ataque."""
+
+    unit: UnitKey
+    attack_origin: str | None
+
+
+@dataclass(frozen=True, slots=True)
 class ResolutionState:
     """Agrupa un paso inmutable de la adjudicación militar."""
 
@@ -63,6 +71,7 @@ class ResolutionState:
     cancelled_by_self_conflict: frozenset[UnitKey]
     effective_positions: tuple[tuple[UnitKey, str | None], ...]
     resolved_conflicts: frozenset[str]
+    dislodgements: tuple[DislodgementRecord, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,6 +93,7 @@ class UnitOutcome:
     final_unit_type: str
     final_location: str | None
     dislodged: bool
+    attack_origin: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -857,6 +867,7 @@ class MilitaryResolver:
         cancelled = set(state.cancelled_orders)
         cancelled_self = set(state.cancelled_by_self_conflict)
         dislodged = set(state.dislodged_units)
+        dislodgements = {record.unit: record for record in state.dislodgements}
         successful_moves = set(state.successful_moves)
         successful_conversions = set(state.successful_conversions)
         factions = {unit.player_id for unit in units}
@@ -879,11 +890,13 @@ class MilitaryResolver:
                     )
                     if conflict_location(unit.origin, unit.unit_type) == winner_target:
                         dislodged.add(unit)
+                        self._record_dislodgement(dislodgements, unit, winner)
                         cancelled.add(unit)
                     else:
                         cancelled.add(unit)
                 else:
                     dislodged.add(unit)
+                    self._record_dislodgement(dislodgements, unit, winner)
                     cancelled.add(unit)
         next_state = ResolutionState(
             state.active_supports - frozenset(dislodged),
@@ -902,6 +915,7 @@ class MilitaryResolver:
                 )
             ),
             state.resolved_conflicts | frozenset(locations),
+            tuple(dislodgements[key] for key in sorted(dislodgements, key=_key_sort)),
         )
         return (
             next_state,
@@ -922,6 +936,25 @@ class MilitaryResolver:
                 unit.origin, order.target_location or unit.unit_type
             )
         return conflict_location(unit.origin, unit.unit_type)
+
+    def _record_dislodgement(
+        self,
+        dislodgements: dict[UnitKey, DislodgementRecord],
+        unit: UnitKey,
+        winner: UnitKey,
+    ) -> None:
+        """Registra una única procedencia para cada unidad desalojada."""
+        if unit in dislodgements:
+            raise MilitaryResolutionError("Unidad desalojada más de una vez")
+        order = self.orders_by_unit[winner]
+        attack_origin = (
+            order.path[-2]
+            if order.order_type == "A" and order.is_convoy
+            else winner.origin
+            if order.order_type == "A"
+            else None
+        )
+        dislodgements[unit] = DislodgementRecord(unit, attack_origin)
 
     def _support_strength_for(
         self,
@@ -944,168 +977,6 @@ class MilitaryResolver:
             and support.target_location in locations
             and support.supported_faction == faction
         )
-
-    def _resolve_round(
-        self, state: ResolutionState
-    ) -> tuple[ResolutionState, frozenset[str]]:
-        """Evalúa en bloque el tablero completo desde un estado inmutable."""
-        active_supports = set(state.active_supports)
-        cancelled = set(state.cancelled_orders)
-        dislodged = set(state.dislodged_units)
-        cancelled_self = set(state.cancelled_by_self_conflict)
-        available_convoys = {
-            key
-            for key, order in self.orders_by_unit.items()
-            if order.is_convoy
-            and key not in cancelled
-            and key not in dislodged
-            and all(transporter not in dislodged for transporter in order.transporters)
-        }
-        # Un convoy deja de existir como movimiento si cae cualquiera de sus flotas.
-        broken = {
-            key
-            for key, order in self.orders_by_unit.items()
-            if order.is_convoy and key not in available_convoys
-        }
-        cancelled.update(broken)
-        self._broken_convoys.update(broken)
-
-        # Los apoyos se cortan antes de calcular fuerzas, salvo si el ataque
-        # parte del mismo objetivo al que prestan apoyo.
-        attackers = self._active_attackers(cancelled, dislodged, available_convoys)
-        for supporter in tuple(active_supports):
-            order = self.orders_by_unit[supporter]
-            if supporter in dislodged or any(
-                target == supporter.origin and origin != order.target_location
-                for origin, target in attackers
-            ):
-                active_supports.discard(supporter)
-                cancelled.add(supporter)
-
-        conflicts, moving, crossings = self._round_conflicts(
-            cancelled, dislodged, available_convoys
-        )
-        contested = set(crossings)
-        successful_moves: set[UnitKey] = set()
-        successful_conversions: set[UnitKey] = set()
-        # Cada plaza se resuelve con la misma fotografía de apoyos y atacantes.
-        for location in sorted(conflicts):
-            units = conflicts[location]
-            movers = moving & set(units)
-            factions = {key.player_id for key in units}
-            if len(factions) > 1 and len(units) > 1:
-                contested.add(location)
-            if not movers:
-                continue
-            if len(units) == 1:
-                self._mark_success(
-                    next(iter(movers)), successful_moves, successful_conversions
-                )
-                continue
-            if len(factions) == 1:
-                cancelled.update(movers)
-                cancelled_self.update(movers)
-                continue
-            strengths = {
-                key: (
-                    1
-                    + self._support_strength(key, location, active_supports)
-                    + self._rebellion_modifier(key, location)
-                )
-                for key in units
-            }
-            maximum = max(strengths.values())
-            winners = [key for key in units if strengths[key] == maximum]
-            if len(winners) != 1:
-                cancelled.update(movers)
-                continue
-            winner = winners[0]
-            if winner not in movers:
-                cancelled.update(movers)
-                continue
-            self._mark_success(winner, successful_moves, successful_conversions)
-            for key in units:
-                if key == winner:
-                    continue
-                if key in movers:
-                    cancelled.add(key)
-                else:
-                    dislodged.add(key)
-                    cancelled.add(key)
-                    active_supports.discard(key)
-
-        positions = tuple(
-            (
-                key,
-                self._final_location(
-                    key, successful_moves, successful_conversions, dislodged
-                ),
-            )
-            for key in sorted(self.units_by_key, key=_key_sort)
-        )
-        return (
-            ResolutionState(
-                frozenset(active_supports),
-                frozenset(available_convoys),
-                frozenset(successful_moves),
-                frozenset(successful_conversions),
-                frozenset(dislodged),
-                frozenset(cancelled),
-                frozenset(cancelled_self),
-                positions,
-                frozenset(),
-            ),
-            frozenset(contested),
-        )
-
-    def _round_conflicts(
-        self,
-        cancelled: set[UnitKey],
-        dislodged: set[UnitKey],
-        available_convoys: set[UnitKey],
-    ) -> tuple[dict[str, list[UnitKey]], set[UnitKey], set[str]]:
-        """Construye las ocupaciones efectivas y detecta cruces directos."""
-        conflicts: dict[str, list[UnitKey]] = {}
-        moving: set[UnitKey] = set()
-        direct_moves: dict[tuple[str, str], UnitKey] = {}
-        for key in sorted(self.units_by_key, key=_key_sort):
-            if key in dislodged:
-                continue
-            order = self.orders_by_unit[key]
-            active_advance = (
-                order.order_type == "A"
-                and key not in cancelled
-                and (not order.is_convoy or key in available_convoys)
-            )
-            active_conversion = order.order_type == "C" and key not in cancelled
-            if active_advance:
-                location = conflict_location(
-                    order.target_location or key.origin, key.unit_type
-                )
-                moving.add(key)
-                if not order.is_convoy:
-                    direct_moves[(key.origin, order.target_location or key.origin)] = (
-                        key
-                    )
-            elif active_conversion:
-                location = conflict_location(
-                    key.origin, order.target_location or key.unit_type
-                )
-                moving.add(key)
-            else:
-                location = conflict_location(key.origin, key.unit_type)
-            conflicts.setdefault(location, []).append(key)
-        crossings = {
-            location
-            for (origin, target), key in direct_moves.items()
-            if (opponent := direct_moves.get((target, origin))) is not None
-            and opponent.player_id != key.player_id
-            for location in (
-                conflict_location(origin, key.unit_type),
-                conflict_location(target, key.unit_type),
-            )
-        }
-        return conflicts, moving, crossings
 
     def _active_attackers(
         self,
@@ -1150,18 +1021,6 @@ class MilitaryResolver:
             cancelled_orders=state.cancelled_orders | supporters,
         )
 
-    def _support_strength(
-        self, unit: UnitKey, location: str, active_supports: set[UnitKey]
-    ) -> int:
-        """Cuenta los apoyos válidos de la facción en una plaza concreta."""
-        faction = self._player_power(unit)
-        return sum(
-            1
-            for key in active_supports
-            if (order := self.orders_by_unit[key]).target_location == location
-            and order.supported_faction == faction
-        )
-
     def _rebellion_modifier(self, unit: UnitKey, location: str) -> int:
         """Aplica la rebelión a la plaza provincial sin crear participantes."""
         if location.startswith("G "):
@@ -1188,6 +1047,18 @@ class MilitaryResolver:
             ("successful_moves", keys(state.successful_moves)),
             ("successful_conversions", keys(state.successful_conversions)),
             ("dislodged_units", keys(state.dislodged_units)),
+            (
+                "dislodgements",
+                tuple(
+                    (
+                        record.unit.player_id or "",
+                        record.unit.unit_type,
+                        record.unit.origin,
+                        record.attack_origin,
+                    )
+                    for record in state.dislodgements
+                ),
+            ),
             ("cancelled_orders", keys(state.cancelled_orders)),
             ("cancelled_by_self_conflict", keys(state.cancelled_by_self_conflict)),
             (
@@ -1234,6 +1105,9 @@ class MilitaryResolver:
     ) -> MilitaryResolution:
         """Convierte el estado estable en un resultado completo por unidad inicial."""
         dislodged_units = state.dislodged_units | additional_dislodged
+        attack_origins = {
+            record.unit: record.attack_origin for record in state.dislodgements
+        }
         outcomes = tuple(
             UnitOutcome(
                 key,
@@ -1245,6 +1119,7 @@ class MilitaryResolver:
                     dislodged_units,
                 ),
                 key in dislodged_units,
+                attack_origins.get(key),
             )
             for key in sorted(self.units_by_key, key=_key_sort)
         )
@@ -1623,6 +1498,10 @@ class MilitaryResolver:
                 raise MilitaryResolutionError(
                     "Una guarnición eliminada por asedio no puede retirarse"
                 )
+            if destination is not None and destination == outcomes[key].attack_origin:
+                raise MilitaryResolutionError(
+                    "Una unidad no puede retirarse al origen del ataque que la desalojó"
+                )
             if (
                 destination is not None
                 and conflict_location(destination, outcomes[key].final_unit_type)
@@ -1905,6 +1784,7 @@ class MilitaryResolver:
                 outcome.final_unit_type,
                 outcome.final_location,
                 outcome.dislodged,
+                outcome.attack_origin,
             ]
             for outcome in resolution.outcomes
         ]

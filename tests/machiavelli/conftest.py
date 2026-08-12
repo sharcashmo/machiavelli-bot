@@ -113,7 +113,7 @@ def valid_event_payloads() -> Mapping[EventType, dict[str, JSONValue]]:
             ],
         },
         EventType.MILITARY_RESOLUTION: {
-            "outcomes": [[unit, "A", "ven", False]],
+            "outcomes": [[unit, "A", "ven", False, None]],
             "cancelled_orders": [unit],
             "broken_convoys": [unit],
             "dislodgements": [unit],

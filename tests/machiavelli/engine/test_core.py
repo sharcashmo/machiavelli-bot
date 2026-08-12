@@ -674,10 +674,10 @@ ACTIVE_CAMPAIGN_SNAPSHOT_V1 = {
             "military_resolution",
             '{"broken_convoys":[],"cancelled_orders":[],"decisions":[],'
             '"dislodgements":[],'
-            '"outcomes":[[["P0","A","fort"],"A","fort",false],'
-            '[["P1","A","other"],"A","other",false],'
-            '[[null,"G","fort"],"G","fort",false],'
-            '[[null,"G","free"],"G","free",false]],"rebellions":[],'
+            '"outcomes":[[["P0","A","fort"],"A","fort",false,null],'
+            '[["P1","A","other"],"A","other",false,null],'
+            '[[null,"G","fort"],"G","fort",false,null],'
+            '[[null,"G","free"],"G","free",false,null]],"rebellions":[],'
             '"sieges":[[["P0","A","fort"],"fort","started"]]}',
         ),
         (
@@ -751,7 +751,7 @@ def test_active_rules_versioned_snapshots_v1() -> None:
 
     with (
         patch("machiavelli.engine.disasters.Random", return_value=disaster_rng),
-        patch.object(GameTables, "disasters", {0: ["row"]}),
+        patch.object(GameTables, "disasters", {0: ["row"], 1: ["row"]}),
         patch.object(GameTables, "famine", [["free"]]),
         patch.object(GameTables, "plague", [["other"]]),
     ):
@@ -908,7 +908,7 @@ def test_first_turn_famine_inactive_integrated_snapshot() -> None:
         disaster_rng.randint.side_effect = [1, 0, 0]
         with (
             patch("machiavelli.engine.disasters.Random", return_value=disaster_rng),
-            patch.object(GameTables, "disasters", {0: ["row"]}),
+            patch.object(GameTables, "disasters", {0: ["row"], 1: ["row"]}),
             patch.object(GameTables, "famine", [["free"]]),
         ):
             GameEngine(game, Random(7)).run_startup()
@@ -958,7 +958,7 @@ def test_famine_inactive_integrated_snapshot_and_event_order() -> None:
         disaster_rng.randint.side_effect = [1, 0, 0]
         with (
             patch("machiavelli.engine.disasters.Random", return_value=disaster_rng),
-            patch.object(GameTables, "disasters", {0: ["row"]}),
+            patch.object(GameTables, "disasters", {0: ["row"], 1: ["row"]}),
             patch.object(GameTables, "plague", [["other"]]),
         ):
             GameEngine(game, Random(7)).run_campaign()
@@ -1091,7 +1091,7 @@ def test_plague_inactive_integrated_snapshot_and_event_order() -> None:
         disaster_rng.randint.side_effect = [1, 0, 0]
         with (
             patch("machiavelli.engine.disasters.Random", return_value=disaster_rng),
-            patch.object(GameTables, "disasters", {0: ["row"]}),
+            patch.object(GameTables, "disasters", {0: ["row"], 1: ["row"]}),
             patch.object(GameTables, "plague", [["other"]]),
         ):
             GameEngine(game, Random(7)).run_campaign()

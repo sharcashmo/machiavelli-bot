@@ -57,7 +57,7 @@ def test_military_event_round_trip_preserves_seven_lists(tmp_path):
     db_path = tmp_path / "game.db"
     database.upgrade(str(db_path))
     event = TurnEvent.military_resolution(
-        [[["P1", "A", "rome"], "A", "pisa", False]],
+        [[["P1", "A", "rome"], "A", "pisa", False, None]],
         [["P1", "A", "rome"]],
         [],
         [],
@@ -81,8 +81,8 @@ def test_military_event_is_canonical_compact_and_keeps_previous_records():
     """Verifica orden, formato compacto y compatibilidad con eventos previos."""
     event = TurnEvent.military_resolution(
         [
-            [["V", "A", "zeta"], "A", "ñ", False],
-            [["M", "F", "alfa"], "F", "beta", False],
+            [["V", "A", "zeta"], "A", "ñ", False, None],
+            [["M", "F", "alfa"], "F", "beta", False, None],
         ],
         [["V", "A", "zeta"], ["M", "F", "alfa"]],
         [["V", "A", "zeta"]],
@@ -108,8 +108,8 @@ def test_military_event_is_canonical_compact_and_keeps_previous_records():
         '"decisions":[[["M","F","alfa"],"disband",null],'
         '[["V","A","zeta"],"retreat","alfa"]],'
         '"dislodgements":[["M","F","alfa"]],'
-        '"outcomes":[[["M","F","alfa"],"F","beta",false],'
-        '[["V","A","zeta"],"A","ñ",false]],'
+        '"outcomes":[[["M","F","alfa"],"F","beta",false,null],'
+        '[["V","A","zeta"],"A","ñ",false,null]],'
         '"rebellions":[["M","province","alfa","subdued"],'
         '["V","city","ñ","liberated"]],'
         '"sieges":[[["M","F","alfa"],"beta","lifted"],'

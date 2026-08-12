@@ -123,8 +123,8 @@ def test_integer_fields_reject_bool(
 
 
 @pytest.mark.parametrize("event_type", [EventType.FAMINE_SPAWN, EventType.PLAGUE_SPAWN])
-@pytest.mark.parametrize("roll", [0, 7, True])
-def test_severity_roll_is_one_to_six(
+@pytest.mark.parametrize("roll", [-1, 6, True])
+def test_severity_roll_is_zero_to_five(
     event_type: EventType,
     roll: int | bool,
     copied_event_payloads: dict[EventType, dict[str, JSONValue]],
@@ -179,7 +179,7 @@ def test_military_resolution_accepts_seven_empty_collections() -> None:
 def test_military_resolution_accepts_non_empty_tuples() -> None:
     unit = ("Milan", "A", "mil")
     event = TurnEvent.military_resolution(
-        ((unit, "A", "ven", False),),
+        ((unit, "A", "ven", False, None),),
         (unit,),
         (unit,),
         (unit,),
@@ -278,7 +278,7 @@ def test_json_is_compact_deterministic_and_native() -> None:
 
     unit = ("Milan", "A", "mil")
     military = TurnEvent.military_resolution(
-        ((unit, "A", "ven", False),),
+        ((unit, "A", "ven", False, None),),
         (unit,),
         (unit,),
         (unit,),
@@ -291,7 +291,7 @@ def test_json_is_compact_deterministic_and_native() -> None:
         '"cancelled_orders":[["Milan","A","mil"]],'
         '"decisions":[[["Milan","A","mil"],"retreat","mil"]],'
         '"dislodgements":[["Milan","A","mil"]],'
-        '"outcomes":[[["Milan","A","mil"],"A","ven",false]],'
+        '"outcomes":[[["Milan","A","mil"],"A","ven",false,null]],'
         '"rebellions":[["Milan","province","mil","subdued"]],'
         '"sieges":[[["Milan","A","mil"],"mil","started"]]}'
     )

@@ -182,6 +182,33 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         self.assertEqual(result, DislodgementDecision("retreat", "naple"))
 
+    def test_retreat_filters_attack_origin(self):
+        """Verifica que se descartan como destino el origen del ataque."""
+        self.player.home_countries = ["P"]
+        self.player.controlled_locations = ["rome"]
+        self.game.scenario.home_countries_provinces.return_value = ["venic"]
+
+        self.mock_map.adjacent_locations.return_value = {"rome", "naple"}
+
+        outcome = Mock()
+        outcome.unit.player_id = 1
+        outcome.unit.unit_type = "A"
+        outcome.unit.origin = "flore"
+        outcome.final_unit_type = "A"
+
+        # 'rome' es ideal pero está bloqueado/invalidado
+        outcome.attack_origin = "rome"
+        invalid_destinations = set()
+
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
+
+        self.assertEqual(result, DislodgementDecision("retreat", "naple"))
+
     @patch("machiavelli.engine.dislodgement.conflict_location")
     def test_retreat_transforms_to_garrison_in_fortified_city(
         self, mock_conflict_location
@@ -234,6 +261,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
         outcome.unit.unit_type = "F"
         outcome.unit.origin = "naple"
         outcome.final_unit_type = "F"
+        outcome.attack_origin = "GON"
 
         invalid_destinations = {}
         for step in RetreatStep:

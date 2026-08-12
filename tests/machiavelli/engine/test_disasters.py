@@ -312,7 +312,7 @@ class TestSpawnDisaster(unittest.TestCase):
 
         # 1a llamada: severity_dice (0)
         # 2a y 3a llamada: dado fila (1 + 1 = 2)
-        self.mock_rng.randint.side_effect = [1, 1, 1]
+        self.mock_rng.randint.side_effect = [0, 1, 1]
 
         result = self.manager._spawn_disaster(EventType.FAMINE_SPAWN)
 
@@ -323,7 +323,7 @@ class TestSpawnDisaster(unittest.TestCase):
         self.assertEqual(event.type, EventType.FAMINE_SPAWN)
         self.assertEqual(
             event.data,
-            {"severity_roll": 1, "provinces": ("pisa", "flore")},
+            {"severity_roll": 0, "provinces": ("pisa", "flore")},
         )
 
     @patch("machiavelli.engine.disasters.GameTables")
@@ -339,7 +339,7 @@ class TestSpawnDisaster(unittest.TestCase):
         # 1a: severity_dice (1)
         # 2a, 3a: dado fila (0 + 0 = 0) -> Fila 0: ["pisa", "flore"]
         # 4a, 5a: dado columna (0 + 0 = 0) -> Columna 0: ["pisa", "pisa"]
-        self.mock_rng.randint.side_effect = [2, 0, 0, 0, 0]
+        self.mock_rng.randint.side_effect = [1, 0, 0, 0, 0]
 
         result = self.manager._spawn_disaster(EventType.PLAGUE_SPAWN)
 
@@ -349,13 +349,13 @@ class TestSpawnDisaster(unittest.TestCase):
         self.assertEqual(event.type, EventType.PLAGUE_SPAWN)
         self.assertEqual(
             event.data,
-            {"severity_roll": 2, "provinces": ("pisa", "flore")},
+            {"severity_roll": 1, "provinces": ("pisa", "flore")},
         )
 
     @patch("machiavelli.engine.disasters.GameTables")
     def test_spawn_disaster_filters_out_provinces_not_on_map(self, mock_tables):
         """Ignora provincias que no existen en self.map.provinces o son None."""
-        mock_tables.disasters = {0: ["row"]}
+        mock_tables.disasters = {0: ["row"], 1: ["row"]}
         # "unkno" no está en self.mock_map.provinces
         mock_tables.famine = [["pisa", None, "unkno"]]
 

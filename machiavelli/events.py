@@ -311,7 +311,7 @@ def _start_season(data: Mapping[str, object]) -> dict[str, JSONValue]:
 def _spawn(data: Mapping[str, object]) -> dict[str, JSONValue]:
     _keys(data, {"severity_roll", "provinces"})
     roll = _integer(data["severity_roll"])
-    if not 1 <= roll <= 6:
+    if not 0 <= roll <= 5:
         raise ValueError("Tirada fuera de rango")
     return {
         "severity_roll": roll,
@@ -458,7 +458,7 @@ def _unit_key(value: object) -> list[JSONValue]:
 
 
 def _outcome(value: object) -> list[JSONValue]:
-    item = _sequence(value, 4)
+    item = _sequence(value, 5)
     unit = _unit_key(item[0])
     final_type = _choice(item[1], {"A", "F", "G"})
     final_location = _nullable_string(item[2])
@@ -467,7 +467,10 @@ def _outcome(value: object) -> list[JSONValue]:
     dislodged = item[3]
     if dislodged != (final_location is None):
         raise ValueError("Destino militar incoherente")
-    return [unit, final_type, final_location, dislodged]
+    attack_origin = _nullable_string(item[4])
+    if attack_origin is not None and not dislodged:
+        raise ValueError("Origen de ataque sin desalojo")
+    return [unit, final_type, final_location, dislodged, attack_origin]
 
 
 def _rebellion(value: object) -> list[JSONValue]:

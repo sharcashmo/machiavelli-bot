@@ -453,9 +453,9 @@ class TestAtomicResolution(unittest.TestCase):
             self.assertEqual(
                 _event_payload(game)["outcomes"],
                 [
-                    [["P1", "A", "a"], "A", "b", False],
-                    [["P1", "F", "SEA"], "F", "SEA", False],
-                    [["P2", "A", "c"], "A", "c", False],
+                    [["P1", "A", "a"], "A", "b", False, None],
+                    [["P1", "F", "SEA"], "F", "SEA", False, None],
+                    [["P2", "A", "c"], "A", "c", False, None],
                 ],
             )
         self.assertTrue(all(outcome == outcomes[0] for outcome in outcomes))
@@ -888,6 +888,25 @@ class TestConvoyCompilationAndResolution(unittest.TestCase):
         self.assertEqual(opposed.players[0].armies, ["b", "c"])
         self.assertEqual(opposed.players[1].armies, ["a"])
 
+    def test_convoy_dislodgement_records_its_last_scale_as_attack_origin(self):
+        game = self._game(
+            army_orders=[("A a", "A", "S1"), ("A a", "A", "S2"), ("A a", "A", "b")],
+            fleet_orders=[("F S1", "T", "A a"), ("F S2", "T", "A a")],
+            enemy_armies=["b"],
+            enemy_orders=[("A b", "H", "")],
+        )
+        game.players[1].rebelled_provinces = ["b"]
+        resolver = MilitaryResolver(game)
+        resolver._build_unit_index()
+        resolver._compile_orders()
+        resolver._link_and_validate_orders()
+
+        resolution = resolver._build_resolution(resolver._resolve_conflicts())
+        outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
+
+        self.assertTrue(outcomes[UnitKey("P2", "A", "b")].dislodged)
+        self.assertEqual(outcomes[UnitKey("P2", "A", "b")].attack_origin, "S2")
+
     def test_convoy_against_opposed_direct_move_and_transporter_attacks(self):
         cases = (
             ("tie", [], [], False),
@@ -1058,6 +1077,7 @@ class TestConflictConstructionAndSupport(unittest.TestCase):
         outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
         self.assertEqual(outcomes[UnitKey("P1", "A", "a")].final_location, "b")
         self.assertTrue(outcomes[UnitKey("P2", "A", "b")].dislodged)
+        self.assertEqual(outcomes[UnitKey("P2", "A", "b")].attack_origin, "a")
         self.assertEqual(resolution.contested_locations, frozenset({"a", "b"}))
 
     def test_support_is_cut_by_a_tie_but_not_a_lost_attack_or_origin_exception(self):
@@ -1900,6 +1920,7 @@ class TestRebellions(unittest.TestCase):
                 outcome.final_unit_type,
                 outcome.final_location,
                 outcome.dislodged,
+                outcome.attack_origin,
             ]
             for outcome in resolution.outcomes
         ]
@@ -2309,6 +2330,7 @@ class TestSiegesAndRestrictedConversions(unittest.TestCase):
                 outcome.final_unit_type,
                 outcome.final_location,
                 outcome.dislodged,
+                outcome.attack_origin,
             ]
             for outcome in resolution.outcomes
         ]
@@ -3099,6 +3121,20 @@ class TestDislodgementContract(unittest.TestCase):
         manager.assert_called_once()
         resolution = manager.call_args.args[0]
         self.assertEqual(resolution.contested_locations, frozenset({"b"}))
+        self.assertEqual(military_snapshot(game), before)
+
+    def test_attack_origin_cannot_be_selected_as_a_retreat(self):
+        game = self._single_dislodgement_game()
+        before = military_snapshot(game)
+        dislodged = UnitKey("P2", "A", "b")
+        manager = Mock(return_value={dislodged: DislodgementDecision("retreat", "a")})
+
+        with self.assertRaises(MilitaryResolutionError):
+            MilitaryResolver(game).run(manager)
+
+        resolution = manager.call_args.args[0]
+        outcome = next(item for item in resolution.outcomes if item.unit == dislodged)
+        self.assertEqual(outcome.attack_origin, "a")
         self.assertEqual(military_snapshot(game), before)
 
     def test_two_retreats_cannot_share_a_destination(self):
