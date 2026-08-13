@@ -1,5 +1,6 @@
 """Pruebas de coordinación y barreras de error del motor de turnos."""
 
+import logging
 import unittest
 from random import Random
 from unittest.mock import Mock, call, patch
@@ -20,6 +21,8 @@ from machiavelli.game.scenario import (
 )
 from machiavelli.game.tables import GameTables
 from tests.machiavelli.engine.helpers import create_military_game, military_snapshot
+
+logger = logging.getLogger(__name__)
 
 
 class TrackingGame:
@@ -1048,6 +1051,7 @@ def test_assassinations_inactive_integrated_snapshot_and_event_order() -> None:
     inactive_types = _domain_event_types(games[False].turn_events)
     assert active_types == (
         EventType.EXPENSE,
+        EventType.ASSASSINATION_ATTEMPT,
         EventType.MILITARY_RESOLUTION,
         EventType.START_SEASON,
     )
@@ -1056,9 +1060,11 @@ def test_assassinations_inactive_integrated_snapshot_and_event_order() -> None:
         EventType.START_SEASON,
     )
     assert EventType.EXPENSE not in inactive_types
-    assert tuple(event for event in active_types if event is not EventType.EXPENSE) == (
-        inactive_types
-    )
+    assert tuple(
+        event
+        for event in active_types
+        if event not in (EventType.EXPENSE, EventType.ASSASSINATION_ATTEMPT)
+    ) == (inactive_types)
 
 
 def test_plague_inactive_integrated_snapshot_and_event_order() -> None:

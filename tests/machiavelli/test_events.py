@@ -37,12 +37,13 @@ EXPECTED_EVENT_TYPES = {
     "player_won",
     "military_resolution",
     "military_orders_summary",
+    "assassination_attempt",
 }
 
 
 def test_catalog_is_exact() -> None:
     assert {event_type.value for event_type in EventType} == EXPECTED_EVENT_TYPES
-    assert len(EventType) == 27
+    assert len(EventType) == 28
 
 
 def test_every_valid_payload_round_trips(

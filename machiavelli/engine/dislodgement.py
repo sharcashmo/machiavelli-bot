@@ -50,13 +50,6 @@ class RetreatHandler:
             my_invalid_destinations = set(invalid_destinations)
             my_invalid_destinations.add(outcome.attack_origin)
 
-        logger.debug(
-            "Preferred retreat. Step: %s- Outcome: %s. Invalid destionations: %s",
-            retreat_step,
-            outcome,
-            invalid_destinations,
-        )
-
         # Las guarniciones no se retiran
         if unit.player_id is None or unit.unit_type == "G":
             return DislodgementDecision("disband", None)

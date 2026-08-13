@@ -40,6 +40,7 @@ def create_mock_player(
     rebelled_provinces: list[str] | None = None,
     rebelled_cities: list[str] | None = None,
     discord_id: int | None = 0,
+    power: str | None = None,
 ) -> Mock:
     """Crea un Mock con la especificación de Player."""
     player = Mock(spec=Player)
@@ -56,6 +57,7 @@ def create_mock_player(
     )
     player.rebelled_cities = rebelled_cities if rebelled_cities is not None else []
     player.discord_id = discord_id
+    player.power = power
     return player
 
 

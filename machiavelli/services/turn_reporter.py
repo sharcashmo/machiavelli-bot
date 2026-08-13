@@ -81,7 +81,6 @@ class TurnReporter:
             report.append("### 💰 **Gastos**")
 
         for event in game.turn_events:
-            logger.debug("Events %s", game.turn_events)
             report.extend(TurnReporter._render_event(game, event))
         report.append("## 🗺️ REPORTE DE SITUACIÓN")
 
@@ -120,7 +119,6 @@ class TurnReporter:
                 scenario = TurnReporter._safe(cast(str, data["scenario"]))
                 return [f"Se inició la partida con el escenario {scenario}."]
             case EventType.START_GAME_POWER_ASSIGNED:
-                logger.debug("data is %s", data)
                 discord_id = cast(int | None, data["discord_id"])
                 player = (
                     f"<@{discord_id}>"
@@ -128,11 +126,6 @@ class TurnReporter:
                     else TurnReporter._player(game, cast(str, data["player_id"]))
                 )
                 power = TurnReporter._power(game, cast(str, data["power_id"]))
-                logger.debug(
-                    "Se devolverá %s - %s",
-                    player,
-                    f"{player} recibió la potencia {power}.",
-                )
                 return [f"{player} recibió la potencia {power}."]
             case EventType.START_SEASON:
                 season = _SEASONS[cast(int, data["season"])]
@@ -224,6 +217,8 @@ class TurnReporter:
                 return TurnReporter._render_military(game, data)
             case EventType.MILITARY_ORDERS_SUMMARY:
                 return TurnReporter._render_orders_summary(game, data)
+            case EventType.ASSASSINATION_ATTEMPT:
+                return TurnReporter._report_assassination_attempt(game, data)
             case _:
                 raise InvalidTurnEventError(event_type=str(event.type))
 
@@ -433,7 +428,6 @@ class TurnReporter:
     ) -> list[str]:
         orders = cast(tuple[MilitaryOrderRecord, ...], data["orders"])
         invalid_orders = cast(tuple[InvalidOrderRecord, ...], data["invalid_orders"])
-        logger.debug(data)
         if not any((orders, invalid_orders)):
             return "Sin órdenes militares."
 
@@ -463,6 +457,65 @@ class TurnReporter:
                         for invalid_order in player_invalid_orders
                     )
         return lines
+
+    @staticmethod
+    def _report_assassination_attempt(
+        game: Game, data: Mapping[str, FrozenJSONValue]
+    ) -> list[str]:
+        assassin = TurnReporter._player(game, cast(str, data["assassin"]))
+        target = TurnReporter._player(game, cast(str, data["target"]))
+        result = cast(str, data["result"])
+        lost_garrisons = cast(tuple([str]), data["lost_garrisons"])
+        rebellions = cast(tuple([str]), data["rebellions"])
+
+        if result == "failed":
+            return [
+                f":dagger: {assassin} envió un asesino a "
+                f"acabar con el líder de {target}, "
+                "pero fracasó en su intento."
+            ]
+        elif result == "late":
+            return [
+                f":dagger: {assassin} envió un asesino a "
+                f"acabar con el líder de {target}, "
+                "pero alguien se le había adelantado."
+            ]
+        else:
+            lines = [
+                f":dagger: {assassin} envió un asesino a "
+                f"acabar con el líder de {target}, "
+                "poniendo fin a sus días.",
+                "- Sus ejércitos y flotas detuvieron sus operaciones "
+                "ante la incierta situación",
+            ]
+            if lost_garrisons:
+                lost_garrisons_text = TurnReporter._join(
+                    [
+                        TurnReporter._location(game, province)
+                        for province in lost_garrisons
+                    ]
+                )
+                if len(lost_garrisons) > 1:
+                    lines.append(
+                        f"Las guarniciones de {lost_garrisons_text} se rindieron."
+                    )
+                else:
+                    lines.append(f"La guarnición de {lost_garrisons_text} se rindió.")
+            if rebellions:
+                rebellions_text = TurnReporter._join(
+                    [TurnReporter._location(game, province) for province in rebellions]
+                )
+                if len(rebellions) > 1:
+                    lines.append(
+                        f"Las provincias {rebellions_text} se rebelaron "
+                        "aprovechando el vacío de poder"
+                    )
+                else:
+                    lines.append(
+                        f"La provincia {rebellions_text} se rebeló "
+                        "aprovechando el vacío de poder"
+                    )
+            return lines
 
     @staticmethod
     def _render_military(

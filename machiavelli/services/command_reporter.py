@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING
 
 from machiavelli.game.tables import GameTables
@@ -97,10 +98,11 @@ class CommandReporter:
             report.append(locations[target].name if target in locations else target)
 
         elif target_type == "location_ext":
-            parts = target.split()
-            loc_name = locations[parts[0]].name if parts[0] in locations else parts[0]
-            if len(parts) > 1:
-                power_name = GameTables.powers.get(parts[1], parts[1])
+            match = re.fullmatch(r"(.+?)(?: \(([^()\s]+)\))?", target)
+            location, faction = match.groups()
+            loc_name = locations[location].name if location in locations else location
+            if faction:
+                power_name = GameTables.powers.get(faction, faction)
                 report.append(f"{loc_name} ({power_name})")
             else:
                 report.append(loc_name)

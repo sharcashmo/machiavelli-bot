@@ -1688,7 +1688,6 @@ class MilitaryResolver:
             dislodgement_resolver,
             siege_dislodged,
         )
-        logger.debug("Resolving dislodgements. Decisions: %s", decisions)
         self._apply_dislodgement_decisions(
             resolution,
             decisions,

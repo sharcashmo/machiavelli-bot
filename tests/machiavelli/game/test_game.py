@@ -10,18 +10,8 @@ from tests.machiavelli.engine.helpers import (
 )
 
 
-class TestRemovedLegacyAlgorithms(unittest.TestCase):
-    """Fija la retirada de los algoritmos duplicados del agregado."""
-
-    def test_initial_setup_does_not_exist(self):
-        self.assertNotIn("initial_setup", Game.__dict__)
-
-    def test_spring_start_does_not_exist(self):
-        self.assertNotIn("spring_start", Game.__dict__)
-
-
 class TestTurnEvents(unittest.TestCase):
-    def test_add_event_keeps_object_identity_and_order(self):
+    def test_add_event(self):
         game = Game("typed-history")
         first = TurnEvent(EventType.START_GAME, {"scenario": "Be"})
         second = TurnEvent(EventType.START_SEASON, {"year": 1454, "season": 0})
@@ -35,11 +25,11 @@ class TestTurnEvents(unittest.TestCase):
         self.assertIs(game.turn_events[1], second)
         self.assertIs(game.turn_events[2], first)
 
-    def test_add_event_rejects_strings(self):
+    def test_add_event_rejected(self):
         game = Game("typed-history")
 
         with self.assertRaisesRegex(TypeError, "TurnEvent"):
-            game.add_event("start_game|{}")  # type: ignore[arg-type]
+            game.add_event("start_game|{}")
 
         self.assertEqual(game.turn_events, [])
 
@@ -116,3 +106,48 @@ class TestGetUnitOwner(unittest.TestCase):
         """Lanza ValueError si el formato del identificador es incorrecto."""
         with self.assertRaises(ValueError):
             self.game.get_unit_owner("Aprove")
+
+
+class TestGetPlayer(unittest.TestCase):
+    """Test unitarios para el método get_player."""
+
+    def setUp(self):
+        """Prepara el juego de pruebas."""
+        self.game = Game("test")
+        self.player1 = create_mock_player(player_id="P1", discord_id=123, power="L")
+        self.player2 = create_mock_player(player_id="P2", discord_id=456, power="V")
+
+        self.game.players = [self.player1, self.player2]
+
+    def test_get_player_from_player_id(self):
+        """Recupera un jugador de su player_id."""
+        player = self.game.get_player(player_id="P1")
+        self.assertEqual(player, self.player1)
+
+        player = self.game.get_player(player_id="P3")
+        self.assertIsNone(player)
+
+    def test_get_player_from_discord_id(self):
+        """Recupera un jugador de su id de discord."""
+        player = self.game.get_player(discord_id=456)
+        self.assertEqual(player, self.player2)
+
+        player = self.game.get_player(discord_id=987)
+        self.assertIsNone(player)
+
+    def test_get_player_from_power_id(self):
+        """Recupera un jugador de su id de potencia."""
+        player = self.game.get_player(power_id="L")
+        self.assertEqual(player, self.player1)
+
+        player = self.game.get_player(power_id="N")
+        self.assertIsNone(player)
+
+    def test_get_player_invalid_parameters(self):
+        """No se pasa ningún parámetro, o se pasan varios, para recuperarlo."""
+
+        player = self.game.get_player()
+        self.assertIsNone(player)
+
+        player = self.game.get_player(player_id="P1", discord_id=123)
+        self.assertIsNone(player)

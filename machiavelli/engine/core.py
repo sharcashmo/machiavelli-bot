@@ -1,6 +1,7 @@
 # machiavelli/engine/core.py
 
 
+import logging
 from random import Random
 
 from ..game.game import Game
@@ -15,6 +16,8 @@ from .maintenance import MaintenanceResolver
 from .military import MilitaryResolver
 from .rebellions import RebellionManager
 from .setup import SetupManager
+
+logger = logging.getLogger(__name__)
 
 
 class GameEngine:

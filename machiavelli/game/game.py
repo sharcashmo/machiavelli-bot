@@ -64,6 +64,30 @@ class Game:
             raise RuntimeError("La partida requiere un escenario cargado")
         return scenario
 
+    def get_player(
+        self, *, player_id: str = None, discord_id: int = None, power_id: str = None
+    ) -> Player:
+        """Devuelve un jugador por su id, su id de discord, o su power_id."""
+        if sum(1 for p in (player_id, discord_id, power_id) if p is not None) != 1:
+            return None
+        player = None
+        if player_id:
+            player = next(
+                (player for player in self.players if player.player_id == player_id),
+                None,
+            )
+        elif discord_id:
+            player = next(
+                (player for player in self.players if player.discord_id == discord_id),
+                None,
+            )
+        elif power_id:
+            player = next(
+                (player for player in self.players if player.power == power_id),
+                None,
+            )
+        return player
+
     def add_player(self, player_id: str, discord_id: int | None = None) -> Player:
         """Crea y registra un jugador canónico en este agregado de partida."""
         if any(player.player_id == player_id for player in self.players):

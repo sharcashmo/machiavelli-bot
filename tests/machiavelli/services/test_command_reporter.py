@@ -99,7 +99,7 @@ class TestCommandReporter:
             ("unit", "A milan", "Ejército de Milan"),
             ("army_ext", "A milan V", "Ejército de Milan (Venice)"),
             ("army_ext", "A milan", "Ejército de Milan"),
-            ("location_ext", "UA V", "Upper Adriatic (Venice)"),
+            ("location_ext", "UA (V)", "Upper Adriatic (Venice)"),
             ("location_ext", "UA", "Upper Adriatic"),
         ],
     )

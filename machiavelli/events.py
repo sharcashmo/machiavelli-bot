@@ -53,6 +53,7 @@ class EventType(StrEnum):
     PLAYER_WON = "player_won"
     MILITARY_ORDERS_SUMMARY = "military_orders_summary"
     MILITARY_RESOLUTION = "military_resolution"
+    ASSASSINATION_ATTEMPT = "assassination_attempt"
 
 
 class InvalidTurnEventError(ValueError):
@@ -341,6 +342,17 @@ def _rebellion_pacify(data: Mapping[str, object]) -> dict[str, JSONValue]:
     }
 
 
+def _assassination_attempt(data: Mapping[str, object]) -> dict[str, JSONValue]:
+    _keys(data, {"assassin", "target", "result", "lost_garrisons", "rebellions"})
+    return {
+        "assassin": _string(data["assassin"]),
+        "target": _string(data["target"]),
+        "result": _choice(data["result"], {"success", "failed", "late"}),
+        "lost_garrisons": _string_list(data["lost_garrisons"], non_empty=False),
+        "rebellions": _string_list(data["rebellions"], non_empty=False),
+    }
+
+
 def _expense(data: Mapping[str, object]) -> dict[str, JSONValue]:
     _keys(data, {"player", "expense", "target", "amount"})
     amount = data["amount"]
@@ -607,6 +619,7 @@ _VALIDATORS = {
     EventType.PLAYER_WON: _player_won,
     EventType.MILITARY_RESOLUTION: _military_resolution,
     EventType.MILITARY_ORDERS_SUMMARY: _military_orders_summary,
+    EventType.ASSASSINATION_ATTEMPT: _assassination_attempt,
 }
 
 

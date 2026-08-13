@@ -121,6 +121,13 @@ def valid_event_payloads() -> Mapping[EventType, dict[str, JSONValue]]:
             "sieges": [[unit, "mil", "started"]],
             "decisions": [[unit, "retreat", "ven"]],
         },
+        EventType.ASSASSINATION_ATTEMPT: {
+            "assassin": "P1",
+            "target": "P2",
+            "result": "success",
+            "rebellions": ["milan", "prove", "trent"],
+            "lost_garrisons": ["genoa"],
+        },
     }
 
 
