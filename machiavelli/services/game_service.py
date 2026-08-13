@@ -217,7 +217,6 @@ class GameService:
                 for command in player.commands
             ]
         )
-        # lines.extend([f"- {command}" for command in player.commands])
         return lines
 
     def get_turn_report(self, channel_id: int) -> list[str]:
