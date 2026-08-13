@@ -439,7 +439,7 @@ class MilitaryResolver:
                 location.split()[0]
                 for location in self.map.adjacent_locations(key.origin, mode)
             ]
-            if not own_garrison_province and support_location.split()[0] not in (
+            if not own_garrison_province and support_location not in (
                 adjacent_locations
             ):
                 return "apoyo no adyacente"

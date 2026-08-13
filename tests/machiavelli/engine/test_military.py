@@ -280,11 +280,11 @@ class TestOrderCompilation(unittest.TestCase):
 
         resolver = self._compile(
             [{"player_id": "P1", "power": "M", "fleets": ["SEA"]}],
-            [("F SEA", "S", "coast S (M)")],
+            [("F SEA", "S", "coast (M)")],
         )
         self.assertEqual(
             resolver.orders_by_unit[UnitKey("P1", "F", "SEA")].target_location,
-            "coast S",
+            "coast",
         )
 
         resolver = self._compile(
@@ -549,9 +549,7 @@ class TestAtomicResolution(unittest.TestCase):
                     [["P1", "A", "a"], "A", "b", ["a", "b"], None, None, False],
                     [["P1", "A", "b"], "H", None, None, None, None, False],
                 ],
-                "invalid_orders": [
-                    [["P1", "A", "b"], "código de orden inválido"]
-                ],
+                "invalid_orders": [[["P1", "A", "b"], "código de orden inválido"]],
             },
         )
 
