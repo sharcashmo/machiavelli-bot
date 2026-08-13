@@ -67,6 +67,10 @@ async def sync_commands(ctx, modo: str | None = None):
     else:
         await ctx.send("🏠 Sincronizando comandos en este servidor específico...")
         try:
+            # Limpiamos el árbol del servidor para eliminar comandos fantasma
+            bot.tree.clear_commands(guild=ctx.guild)
+            await bot.tree.sync(guild=ctx.guild)
+
             # Clona los comandos que tenemos en memoria dentro de este servidor concreto
             bot.tree.copy_global_to(guild=ctx.guild)
             # Sincroniza solo este servidor
