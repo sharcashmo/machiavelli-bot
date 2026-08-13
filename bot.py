@@ -67,12 +67,9 @@ async def sync_commands(ctx, modo: str | None = None):
     else:
         await ctx.send("🏠 Sincronizando comandos en este servidor específico...")
         try:
-            # Limpiamos el árbol del servidor para eliminar comandos fantasma
-            bot.tree.clear_commands(guild=ctx.guild)
-            await bot.tree.sync(guild=ctx.guild)
-
             # Clona los comandos que tenemos en memoria dentro de este servidor concreto
             bot.tree.copy_global_to(guild=ctx.guild)
+
             # Sincroniza solo este servidor
             synced = await bot.tree.sync(guild=ctx.guild)
             await ctx.send(
@@ -117,7 +114,7 @@ def main() -> None:
     db_path = os.getenv("DATABASE_PATH", "machiavelli.db")
 
     setup_service_logging()
-    if not token or token == "tu_token_aqui":
+    if not token:
         print(
             "⚠️ ADVERTENCIA: Por favor, configura tu DISCORD_TOKEN en el archivo .env."
         )
