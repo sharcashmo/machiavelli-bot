@@ -434,8 +434,13 @@ class MilitaryResolver:
             own_garrison_province = (
                 key.unit_type == "G" and support_location == key.origin
             )
-            if not own_garrison_province and support_location not in (
-                self.map.adjacent_locations(key.origin, mode)
+            # El apoyo a una provincia puede ser a través de una de sus costas
+            adjacent_locations = [
+                location.split()[0]
+                for location in self.map.adjacent_locations(key.origin, mode)
+            ]
+            if not own_garrison_province and support_location.split()[0] not in (
+                adjacent_locations
             ):
                 return "apoyo no adyacente"
             self.orders_by_unit[key] = MilitaryOrder(
