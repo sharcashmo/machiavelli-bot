@@ -27,7 +27,7 @@ class RebellionManager:
             raise RuntimeError("La partida requiere un escenario cargado")
         return scenario
 
-    def expense_rebellion_pacify(self, command: Command) -> None:
+    def _expense_rebellion_pacify(self, command: Command) -> None:
         """Pacifica una rebelión activa en una provincia o ciudad."""
         target = command.target
         if target is None:
@@ -58,7 +58,73 @@ class RebellionManager:
                     )
                     return  # Solo hay una rebelión por provincia
 
-    def _do_rebellion(self, owner: Player, target: str) -> None:
+    def _expense_rebellion_non_home_country(self, command: Command) -> None:
+        """Comenzar rebelión en una provincia no natal."""
+        # Primer comprobamos si la provincia la controla alguien
+        # (si no hay control, no hay rebeliones)
+        target = command.target
+        if target is None:
+            return
+
+        player_owner = next(
+            (p for p in self.game.players if target in p.controlled_locations),
+            None,
+        )
+
+        if not player_owner:
+            return
+
+        # Comprobamos que no sea una provincia natal del jugador. Si es natal de otro
+        # jugador no importa
+        hc = self._scenario().province_home_country(target)
+        if hc in player_owner.home_countries:
+            return
+
+        # Realizamos la rebelión
+        self.do_rebellion(owner=player_owner, target=target)
+
+    def _expense_rebellion_home_country(self, command: Command) -> None:
+        """Comenzar una rebelión en una provincia natal."""
+        # Primer comprobamos si la provincia la controla alguien
+        # (si no hay control, no hay rebeliones)
+        target = command.target
+        if target is None:
+            return
+
+        player_owner = next(
+            (p for p in self.game.players if target in p.controlled_locations),
+            None,
+        )
+
+        if not player_owner:
+            return
+
+        # Comprobamos que sea una provincia natal del jugador
+        hc = self._scenario().province_home_country(target)
+        if hc not in player_owner.home_countries:
+            return
+
+        # Realizamos la rebelión
+        self.do_rebellion(owner=player_owner, target=target)
+
+    REBELLION_EXPENSE_PACIFY = {"B"}
+    REBELLION_EXPENSE_NON_HOME_COUNTRY = {"D"}
+    REBELLION_EXPENSE_HOME_COUNTRY = {"D"}
+
+    def rebellion_expenses(self) -> None:
+        """Ejecuta las gastos de rebeliones."""
+        for player in self.game.players:
+            for command in player.commands:
+                if command.is_valid_expense(self.REBELLION_EXPENSE_PACIFY):
+                    self._expense_rebellion_pacify(command)
+                elif command.is_valid_expense(self.REBELLION_EXPENSE_NON_HOME_COUNTRY):
+                    self._expense_rebellion_non_home_country(command)
+                elif command.is_valid_expense(self.REBELLION_EXPENSE_HOME_COUNTRY):
+                    self._expense_rebellion_home_country(command)
+
+        return
+
+    def do_rebellion(self, owner: Player, target: str) -> None:
         """Realiza una rebelión.
 
         Al llamar a _do_rebellion, owner es ya el controlador de target. Recogimos
@@ -94,69 +160,3 @@ class RebellionManager:
                     {"player": owner.player_id, "province": target},
                 )
             )
-
-    def expense_rebellion_non_home_country(self, command: Command) -> None:
-        """Comenzar rebelión en una provincia no natal."""
-        # Primer comprobamos si la provincia la controla alguien
-        # (si no hay control, no hay rebeliones)
-        target = command.target
-        if target is None:
-            return
-
-        player_owner = next(
-            (p for p in self.game.players if target in p.controlled_locations),
-            None,
-        )
-
-        if not player_owner:
-            return
-
-        # Comprobamos que no sea una provincia natal del jugador. Si es natal de otro
-        # jugador no importa
-        hc = self._scenario().province_home_country(target)
-        if hc in player_owner.home_countries:
-            return
-
-        # Realizamos la rebelión
-        self._do_rebellion(owner=player_owner, target=target)
-
-    def expense_rebellion_home_country(self, command: Command) -> None:
-        """Comenzar una rebelión en una provincia natal."""
-        # Primer comprobamos si la provincia la controla alguien
-        # (si no hay control, no hay rebeliones)
-        target = command.target
-        if target is None:
-            return
-
-        player_owner = next(
-            (p for p in self.game.players if target in p.controlled_locations),
-            None,
-        )
-
-        if not player_owner:
-            return
-
-        # Comprobamos que sea una provincia natal del jugador
-        hc = self._scenario().province_home_country(target)
-        if hc not in player_owner.home_countries:
-            return
-
-        # Realizamos la rebelión
-        self._do_rebellion(owner=player_owner, target=target)
-
-    REBELLION_EXPENSE_PACIFY = {"B"}
-    REBELLION_EXPENSE_NON_HOME_COUNTRY = {"D"}
-    REBELLION_EXPENSE_HOME_COUNTRY = {"D"}
-
-    def rebellion_expenses(self) -> None:
-        """Ejecuta las gastos de rebeliones."""
-        for player in self.game.players:
-            for command in player.commands:
-                if command.is_valid_expense(self.REBELLION_EXPENSE_PACIFY):
-                    self.expense_rebellion_pacify(command)
-                elif command.is_valid_expense(self.REBELLION_EXPENSE_NON_HOME_COUNTRY):
-                    self.expense_rebellion_non_home_country(command)
-                elif command.is_valid_expense(self.REBELLION_EXPENSE_HOME_COUNTRY):
-                    self.expense_rebellion_home_country(command)
-
-        return

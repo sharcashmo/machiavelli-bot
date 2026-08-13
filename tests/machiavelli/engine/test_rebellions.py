@@ -27,7 +27,7 @@ class TestExpenseRebellionPacify(unittest.TestCase):
         """Pacifica exitosamente una provincia en rebelión."""
         self.mock_command.target = "pisa"
 
-        self.manager.expense_rebellion_pacify(self.mock_command)
+        self.manager._expense_rebellion_pacify(self.mock_command)
 
         self.assertNotIn("pisa", self.owner_player.rebelled_provinces)
         self.mock_game.add_event.assert_called_once()
@@ -44,7 +44,7 @@ class TestExpenseRebellionPacify(unittest.TestCase):
         """Pacifica exitosamente una ciudad en rebelión."""
         self.mock_command.target = "flore"
 
-        self.manager.expense_rebellion_pacify(self.mock_command)
+        self.manager._expense_rebellion_pacify(self.mock_command)
 
         self.assertNotIn("flore", self.owner_player.rebelled_cities)
         self.mock_game.add_event.assert_called_once()
@@ -60,7 +60,7 @@ class TestExpenseRebellionPacify(unittest.TestCase):
         """Si el objetivo no tiene ninguna rebelión activa, no hace nada."""
         self.mock_command.target = "rome"
 
-        self.manager.expense_rebellion_pacify(self.mock_command)
+        self.manager._expense_rebellion_pacify(self.mock_command)
 
         self.assertEqual(self.owner_player.rebelled_provinces, ["pisa"])
         self.assertEqual(self.owner_player.rebelled_cities, ["flore"])
@@ -71,7 +71,7 @@ class TestExpenseRebellionPacify(unittest.TestCase):
         self.mock_game.map.provinces["flore"].city = "fortress"
         self.mock_game.scenario.is_defensible_city.return_value = False
 
-        self.manager.expense_rebellion_pacify(self.mock_command)
+        self.manager._expense_rebellion_pacify(self.mock_command)
 
         self.assertEqual(self.owner_player.rebelled_cities, ["flore"])
         self.mock_game.add_event.assert_not_called()
@@ -102,7 +102,7 @@ class TestDoRebellion(unittest.TestCase):
         """No añade nada ni emite eventos si la provincia ya está en rebelión."""
         self.owner.rebelled_provinces = ["pisa"]
 
-        self.manager._do_rebellion(self.owner, "pisa")
+        self.manager.do_rebellion(self.owner, "pisa")
 
         self.assertEqual(self.owner.rebelled_provinces, ["pisa"])
         self.assertEqual(self.owner.rebelled_cities, [])
@@ -112,7 +112,7 @@ class TestDoRebellion(unittest.TestCase):
         """No añade nada ni emite eventos si la ciudad ya está en rebelión."""
         self.owner.rebelled_cities = ["pisa"]
 
-        self.manager._do_rebellion(self.owner, "pisa")
+        self.manager.do_rebellion(self.owner, "pisa")
 
         self.assertEqual(self.owner.rebelled_cities, ["pisa"])
         self.assertEqual(self.owner.rebelled_provinces, [])
@@ -122,7 +122,7 @@ class TestDoRebellion(unittest.TestCase):
         """Si la ciudad está fortificada y no hay guarnición, rebelión en la ciudad."""
         self.mock_province.city = "fortified"
 
-        self.manager._do_rebellion(self.owner, "pisa")
+        self.manager.do_rebellion(self.owner, "pisa")
 
         self.assertEqual(self.owner.rebelled_cities, ["pisa"])
         self.assertEqual(self.owner.rebelled_provinces, [])
@@ -138,7 +138,7 @@ class TestDoRebellion(unittest.TestCase):
         self.mock_province.city = "fortified"
         self.owner.garrisons = ["pisa"]
 
-        self.manager._do_rebellion(self.owner, "pisa")
+        self.manager.do_rebellion(self.owner, "pisa")
 
         self.assertEqual(self.owner.rebelled_provinces, ["pisa"])
         self.assertEqual(self.owner.rebelled_cities, [])
@@ -152,7 +152,7 @@ class TestDoRebellion(unittest.TestCase):
         """Si la provincia no tiene fortificación, emite REBELLION_PROVINCE."""
         self.mock_province.city = "unfortified"
 
-        self.manager._do_rebellion(self.owner, "pisa")
+        self.manager.do_rebellion(self.owner, "pisa")
 
         self.assertEqual(self.owner.rebelled_provinces, ["pisa"])
         self.mock_game.add_event.assert_called_once()
@@ -165,7 +165,7 @@ class TestDoRebellion(unittest.TestCase):
         self.mock_province.city = "fortress"
         self.mock_game.scenario.rules.fortress_active = True
 
-        self.manager._do_rebellion(self.owner, "pisa")
+        self.manager.do_rebellion(self.owner, "pisa")
 
         self.assertEqual(self.owner.rebelled_cities, ["pisa"])
         self.assertEqual(self.owner.rebelled_provinces, [])
@@ -180,7 +180,7 @@ class TestDoRebellion(unittest.TestCase):
         self.mock_province.city = "fortress"
         self.mock_game.scenario.rules.fortress_active = False
 
-        self.manager._do_rebellion(self.owner, "pisa")
+        self.manager.do_rebellion(self.owner, "pisa")
 
         self.assertEqual(self.owner.rebelled_provinces, ["pisa"])
         self.assertEqual(self.owner.rebelled_cities, [])
@@ -208,13 +208,13 @@ class TestExpenseRebellionNonHomeCountry(unittest.TestCase):
         self.mock_command = Mock()
 
     def test_expense_rebellion_non_home_country(self):
-        """Dispara _do_rebellion si la provincia está controlada y no es país natal."""
+        """Dispara do_rebellion si la provincia está controlada y no es país natal."""
         self.mock_command.target = "pisa"
         # La provincia pertenece al territorio natal de Milán, no de Florencia
         self.mock_game.scenario.province_home_country.return_value = "M"
 
-        with patch.object(self.manager, "_do_rebellion") as mock_do_rebellion:
-            self.manager.expense_rebellion_non_home_country(self.mock_command)
+        with patch.object(self.manager, "do_rebellion") as mock_do_rebellion:
+            self.manager._expense_rebellion_non_home_country(self.mock_command)
 
             mock_do_rebellion.assert_called_once_with(
                 owner=self.owner_player, target="pisa"
@@ -225,8 +225,8 @@ class TestExpenseRebellionNonHomeCountry(unittest.TestCase):
         self.mock_command.target = "rome"
         self.mock_game.scenario.province_home_country.return_value = "P"
 
-        with patch.object(self.manager, "_do_rebellion") as mock_do_rebellion:
-            self.manager.expense_rebellion_non_home_country(self.mock_command)
+        with patch.object(self.manager, "do_rebellion") as mock_do_rebellion:
+            self.manager._expense_rebellion_non_home_country(self.mock_command)
 
             mock_do_rebellion.assert_not_called()
 
@@ -236,8 +236,8 @@ class TestExpenseRebellionNonHomeCountry(unittest.TestCase):
         # Pertenece al territorio natal del propio jugador
         self.mock_game.scenario.province_home_country.return_value = "L"
 
-        with patch.object(self.manager, "_do_rebellion") as mock_do_rebellion:
-            self.manager.expense_rebellion_non_home_country(self.mock_command)
+        with patch.object(self.manager, "do_rebellion") as mock_do_rebellion:
+            self.manager._expense_rebellion_non_home_country(self.mock_command)
 
             mock_do_rebellion.assert_not_called()
 
@@ -252,10 +252,10 @@ class TestExpenseRebellionNonHomeCountry(unittest.TestCase):
         self.mock_game.players = [self.owner_player, another_player]
         self.mock_game.scenario.province_home_country.return_value = "M"
 
-        with patch.object(self.manager, "_do_rebellion") as mock_do_rebellion:
-            self.manager.expense_rebellion_non_home_country(self.mock_command)
+        with patch.object(self.manager, "do_rebellion") as mock_do_rebellion:
+            self.manager._expense_rebellion_non_home_country(self.mock_command)
 
-            # Debe llamar a _do_rebellion con Florencia (owner_player) como afectado
+            # Debe llamar a do_rebellion con Florencia (owner_player) como afectado
             mock_do_rebellion.assert_called_once_with(
                 owner=self.owner_player, target="pisa"
             )
@@ -276,13 +276,13 @@ class TestExpenseRebellionHomeCountry(unittest.TestCase):
         self.mock_command = Mock()
 
     def test_expense_rebellion_home_country(self):
-        """Dispara _do_rebellion si la provincia está controlada y es país natal."""
+        """Dispara do_rebellion si la provincia está controlada y es país natal."""
         self.mock_command.target = "flore"
         # Es provincia natal de Florencia
         self.mock_game.scenario.province_home_country.return_value = "L"
 
-        with patch.object(self.manager, "_do_rebellion") as mock_do_rebellion:
-            self.manager.expense_rebellion_home_country(self.mock_command)
+        with patch.object(self.manager, "do_rebellion") as mock_do_rebellion:
+            self.manager._expense_rebellion_home_country(self.mock_command)
 
             mock_do_rebellion.assert_called_once_with(
                 owner=self.owner_player, target="flore"
@@ -293,8 +293,8 @@ class TestExpenseRebellionHomeCountry(unittest.TestCase):
         self.mock_command.target = "rome"
         self.mock_game.scenario.province_home_country.return_value = "P"
 
-        with patch.object(self.manager, "_do_rebellion") as mock_do_rebellion:
-            self.manager.expense_rebellion_home_country(self.mock_command)
+        with patch.object(self.manager, "do_rebellion") as mock_do_rebellion:
+            self.manager._expense_rebellion_home_country(self.mock_command)
 
             mock_do_rebellion.assert_not_called()
 
@@ -304,7 +304,7 @@ class TestExpenseRebellionHomeCountry(unittest.TestCase):
         # 'pisa' está controlada por Florencia, pero pertenece al país natal de Milán
         self.mock_game.scenario.province_home_country.return_value = "M"
 
-        with patch.object(self.manager, "_do_rebellion") as mock_do_rebellion:
-            self.manager.expense_rebellion_home_country(self.mock_command)
+        with patch.object(self.manager, "do_rebellion") as mock_do_rebellion:
+            self.manager._expense_rebellion_home_country(self.mock_command)
 
             mock_do_rebellion.assert_not_called()
