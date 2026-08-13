@@ -264,16 +264,16 @@ class PlayerInteractionService:
                                 )
                 elif actor_type == "F":
                     for r in locations[actor_location].sea_routes:
-                        choices.append(
-                            (r.destination, f"{locations[r.destination].name}")
-                        )
+                        destination = r.destination.split()[0]
+                        choices.append((destination, f"{locations[destination].name}"))
                     for r in locations[actor_location].sea_routes:
+                        destination = r.destination.split()[0]
                         for p in self.game.players:
                             if p != self.player:
                                 choices.append(
                                     (
-                                        f"{r.destination} ({p.power})",
-                                        f"{locations[r.destination].name} "
+                                        f"{destination} ({p.power})",
+                                        f"{locations[destination].name} "
                                         f"({GameTables.powers[p.power]})",
                                     )
                                 )
