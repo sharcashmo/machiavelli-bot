@@ -33,6 +33,7 @@ from machiavelli.game.trading import (
 )
 from machiavelli.repositories.game_repository import GameRepository
 
+from .command_reporter import CommandReporter
 from .turn_reporter import TurnReporter
 
 type PlayerInfo = tuple[str, int | None]
@@ -210,7 +211,13 @@ class GameService:
             f"### :scroll: **Comandos actuales para "
             f"{GameTables.powers[player.power]}:**"
         )
-        lines.extend([f"- {command}" for command in player.commands])
+        lines.extend(
+            [
+                CommandReporter.format_report(command, game.map, game.turn_number)
+                for command in player.commands
+            ]
+        )
+        # lines.extend([f"- {command}" for command in player.commands])
         return lines
 
     def get_turn_report(self, channel_id: int) -> list[str]:
