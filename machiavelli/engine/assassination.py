@@ -21,7 +21,7 @@ class AssassinationResolver:
         self.rng = rng if rng is not None else Random()
         self.assassinations: list[str] = []
 
-    def _execute_asssassination(self, assassin: Player, target: Player) -> None:
+    def _execute_assassination(self, assassin: Player, target: Player) -> None:
         """Ejecuta un asesinato."""
         # En primer lugar, todas las órdenes de sus ejércitos se cancelan
         target.commands = [
@@ -39,10 +39,12 @@ class AssassinationResolver:
         # Provocamos rebeliones
         manager = RebellionManager(self.game)
         rebellions = []
-        army_locations = [province for province in target.armies] + [
-            province.split()[0] for province in target.fleets
-        ]
-        for province in target.controlled_locations:
+        army_locations = {
+            *target.armies,
+            *(province.split()[0] for province in target.fleets),
+            *target.garrisons,
+        }
+        for province in sorted(target.controlled_locations):
             rebellion_index = 0
             home_country = self.game.scenario.province_home_country(province)
             is_home_country = home_country in target.home_countries
@@ -77,6 +79,7 @@ class AssassinationResolver:
 
     def _do_assassination_attempt(self, player: Player, command: Command) -> None:
         """Intenta un asesinato."""
+        # No es necesario comprobar el comando porque se comprueba en run()
         # Comprobamos el target
         if command.target is None:
             return
@@ -137,4 +140,3 @@ class AssassinationResolver:
             for command in player.commands:
                 if command.is_valid_expense(self.ASSASSINATION_EXPENSE_TYPES):
                     self._do_assassination_attempt(player, command)
-        return
