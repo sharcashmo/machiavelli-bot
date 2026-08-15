@@ -54,21 +54,42 @@ class PlayerInteractionService:
             ]
 
             for p in home_countries_cities:
-                if p not in self.player.armies and p not in self.player.fleets:
-                    choices.append(
-                        (f"A {p}", f"Ejército en {provinces[p].name} (reclutar)")
-                    )
-                    if map.provinces[p].has_port:
+                if map.provinces[p].is_venice:
+                    if (
+                        p not in self.player.armies
+                        and p not in self.player.fleets
+                        and p not in self.player.garrisons
+                    ):
                         choices.append(
-                            (f"F {p}", f"Flota en {provinces[p].name} (reclutar)")
+                            (f"A {p}", f"Ejército en {provinces[p].name} (reclutar)")
                         )
-                if (
-                    p not in self.player.garrisons
-                    and map.provinces[p].city == "fortified"
-                ):
-                    choices.append(
-                        (f"G {p}", f"Guarnición en {provinces[p].name} (reclutar)")
-                    )
+                        if map.provinces[p].has_port:
+                            choices.append(
+                                (f"F {p}", f"Flota en {provinces[p].name} (reclutar)")
+                            )
+                        if map.provinces[p].city == "fortified":
+                            choices.append(
+                                (
+                                    f"G {p}",
+                                    f"Guarnición en {provinces[p].name} (reclutar)",
+                                )
+                            )
+                else:
+                    if p not in self.player.armies and p not in self.player.fleets:
+                        choices.append(
+                            (f"A {p}", f"Ejército en {provinces[p].name} (reclutar)")
+                        )
+                        if map.provinces[p].has_port:
+                            choices.append(
+                                (f"F {p}", f"Flota en {provinces[p].name} (reclutar)")
+                            )
+                    if (
+                        p not in self.player.garrisons
+                        and map.provinces[p].city == "fortified"
+                    ):
+                        choices.append(
+                            (f"G {p}", f"Guarnición en {provinces[p].name} (reclutar)")
+                        )
         else:
             # Resto de turnos, campaña
             for a in self.player.armies:
