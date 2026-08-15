@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import json
+import logging
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from types import MappingProxyType
 from typing import Self, TypeGuard
+
+logger = logging.getLogger(__name__)
 
 type JSONValue = (
     None | bool | int | float | str | list[JSONValue] | dict[str, JSONValue]
@@ -69,6 +72,9 @@ class InvalidTurnEventError(ValueError):
         super().__init__(message)
         self.row_id = row_id
         self.event_type = event_type
+        logger.debug(
+            "InvalidTurnEventError %s %s %s", self, self.row_id, self.event_type
+        )
 
 
 _MAINTENANCE_RESULTS = {
@@ -245,7 +251,7 @@ def _string(value: object) -> str:
 
 
 def _nullable_string(value: object) -> str | None:
-    return None if value is None else _string(value)
+    return None if not value else _string(value)
 
 
 def _integer(value: object, *, minimum: int | None = None) -> int:
@@ -419,6 +425,7 @@ def _income_collected(data: Mapping[str, object]) -> dict[str, JSONValue]:
 
 def _maintenance_order(data: Mapping[str, object]) -> dict[str, JSONValue]:
     _keys(data, {"player", "actor", "order", "target", "result", "cost"})
+    logger.debug("Validating maintenance order: %s", data)
     return {
         "player": _string(data["player"]),
         "actor": _string(data["actor"]),
