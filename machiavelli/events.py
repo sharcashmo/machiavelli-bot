@@ -72,9 +72,6 @@ class InvalidTurnEventError(ValueError):
         super().__init__(message)
         self.row_id = row_id
         self.event_type = event_type
-        logger.debug(
-            "InvalidTurnEventError %s %s %s", self, self.row_id, self.event_type
-        )
 
 
 _MAINTENANCE_RESULTS = {
@@ -425,7 +422,6 @@ def _income_collected(data: Mapping[str, object]) -> dict[str, JSONValue]:
 
 def _maintenance_order(data: Mapping[str, object]) -> dict[str, JSONValue]:
     _keys(data, {"player", "actor", "order", "target", "result", "cost"})
-    logger.debug("Validating maintenance order: %s", data)
     return {
         "player": _string(data["player"]),
         "actor": _string(data["actor"]),
