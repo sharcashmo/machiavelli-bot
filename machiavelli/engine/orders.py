@@ -45,9 +45,7 @@ class OrderProcessor:
         player: Player,
         command: Command,
     ) -> list[str]:
-        """Registra una orden de mantenimiento, conservando como máximo una fila por
-        actor.
-        """
+        """Registra una orden de mantenimiento, conservando una orden por actor."""
         current_commands = [
             current for current in player.commands if current.actor == command.actor
         ]
@@ -57,10 +55,7 @@ class OrderProcessor:
             )
 
         if not current_commands:
-            # A disband order only has meaning when it replaces the default order of a
-            # newly created unit. The historical implementation ignored a standalone D.
-            if command.command != "D":
-                player.add_command(command)
+            player.add_command(command)
             return []
 
         current = current_commands[0]
@@ -84,8 +79,7 @@ class OrderProcessor:
         player: Player,
         command: Command,
     ) -> list[str]:
-        """Registra una orden de campaña, actualiza un gasto o añade un tramo de convoy.
-        """
+        """Registra una orden, actualiza un gasto o añade un tramo de convoy."""
         actor_type, _actor_id = command.actor.split(maxsplit=1)
         if actor_type == "E":
             return self._handle_expense_command(player, command)
