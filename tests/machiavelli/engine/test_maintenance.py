@@ -238,7 +238,7 @@ def test_run_emits_disband_maintain_recruit_then_summary() -> None:
     game, player = _state(ducats=9)
     player.armies = ["rome", "flore"]
     player.commands = [
-        Command(game, player, "G flore", "R"),
+        Command(game, player, "G venic", "R"),
         Command(game, player, "A rome", "M"),
         Command(game, player, "A flore", "D"),
     ]
