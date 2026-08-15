@@ -75,7 +75,7 @@ class MaintenanceResolver:
             self._set_default_commands(player)
 
             for command in [item for item in player.commands if item.command == "D"]:
-                unit_type, unit_id = command.actor.split()
+                unit_type, unit_id = command.actor.split(maxsplit=1)
                 units = self._unit_collection(player, unit_type)
                 if unit_id in units:
                     units.remove(unit_id)
