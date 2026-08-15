@@ -1414,7 +1414,7 @@ async def cmd_user(
     command: str,
     target: str | None = None,
 ):
-    await interaction.response.defer(ephemeral=False)
+    await interaction.response.defer(ephemeral=True)
 
     try:
         lines = await asyncio.to_thread(
@@ -1427,22 +1427,22 @@ async def cmd_user(
             target,
             power,
         )
-        await interaction.followup.send("\n".join(lines), ephemeral=False)
+        await interaction.followup.send("\n".join(lines), ephemeral=True)
     except GameNotFoundException:
         await interaction.followup.send(
-            "**Error:** No hay ninguna partida activa en este canal.", ephemeral=False
+            "**Error:** No hay ninguna partida activa en este canal.", ephemeral=True
         )
     except PlayerNotFoundException:
         await interaction.followup.send(
             f"**Error:** No se encontró la potencia `{power}` en la partida.",
-            ephemeral=False,
+            ephemeral=True,
         )
     except ValueError as error:
-        await interaction.followup.send(f"**Error:** {error}", ephemeral=False)
+        await interaction.followup.send(f"**Error:** {error}", ephemeral=True)
     except Exception as error:
         detailed_error = format_error_with_location(error)
         await interaction.followup.send(
-            f"**Error inesperado:** {detailed_error}", ephemeral=False
+            f"**Error inesperado:** {detailed_error}", ephemeral=True
         )
 
 
@@ -1518,7 +1518,7 @@ async def expense(
 async def expense_user(
     interaction: discord.Interaction, power: str, expense: str, target: str, amount: str
 ):
-    await interaction.response.defer(ephemeral=False)
+    await interaction.response.defer(ephemeral=True)
 
     try:
         lines = await asyncio.to_thread(
@@ -1531,25 +1531,25 @@ async def expense_user(
             amount,
             power,
         )
-        await interaction.followup.send("\n".join(lines), ephemeral=False)
+        await interaction.followup.send("\n".join(lines), ephemeral=True)
     except GameNotFoundException:
         await interaction.followup.send(
-            "**Error:** No hay ninguna partida activa en este canal.", ephemeral=False
+            "**Error:** No hay ninguna partida activa en este canal.", ephemeral=True
         )
     except PlayerNotFoundException:
         await interaction.followup.send(
             f"**Error:** No se encontró la potencia `{power}` en la partida.",
-            ephemeral=False,
+            ephemeral=True,
         )
     except TooManyExpenses:
         await interaction.followup.send(
             "**Error:** Superado el límite de gastos. La orden no se ha guardado.",
-            ephemeral=False,
+            ephemeral=True,
         )
     except ValueError as error:
-        await interaction.followup.send(f"**Error:** {error}", ephemeral=False)
+        await interaction.followup.send(f"**Error:** {error}", ephemeral=True)
     except Exception as error:
         detailed_error = format_error_with_location(error)
         await interaction.followup.send(
-            f"**Error inesperado:** {detailed_error}", ephemeral=False
+            f"**Error inesperado:** {detailed_error}", ephemeral=True
         )
