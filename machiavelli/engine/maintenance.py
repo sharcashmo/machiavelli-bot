@@ -63,14 +63,15 @@ class MaintenanceResolver:
             raise ValueError(f"Tipo de unidad desconocido: {unit_type}") from error
 
     def run(self) -> None:
-        """Resuelve todos los intentos de mantenimiento y emite un resumen por jugador.
-        """
+        """Resuelve los intentos de mantenimiento y emite un resumen por jugador."""
         game_map = self.game.require_map()
         scenario = self.game.require_scenario()
 
         for player in self.game.players:
             initial_ducats = player.ducats
             expenses = 0
+            recruited_places = []
+            disbanded_places = []
             self._set_default_commands(player)
 
             for command in [item for item in player.commands if item.command == "D"]:
@@ -78,6 +79,7 @@ class MaintenanceResolver:
                 units = self._unit_collection(player, unit_type)
                 if unit_id in units:
                     units.remove(unit_id)
+                    disbanded_places.append(unit_id)
                     self._emit(player, command, "disbanded", 0)
                 else:
                     self._emit(player, command, "unit_not_found", 0)
@@ -108,6 +110,12 @@ class MaintenanceResolver:
                 if unit_id not in home_country_cities:
                     self._emit(player, command, "invalid_home_or_control", 0)
                     continue
+                if unit_id in recruited_places:
+                    self._emit(player, command, "already_recruited", 0)
+                    continue
+                if unit_id in disbanded_places:
+                    self._emit(player, command, "disbanded_place", 0)
+                    continue
 
                 province = game_map.provinces[unit_id]
                 occupied = unit_id in player.armies or any(
@@ -123,6 +131,7 @@ class MaintenanceResolver:
                         self._emit(player, command, "port_required", 0)
                     else:
                         self._unit_collection(player, unit_type).append(unit_id)
+                        recruited_places.append(unit_id)
                         expenses += 3
                         self._emit(player, command, "recruited", 3)
                 elif unit_type == "G":
@@ -136,6 +145,7 @@ class MaintenanceResolver:
                         self._emit(player, command, "fortified_city_required", 0)
                     else:
                         player.garrisons.append(unit_id)
+                        recruited_places.append(unit_id)
                         expenses += 3
                         self._emit(player, command, "recruited", 3)
                 else:

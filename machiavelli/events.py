@@ -79,6 +79,8 @@ _MAINTENANCE_RESULTS = {
     "recruited",
     "recruitment_no_funds",
     "invalid_home_or_control",
+    "already_recruited",
+    "disbanded_place",
     "space_occupied",
     "port_required",
     "rebelled_city",

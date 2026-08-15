@@ -52,6 +52,8 @@ _MAINTENANCE_RESULTS = {
     "recruited": "reclutada",
     "recruitment_no_funds": "reclutamiento rechazado por falta de fondos",
     "invalid_home_or_control": "reclutamiento fuera de territorio válido",
+    "already_recruited": "ya se reclutó en esta provincia",
+    "disbanded_place": "no se puede desbandar y reclutar en la misma provincia",
     "space_occupied": "espacio ocupado",
     "port_required": "puerto necesario",
     "rebelled_city": "ciudad rebelde",
