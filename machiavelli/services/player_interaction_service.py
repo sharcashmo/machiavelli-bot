@@ -54,11 +54,7 @@ class PlayerInteractionService:
             ]
 
             for p in home_countries_cities:
-                if (
-                    p not in self.player.armies
-                    and p not in self.player.fleets
-                    and (p not in self.player.garrisons)
-                ):
+                if p not in self.player.armies and p not in self.player.fleets:
                     choices.append(
                         (f"A {p}", f"Ejército en {provinces[p].name} (reclutar)")
                     )
