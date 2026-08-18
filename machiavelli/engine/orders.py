@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from machiavelli.engine.exceptions import TooManyExpenses
 from machiavelli.game.map import MovementMode, Province
 from machiavelli.game.player import TurnType
+from machiavelli.services.command_reporter import CommandReporter
 
 if TYPE_CHECKING:
     from machiavelli.game.command import Command
@@ -37,7 +38,11 @@ class OrderProcessor:
             report.extend(self._handle_campaign_command(player, command))
 
         report.append("**Órdenes recibidas hasta ahora:**")
-        report.extend(f"`{registered}`" for registered in player.commands)
+        for registered in player.commands:
+            command_line = CommandReporter.format_report(
+                registered, self.game.map, self.game.turn_number
+            )
+            report.append(f"`{command_line}`")
         return report
 
     def _handle_maintenance_command(
