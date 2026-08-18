@@ -85,7 +85,7 @@ class MaintenanceResolver:
                     self._emit(player, command, "unit_not_found", 0)
 
             for command in [item for item in player.commands if item.command == "M"]:
-                unit_type, unit_id = command.actor.split()
+                unit_type, unit_id = command.actor.split(maxsplit=1)
                 units = self._unit_collection(player, unit_type)
                 if unit_id not in units:
                     self._emit(player, command, "unit_not_found", 0)
@@ -103,7 +103,7 @@ class MaintenanceResolver:
                 and game_map.provinces[province].city in ("city", "fortified")
             }
             for command in [item for item in player.commands if item.command == "R"]:
-                unit_type, unit_id = command.actor.split()
+                unit_type, unit_id = command.actor.split(maxsplit=1)
                 if player.ducats - expenses < 3:
                     self._emit(player, command, "recruitment_no_funds", 0)
                     continue
