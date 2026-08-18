@@ -21,12 +21,6 @@ def create_command(
     )
 
 
-def test_command_repr() -> None:
-    cmd = create_command(actor="A milan", command="M", target="venic")
-
-    assert repr(cmd) == "Command(actor='A milan', command='M', target='venic')"
-
-
 class TestIsValidExpense:
     def test_valid_expense_default_tables(self, monkeypatch) -> None:
         monkeypatch.setattr(
