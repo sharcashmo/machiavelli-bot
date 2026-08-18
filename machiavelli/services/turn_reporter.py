@@ -155,14 +155,12 @@ class TurnReporter:
                 provinces = TurnReporter._locations(
                     game, cast(tuple[str, ...], data["provinces"])
                 )
-                return [
-                    f"La plaga apareció tras una tirada de "
-                    f"{cast(int, data['severity_roll'])} en {provinces}."
-                ]
+                severity = GameTables.disasters[cast(int, data["severity_roll"])][1]
+                return [f"### :skull: Plaga {severity}.", f"> Apareció en {provinces}."]
             case EventType.PLAGUE_DEATH:
                 player = TurnReporter._nullable_player(game, data["player"])
                 units = TurnReporter._units(game, cast(tuple[str, ...], data["units"]))
-                return [f"La plaga eliminó unidades de {player}: {units}."]
+                return [f"> La plaga eliminó unidades de {player}: {units}."]
             case EventType.REBELLION_PACIFY:
                 player = TurnReporter._player(game, cast(str, data["player"]))
                 province = TurnReporter._location(game, cast(str, data["province"]))
