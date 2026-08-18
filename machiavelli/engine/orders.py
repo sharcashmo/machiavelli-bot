@@ -30,7 +30,10 @@ class OrderProcessor:
         """Registra una orden y devuelve su informe visible para el usuario en un orden
         estable.
         """
-        report = [f"Orden `{command}` enviada."]
+        command_txt = CommandReporter.format_report(
+            command, self.game.map, self.game.turn_number
+        )
+        report = [f"Orden `{command_txt}` enviada."]
 
         if turn_type == TurnType.MAINTENANCE:
             report.extend(self._handle_maintenance_command(player, command))
