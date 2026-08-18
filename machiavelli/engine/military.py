@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import logging
 import re
+import traceback
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, replace
+from enum import StrEnum
 
 from ..events import TurnEvent
 from ..game.command import Command
@@ -48,6 +50,7 @@ class MilitaryOrder:
     transported_army: UnitKey | None = None
     supported_faction: str | None = None
     is_convoy: bool = False
+    straits: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,6 +110,23 @@ class MilitaryResolution:
 class MilitaryResolutionError(Exception):
     """No se pudo obtener un resultado militar completo."""
 
+    def __init__(self, message):
+        """Constructor  para dejar una traza de la causa del error."""
+        super().__init__(message)  # Extrae la pila de llamadas en tiempo de ejecución
+
+        stack = traceback.extract_stack()
+
+        # stack[-1] es este __init__. stack[-2] es donde se instanció la excepción.
+        origin = stack[-2]
+        self.filename = origin.filename
+        self.lineno = origin.lineno
+
+        # Registrar el error explícitamente con logger.error
+        logger.error(
+            f"Excepción levantada: {message} | Archivo: {self.filename} | Línea:"
+            f" {self.lineno}"
+        )
+
 
 class InvalidMilitaryState(MilitaryResolutionError):
     """El snapshot militar contiene ocupaciones incompatibles."""
@@ -125,11 +145,17 @@ class DislodgementResolverRequired(MilitaryResolutionError):
     """Hay desalojos y falta el gestor externo de retiradas."""
 
 
+class DecisionType(StrEnum):
+    DISBAND = "disband"
+    RETREAT = "retreat"
+    GARRISON = "garrison"
+
+
 @dataclass(frozen=True, slots=True)
 class DislodgementDecision:
     """Define el resultado operativo y el destino opcional de una unidad desalojada."""
 
-    result_type: str  # Valores ("garrison", "retreat", "disband")
+    decision_type: DecisionType
     destination: str | None
 
 
@@ -147,6 +173,31 @@ def conflict_location(location: str, unit_type: str) -> str:
     """Devuelve la plaza de conflicto sin perder la costa de la identidad."""
     base_location = location.split()[0]
     return f"G {base_location}" if unit_type == "G" else base_location
+
+
+def _cancel_moves_towards(
+    units: Iterable[UnitKey],
+    effective_positions: dict[UnitKey, str],
+    successful_moves: set[UnitKey],
+    successful_conversions: set[UnitKey],
+) -> None:
+    """Elimina de successful_moves y successful_conversions las unidades que se dirigen
+    al origen de alguna de las unidades pasadas."""
+    blocked_origins = {u.origin for u in units}
+
+    if not blocked_origins:
+        return
+
+    logger.debug("Eliminando movimientos dirigidos a: %s", blocked_origins)
+
+    successful_moves -= {
+        m for m in successful_moves if effective_positions.get(m) in blocked_origins
+    }
+    successful_conversions -= {
+        c
+        for c in successful_conversions
+        if effective_positions.get(c) in blocked_origins
+    }
 
 
 class MilitaryResolver:
@@ -334,6 +385,46 @@ class MilitaryResolver:
             if reason:
                 self._invalid_order(key, reason)
         self._link_convoys()
+        for key, order in self.orders_by_unit.items():
+            if order.order_type in {"A", "S"}:
+                path = (
+                    order.path
+                    if order.is_convoy
+                    else (key.origin, order.target_location)
+                )
+                mode = (
+                    MovementMode.SEA
+                    if order.is_convoy or key.unit_type == "F"
+                    else MovementMode.LAND
+                )
+                self.orders_by_unit[key] = replace(
+                    order,
+                    straits=self._straits_for_path(path, mode),
+                )
+
+    def _straits_for_path(
+        self, path: tuple[str | None, ...], mode: MovementMode
+    ) -> tuple[str, ...]:
+        """Devuelve los estrechos atravesados por una ruta ya validada."""
+        straits: list[str] = []
+        for origin, target in zip(path[:-1], path[1:], strict=True):
+            if origin is None or target is None:
+                continue
+            route = next(
+                (
+                    item
+                    for item in (
+                        self.map.locations[origin].land_routes
+                        if mode is MovementMode.LAND
+                        else self.map.locations[origin].sea_routes
+                    )
+                    if item.destination == target
+                ),
+                None,
+            )
+            if route is not None and route.strait is not None:
+                straits.append(route.strait)
+        return tuple(straits)
 
     def _link_convoys(self) -> None:
         """Enlaza rutas encadenadas con sus flotas Transport iniciales."""
@@ -589,6 +680,8 @@ class MilitaryResolver:
             # Cada iteración parte de un estado canónico para comparar firmas fiables.
             state = self._normalise_state(state)
             groups, moving = self._conflict_groups(state)
+            # logger.debug("State: %s", state)
+            logger.debug("Iteration: %s. Groups: %s", iteration, groups)
             pending = tuple(
                 sorted(
                     location
@@ -694,7 +787,11 @@ class MilitaryResolver:
         broken = {
             key
             for key, order in self.orders_by_unit.items()
-            if order.is_convoy and key not in available
+            if order.is_convoy
+            and any(
+                transporter in state.dislodged_units
+                for transporter in order.transporters
+            )
         }
         cancelled.update(broken)
         self._broken_convoys.update(broken)
@@ -769,11 +866,14 @@ class MilitaryResolver:
                 )
                 location = conflict_location(position or key.origin, unit_type)
             locations.setdefault(location, []).append(key)
+            # logger.debug("Locations: %s", locations)
         groups: dict[str, tuple[tuple[str, ...], tuple[UnitKey, ...]]] = {}
         crossed: set[str] = set()
+        logger.debug("Direct: %s", direct)
         for (origin, target), unit in direct.items():
             opponent = direct.get((target, origin))
             if opponent is None or opponent.player_id == unit.player_id:
+                logger.debug("Skipping %s -> %s", unit, opponent)
                 continue
             endpoints = tuple(
                 sorted(
@@ -823,6 +923,10 @@ class MilitaryResolver:
                     for transporter in order.transporters
                     if transporter in group_by_unit
                 )
+            if unit in moving:
+                dependencies.update(
+                    self._strait_dependencies(unit, group_by_unit, moving, state)
+                )
             for supporter in state.active_supports:
                 support = self.orders_by_unit[supporter]
                 if (
@@ -831,8 +935,98 @@ class MilitaryResolver:
                     and supporter in group_by_unit
                 ):
                     dependencies.add(group_by_unit[supporter])
+                if (
+                    support.target_location in locations
+                    and support.supported_faction == self._player_power(unit)
+                ):
+                    dependencies.update(
+                        self._strait_dependencies(
+                            supporter, group_by_unit, moving, state
+                        )
+                    )
         dependencies.discard(group)
         return frozenset(dependencies)
+
+    def _strait_dependencies(
+        self,
+        mover: UnitKey,
+        group_by_unit: Mapping[UnitKey, str],
+        moving: set[UnitKey],
+        state: ResolutionState,
+    ) -> set[str]:
+        """Obtiene los conflictos que determinan la ocupación de un estrecho."""
+        dependencies: set[str] = set()
+        for strait in self.orders_by_unit[mover].straits:
+            for candidate in self.units_by_key:
+                if (
+                    candidate.unit_type != "F"
+                    or candidate.player_id == mover.player_id
+                    or candidate in state.dislodged_units
+                ):
+                    continue
+                candidate_order = self.orders_by_unit[candidate]
+                may_remain = conflict_location(candidate.origin, "F") == strait
+                may_enter = (
+                    candidate in moving
+                    and candidate_order.order_type == "A"
+                    and conflict_location(
+                        candidate_order.target_location or candidate.origin, "F"
+                    )
+                    == strait
+                )
+                if (may_remain or may_enter) and candidate in group_by_unit:
+                    dependencies.add(group_by_unit[candidate])
+        return dependencies
+
+    def _blocked_strait_movers(
+        self, movers: frozenset[UnitKey], state: ResolutionState
+    ) -> set[UnitKey]:
+        """Devuelve avances bloqueados por flotas enemigas al fin del movimiento."""
+        return {
+            mover
+            for mover in movers
+            if any(
+                self._foreign_fleet_occupies_strait(mover, strait, state)
+                for strait in self.orders_by_unit[mover].straits
+            )
+        }
+
+    def _blocked_strait_supports(
+        self,
+        locations: tuple[str, ...],
+        state: ResolutionState,
+    ) -> set[UnitKey]:
+        """Devuelve los apoyos al grupo bloqueados por un estrecho enemigo."""
+        return {
+            supporter
+            for supporter in state.active_supports
+            if self.orders_by_unit[supporter].target_location in locations
+            and any(
+                self._foreign_fleet_occupies_strait(supporter, strait, state)
+                for strait in self.orders_by_unit[supporter].straits
+            )
+        }
+
+    def _foreign_fleet_occupies_strait(
+        self, mover: UnitKey, strait: str, state: ResolutionState
+    ) -> bool:
+        """Comprueba si una flota enemiga termina ocupando el estrecho."""
+        return any(
+            candidate.unit_type == "F"
+            and candidate.player_id != mover.player_id
+            and candidate not in state.dislodged_units
+            and (
+                final_location := self._final_location(
+                    candidate,
+                    state.successful_moves,
+                    state.successful_conversions,
+                    state.dislodged_units,
+                )
+            )
+            is not None
+            and conflict_location(final_location, "F") == strait
+            for candidate in self.units_by_key
+        )
 
     def _resolve_group(
         self,
@@ -841,8 +1035,19 @@ class MilitaryResolver:
         state: ResolutionState,
     ) -> tuple[ResolutionState, frozenset[str]]:
         """Adjudica un grupo independiente y devuelve su nuevo estado."""
+        logger.debug("En _resolve_group")
         locations, units = definition
         movers = frozenset(set(units) & moving)
+        if blocked := self._blocked_strait_movers(movers, state):
+            return (
+                replace(
+                    state,
+                    cancelled_orders=state.cancelled_orders | frozenset(blocked),
+                ),
+                frozenset(),
+            )
+        if blocked := self._blocked_strait_supports(locations, state):
+            return self._cancel_supports(state, blocked), frozenset()
         strengths = {
             unit: (
                 1
@@ -876,18 +1081,30 @@ class MilitaryResolver:
         successful_moves = set(state.successful_moves)
         successful_conversions = set(state.successful_conversions)
         factions = {unit.player_id for unit in units}
+        effective_positions = dict(self._effective_positions_for(state))
         # Las colisiones propias se cancelan; los empates enemigos tampoco avanzan.
+        logger.debug("Factions: %s", factions)
+        logger.debug("Units: %s", units)
+        logger.debug("Movers: %s", movers)
         if len(factions) == 1 and len(units) > 1:
             cancelled.update(movers)
             cancelled_self.update(movers)
+            _cancel_moves_towards(
+                movers, effective_positions, successful_moves, successful_conversions
+            )
         elif len(winners) != 1 or next(iter(winners)) not in movers:
+            logger.debug("Empate, y cancelaré %s", movers)
             cancelled.update(movers)
+            _cancel_moves_towards(
+                movers, effective_positions, successful_moves, successful_conversions
+            )
         else:
             winner = next(iter(winners))
             self._mark_success(winner, successful_moves, successful_conversions)
             for unit in units:
                 if unit == winner:
                     continue
+                logger.debug("Unit %s", unit)
                 if unit in movers:
                     winner_target = conflict_location(
                         self.orders_by_unit[winner].target_location or winner.origin,
@@ -898,6 +1115,12 @@ class MilitaryResolver:
                         self._record_dislodgement(dislodgements, unit, winner)
                         cancelled.add(unit)
                     else:
+                        _cancel_moves_towards(
+                            [unit],
+                            effective_positions,
+                            successful_moves,
+                            successful_conversions,
+                        )
                         cancelled.add(unit)
                 else:
                     dislodged.add(unit)
@@ -1179,6 +1402,7 @@ class MilitaryResolver:
             for locations in collections.values():
                 locations.sort()
         independent.sort()
+        logger.debug("Llamamos a _validate_final_collections")
         self._validate_final_collections(players, independent)
         return players, independent, list(self.game.besieges)
 
@@ -1189,6 +1413,7 @@ class MilitaryResolver:
         occupied_campaign: set[str] = set()
         occupied_garrisons: set[str] = set()
         for collections in players.values():
+            logger.debug("Collections: %s", collections)
             for unit_type, locations in collections.items():
                 for location in locations:
                     if unit_type == "A" and location not in self.map.provinces:
@@ -1199,11 +1424,13 @@ class MilitaryResolver:
                         occupied_garrisons if unit_type == "G" else occupied_campaign
                     )
                     conflict = conflict_location(location, unit_type)
+                    logger.debug("Conflict: %s. Occupied: %s", conflict, occupied)
                     if conflict in occupied:
                         raise MilitaryResolutionError("Ocupación final duplicada")
                     occupied.add(conflict)
         for location in independent:
             conflict = conflict_location(location, "G")
+            logger.debug("Conflicto es %s. Garrisons: %s", conflict, occupied_garrisons)
             if conflict in occupied_garrisons:
                 raise MilitaryResolutionError("Ocupación final duplicada")
             occupied_garrisons.add(conflict)
@@ -1493,8 +1720,11 @@ class MilitaryResolver:
                 "El gestor de desalojos no cubre exactamente las unidades desalojadas"
             )
         outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
+        logger.debug("Ahora con los dislodgements. Outcomes es %s", outcomes)
+        logger.debug("Decisions es %r", decisions)
         for key, decision in decisions.items():
             destination = decision.destination
+            decision_type = decision.decision_type
             if destination is not None and (
                 not isinstance(destination, str) or not destination
             ):
@@ -1509,6 +1739,7 @@ class MilitaryResolver:
                 )
             if (
                 destination is not None
+                and decision_type == DecisionType.RETREAT
                 and conflict_location(destination, outcomes[key].final_unit_type)
                 in resolution.contested_locations
             ):
@@ -1528,14 +1759,19 @@ class MilitaryResolver:
         outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
         for key in sorted(decisions, key=_key_sort):
             decision = decisions[key]
-            result_type = decision.result_type
+            decision_type = decision.decision_type
             destination = decision.destination
 
             outcome = outcomes[key]
 
-            unit_type = outcome.unit.unit_type if result_type == "retreat" else "G"
+            unit_type = (
+                outcome.unit.unit_type if decision_type == DecisionType.RETREAT else "G"
+            )
 
-            if decision.result_type == "disband" or decision.destination is None:
+            if (
+                decision.decision_type == DecisionType.DISBAND
+                or decision.destination is None
+            ):
                 continue
 
             if unit_type == "A" and destination not in self.map.provinces:
@@ -1564,6 +1800,7 @@ class MilitaryResolver:
             for locations in collections.values():
                 locations.sort()
         independent.sort()
+        logger.debug("Llamamos a _validate_final_collections")
         self._validate_final_collections(player_collections, independent)
 
     def _apply_final_collections(
@@ -1685,6 +1922,10 @@ class MilitaryResolver:
             provisional_independent,
         )
         resolution = self._build_resolution(state, siege_dislodged)
+        logger.debug(
+            "Llamamos a _build_final_collections. resolution is %s",
+            resolution,
+        )
         collections, independent, _ = self._build_final_collections(resolution)
 
         # Fase 5: resolver retiradas antes de validar el estado definitivo
@@ -1797,7 +2038,7 @@ class MilitaryResolver:
             [
                 [
                     [unit.player_id, unit.unit_type, unit.origin],
-                    decision.result_type,
+                    decision.decision_type,
                     decision.destination,
                 ]
                 for unit, decision in decisions.items()

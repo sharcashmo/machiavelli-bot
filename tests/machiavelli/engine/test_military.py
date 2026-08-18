@@ -136,6 +136,30 @@ def convoy_map() -> Map:
     return Map(provinces=provinces, seas=seas)
 
 
+def strait_map() -> Map:
+    """Mapa mínimo con un estrecho entre dos mares."""
+    provinces = {
+        name: Province(name, custom_id=name, has_port=True)
+        for name in ("a", "b", "piomb")
+    }
+    seas = {name: Sea(name, custom_id=name) for name in ("W", "E", "Q")}
+    for origin, destination, strait in (
+        ("W", "E", "piomb"),
+        ("E", "W", "piomb"),
+        ("a", "W", None),
+        ("W", "a", None),
+        ("E", "b", None),
+        ("b", "E", None),
+        ("piomb", "Q", None),
+        ("Q", "piomb", None),
+        ("Q", "E", None),
+        ("E", "Q", None),
+    ):
+        location = seas[origin] if origin in seas else provinces[origin]
+        location.sea_routes.append(Route(destination, strait))
+    return Map(provinces=provinces, seas=seas)
+
+
 class TestMilitaryModelsAndIndex(unittest.TestCase):
     """Verifica identidades, snapshots e índices militares iniciales."""
 
@@ -1330,6 +1354,144 @@ class TestDependencyResolution(unittest.TestCase):
         self.assertNotIn(army, state.successful_moves)
         self.assertNotIn("b", state.resolved_conflicts)
         self.assertNotIn("b", resolver._build_resolution(state).contested_locations)
+
+
+class TestStraits(unittest.TestCase):
+    """Comprueba la adyacencia dinámica controlada por estrechos."""
+
+    @staticmethod
+    def _resolve(game):
+        resolver = MilitaryResolver(game)
+        resolver._build_unit_index()
+        resolver._compile_orders()
+        resolver._link_and_validate_orders()
+        return resolver, resolver._build_resolution(resolver._resolve_conflicts())
+
+    def test_enemy_fleet_holding_strait_blocks_direct_advance(self):
+        game = create_military_game(
+            strait_map(),
+            [
+                {"player_id": "P1", "power": "M", "fleets": ["W"]},
+                {"player_id": "P2", "power": "V", "fleets": ["piomb"]},
+            ],
+            orders={"P1": [("F W", "A", "E")], "P2": [("F piomb", "H", "")]},
+        )
+
+        resolver, resolution = self._resolve(game)
+
+        mover = UnitKey("P1", "F", "W")
+        self.assertEqual(resolver.orders_by_unit[mover].straits, ("piomb",))
+        self.assertEqual(
+            next(
+                outcome
+                for outcome in resolution.outcomes
+                if outcome.unit == mover
+            ).final_location,
+            "W",
+        )
+
+    def test_own_fleet_does_not_block_strait(self):
+        game = create_military_game(
+            strait_map(),
+            [{"player_id": "P1", "power": "M", "fleets": ["W", "piomb"]}],
+            orders={"P1": [("F W", "A", "E"), ("F piomb", "H", "")]},
+        )
+
+        _, resolution = self._resolve(game)
+
+        mover = UnitKey("P1", "F", "W")
+        self.assertEqual(
+            next(
+                outcome
+                for outcome in resolution.outcomes
+                if outcome.unit == mover
+            ).final_location,
+            "E",
+        )
+
+    def test_enemy_fleet_leaving_strait_with_success_opens_passage(self):
+        game = create_military_game(
+            strait_map(),
+            [
+                {"player_id": "P1", "power": "M", "fleets": ["W"]},
+                {"player_id": "P2", "power": "V", "fleets": ["piomb"]},
+            ],
+            orders={
+                "P1": [("F W", "A", "E")],
+                "P2": [("F piomb", "A", "Q")],
+            },
+        )
+
+        _, resolution = self._resolve(game)
+        outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
+        self.assertEqual(outcomes[UnitKey("P1", "F", "W")].final_location, "E")
+        self.assertEqual(outcomes[UnitKey("P2", "F", "piomb")].final_location, "Q")
+
+    def test_enemy_fleet_entering_strait_blocks_simultaneous_advance(self):
+        game = create_military_game(
+            strait_map(),
+            [
+                {"player_id": "P1", "power": "M", "fleets": ["W"]},
+                {"player_id": "P2", "power": "V", "fleets": ["Q"]},
+            ],
+            orders={"P1": [("F W", "A", "E")], "P2": [("F Q", "A", "piomb")]},
+        )
+
+        _, resolution = self._resolve(game)
+        outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
+
+        self.assertEqual(outcomes[UnitKey("P1", "F", "W")].final_location, "W")
+        self.assertEqual(outcomes[UnitKey("P2", "F", "Q")].final_location, "piomb")
+
+    def test_enemy_fleet_holding_strait_cuts_support_through_it(self):
+        game = create_military_game(
+            strait_map(),
+            [
+                {"player_id": "P1", "power": "M", "fleets": ["Q", "W"]},
+                {"player_id": "P2", "power": "V", "fleets": ["E", "piomb"]},
+            ],
+            orders={
+                "P1": [("F Q", "A", "E"), ("F W", "S", "E")],
+                "P2": [("F E", "H", ""), ("F piomb", "H", "")],
+            },
+        )
+
+        resolver, resolution = self._resolve(game)
+        outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
+
+        supporter = UnitKey("P1", "F", "W")
+        self.assertEqual(resolver.orders_by_unit[supporter].straits, ("piomb",))
+        self.assertEqual(outcomes[UnitKey("P1", "F", "Q")].final_location, "Q")
+        self.assertEqual(outcomes[UnitKey("P2", "F", "E")].final_location, "E")
+
+    def test_enemy_fleet_holding_strait_blocks_convoy(self):
+        game = create_military_game(
+            strait_map(),
+            [
+                {"player_id": "P1", "power": "M", "armies": ["a"]},
+                {"player_id": "P2", "power": "V", "fleets": ["piomb"]},
+                {"player_id": "P3", "power": "G", "fleets": ["W", "E"]},
+            ],
+            orders={
+                "P1": [("A a", "A", "W"), ("A a", "A", "E"), ("A a", "A", "b")],
+                "P2": [("F piomb", "H", "")],
+                "P3": [("F W", "T", "A a"), ("F E", "T", "A a")],
+            },
+        )
+
+        resolver, resolution = self._resolve(game)
+
+        army = UnitKey("P1", "A", "a")
+        self.assertEqual(resolver.orders_by_unit[army].straits, ("piomb",))
+        self.assertEqual(
+            next(
+                outcome
+                for outcome in resolution.outcomes
+                if outcome.unit == army
+            ).final_location,
+            "a",
+        )
+        self.assertNotIn(army, resolver._broken_convoys)
 
 
 class TestCyclesAndCancellationSemantics(unittest.TestCase):

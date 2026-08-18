@@ -21,6 +21,8 @@ def setup_service_logging() -> None:
     logger = logging.getLogger("machiavelli")
     logger.setLevel(log_level)
 
+    logger.propagate = False
+
     stream_handler = logging.StreamHandler(sys.stdout)
 
     # Si estás en modo DEBUG local, incluye información del archivo y línea

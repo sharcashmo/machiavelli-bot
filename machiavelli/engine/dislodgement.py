@@ -9,6 +9,7 @@ from ..game.game import Game
 from ..game.map import Map, MovementMode
 from ..game.player import Player
 from .military import (
+    DecisionType,
     DislodgementDecision,
     MilitaryResolution,
     UnitKey,
@@ -52,7 +53,7 @@ class RetreatHandler:
 
         # Las guarniciones no se retiran
         if unit.player_id is None or unit.unit_type == "G":
-            return DislodgementDecision("disband", None)
+            return DislodgementDecision(DecisionType.DISBAND, None)
 
         # Resolvemos según la fase
         if retreat_step == RetreatStep.GARRISON:
@@ -74,9 +75,9 @@ class RetreatHandler:
                     # Nos retiramos al fuerte
                     destination = conflict_location(unit.origin, unit.unit_type)
                     invalid_destinations.add(conflict_location(destination, "G"))
-                    return DislodgementDecision("garrison", destination)
+                    return DislodgementDecision(DecisionType.GARRISON, destination)
 
-            return DislodgementDecision("disband", None)
+            return DislodgementDecision(DecisionType.DISBAND, None)
         else:
             player: Player = self.players[unit.player_id]
 
@@ -129,7 +130,7 @@ class RetreatHandler:
                     invalid_destinations.add(
                         conflict_location(destination, unit.unit_type)
                     )
-                    return DislodgementDecision("retreat", destination)
+                    return DislodgementDecision(DecisionType.RETREAT, destination)
                 else:
                     return None
             else:

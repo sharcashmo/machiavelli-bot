@@ -23,7 +23,7 @@ Los dos bots necesitan los siguientes permisos:
 
 Estos son los que tendré que utilizar para obtener el token del bot.
 
-En el aparaado de Bot, Privileged Gateway Intents, deben marcarse:
+En el apartado de Bot, Privileged Gateway Intents, deben marcarse:
 
 - Server Members Intent
 - Message Content Intent
@@ -49,7 +49,7 @@ distribución wheel generada mediante `python -m build`.
 
 ## Versión
 
-Versión de desarrollo actual: 0.7.0. Última versión estable publicada: 0.6.0.
+Versión de desarrollo actual: 0.8.1. Última versión estable publicada: 0.8.0.
 
 ## Comandos disponibles
 
@@ -165,27 +165,25 @@ distinta al uso de `/mach expense`, por ejemplo enviando la plantilla rellena.
 
 Se prevén las siguientes versiones
 
-### Versión 0.7.0
+### Versión 0.8.1
 
-- [X] Mejora del reporte.
-  - [X] Incluye las órdenes de los jugadores en el reporte.
-  - [X] Mejora la representación de los eventos.
-  - [X] Mejora general del formato del reporte.
-- [X] Nuevos comandos `/exchange` y `/give` para intercambiar o dar recursos a otro jugador.
-- [X] Incorpora los resultados de `/mach cmdlist` en `/mach game_status`.
-- [X] Mejora el filtrado de comandos en `/mach cmd` en el caso de unidades en asedio.
-- [X] Cambio en el algoritmo de retirada. Ahora se ejecuta por pasos y los unidades que tienen
-  una retirada "preferible" actúan primero.
+- [ ] Solución de bugs.
+
+### Versión 0.9.0
+
+- [ ] Tratamiento de la eliminación de jugadores.
+- [ ] Tratamiento del fin de partida.
+- [ ] Añadir un chequeo de órdenes incorrectas, ilegales o inconsistentes.
+  - [ ] Fase de mantenimiento.
+  - [ ] Fase de campaña.
 
 ### Desarrollos futuros
 
 Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a las versiones conforme se completen.
 
 - [ ] Ejecutar todas las acciones del turno. Todavía faltan:
-  - [ ] Asesinatos.
   - [ ] Tratamiento del fin de partida.
   - [ ] Tratamiento de eliminación de jugadores.
-  - [ ] Control de estrechos.
 - [ ] Incluir algún tipo de chequeo del turno para advertir de órdenes incorrectas, ilegales o inconsistentes.
 - [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades en él.
 
@@ -234,5 +232,10 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
   del juego y de la base de datos; se ha mejorado la gestión de eventos y la generación de reportes, etc.
 - Versión 0.7.0: nuevos comandos `/mach exchange` y `/mach give`. `/mach game_status` ahora incluye el listado de
   órdenes enviadas por lo que `/mach cmdlist` queda eliminada. Presentación del reporte de turno ordenada y mejorada.
-  Nuevo comando `/mach retreats`. Cambio en el algoritmo de retiradas: ahora las unidades con una retirada preferible
-  (ie, hacia su propio territorio) actúan primero.
+  Cambio en el algoritmo de retiradas: ahora las unidades con una retirada preferible (ie, hacia su propio territorio)
+  actúan primero. Se ha implementado el asesinato.
+- Versión 0.7.1: Corrección de un bug que no permitía reclutar ejércitos si hay una guarnición presente.
+- Versión 0.8.0: Corrección de bugs en el tratamiento de órdenes de mantenimiento en el caso de flotas en provincias
+  con dos costas. Resueltos varios bugs en el tratamiento de conflictos encadenados producidos por unidades que al
+  cancelar sus órdenes y quedarse en su provincia de origen provocaban nuevos conflictos. Se ha implementado el control
+  de los estrechos.

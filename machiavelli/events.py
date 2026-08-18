@@ -512,9 +512,9 @@ def _siege(value: object) -> list[JSONValue]:
 def _decisions(value: object) -> list[JSONValue]:
     item = _sequence(value, 3)
     unit = _unit_key(item[0])
-    result_type = _choice(item[1], {"retreat", "garrison", "disband"})
+    decision_type = _choice(item[1], {"retreat", "garrison", "disband"})
     destination = _nullable_string(item[2])
-    return [unit, result_type, destination]
+    return [unit, decision_type, destination]
 
 
 def _orders(value: object) -> list[JSONValue]:

@@ -193,7 +193,7 @@ class TurnReporter:
             case EventType.MAINTENANCE_SUMMARY:
                 player = TurnReporter._player(game, cast(str, data["player"]))
                 return [
-                    f"Mantenimiento de {player}: "
+                    f":coin: Mantenimiento de {player}: "
                     f"{cast(int, data['initial_ducats'])} ducados iniciales, "
                     f"{cast(int, data['expenses'])} gastados y "
                     f"{cast(int, data['remaining_ducats'])} restantes."
@@ -394,8 +394,8 @@ class TurnReporter:
         result_code = cast(str, data["result"])
         result = _MAINTENANCE_RESULTS[result_code]
         return (
-            f"Mantenimiento de {player}: {actor}, orden {order}{target}, "
-            f"resultado {result}, coste {cast(int, data['cost'])} ducados."
+            f"> {player}: {actor}, {order}{target}. "
+            f"{result.capitalize()}, coste {cast(int, data['cost'])} ducados."
         )
 
     @staticmethod
@@ -754,14 +754,14 @@ class TurnReporter:
 
     @staticmethod
     def _military_dislodgement_line(game: Game, decision: DislodgementRecord) -> str:
-        unit, result_type, destination = decision
+        unit, decision_type, destination = decision
         original = TurnReporter._military_unit(game, unit)
         final_destination = (
             TurnReporter._location(game, destination) if destination else None
         )
-        if result_type == "retreat":
+        if decision_type == "retreat":
             return f"> {original} se retiró a {final_destination}."
-        elif result_type == "garrison":
+        elif decision_type == "garrison":
             return f"> {original} se refugió en la fortaleza de {final_destination}."
         else:  # disbanded
             return f"> {original} no pudo retirarse y se desbandó."
