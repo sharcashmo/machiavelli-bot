@@ -167,30 +167,40 @@ class TestCampaignExpenses(BaseOrdersTestCase):
 
         self.assertEqual(self.player.commands, [expense])
 
-    def test_update_existing_expense(self) -> None:
+    @patch("machiavelli.engine.orders.CommandReporter.format_report")
+    def test_update_existing_expense(self, mock_format_report: MagicMock) -> None:
+        formated_text = "A|6 ducados"
+        mock_format_report.return_value = formated_text
+
         self.game.turn_number = 2
-        expense = Command(self.game, self.player, "E 1", "5", "origin")
+        expense = Command(self.game, self.player, "E A", "6", "origin")
         self.player.add_command(expense)
-        previous_text = str(expense)
-        update = Command(self.game, self.player, "E 1", "3", "origin")
+
+        update = Command(self.game, self.player, "E A", "3", "origin")
 
         report = self.processor.process_command(self.player, TurnType.CAMPAIGN, update)
 
         self.assertEqual(self.player.commands, [expense])
         self.assertEqual(expense.command, "3")
-        self.assertEqual(report[1], f"Sustituye la orden anterior `{previous_text}`.")
+        self.assertEqual(report[1], f"Sustituye el gasto anterior `{formated_text}`.")
 
-    def test_zero_cost_removes_existing_expense(self) -> None:
+    @patch("machiavelli.engine.orders.CommandReporter.format_report")
+    def test_zero_cost_removes_existing_expense(
+        self, mock_format_report: MagicMock
+    ) -> None:
+        formated_text = "A|3 ducados"
+        mock_format_report.return_value = formated_text
+
         self.game.turn_number = 2
-        expense = Command(self.game, self.player, "E 1", "5", "origin")
+        expense = Command(self.game, self.player, "E A", "6", "origin")
+
         self.player.add_command(expense)
-        previous_text = str(expense)
-        removal = Command(self.game, self.player, "E 1", "0", "origin")
+        removal = Command(self.game, self.player, "E A", "0", "origin")
 
         report = self.processor.process_command(self.player, TurnType.CAMPAIGN, removal)
 
         self.assertEqual(self.player.commands, [])
-        self.assertEqual(report[1], f"Elimina el gasto anterior `{previous_text}`.")
+        self.assertEqual(report[1], f"Elimina el gasto anterior `{formated_text}`.")
 
     def test_more_than_four_expenses_raises_single_exception(self) -> None:
         self.game.turn_number = 2
@@ -209,11 +219,17 @@ class TestCampaignExpenses(BaseOrdersTestCase):
 
 
 class TestCampaignOrders(BaseOrdersTestCase):
-    def test_standard_order_replaces_previous_order(self) -> None:
+    @patch("machiavelli.engine.orders.CommandReporter.format_report")
+    def test_standard_order_replaces_previous_order(
+        self, mock_format_report: MagicMock
+    ) -> None:
+        formated_text = "command_representation"
+        mock_format_report.return_value = formated_text
+
         self.game.turn_number = 2
         current = Command(self.game, self.player, "A origin", "H")
+
         self.player.add_command(current)
-        previous_text = str(current)
         replacement = Command(self.game, self.player, "A origin", "A", "destination")
 
         report = self.processor.process_command(
@@ -221,7 +237,8 @@ class TestCampaignOrders(BaseOrdersTestCase):
         )
 
         self.assertEqual(self.player.commands, [replacement])
-        self.assertEqual(report[1], f"Sustituye la orden anterior `{previous_text}`.")
+        self.assertEqual(report[1], "Sustituye la orden anterior.")
+        self.assertEqual(report[2], f"`{formated_text}`")
 
     def test_valid_convoy_appends_segment(self) -> None:
         self.game.turn_number = 2

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING
 
 from machiavelli.engine.exceptions import TooManyExpenses
@@ -13,6 +14,9 @@ if TYPE_CHECKING:
     from machiavelli.game.command import Command
     from machiavelli.game.game import Game
     from machiavelli.game.player import Player
+
+
+logger = logging.getLogger(__name__)
 
 
 class OrderProcessor:
@@ -46,6 +50,7 @@ class OrderProcessor:
                 registered, self.game.map, self.game.turn_number
             )
             report.append(f"`{command_line}`")
+
         return report
 
     def _handle_maintenance_command(
@@ -103,10 +108,13 @@ class OrderProcessor:
             player.add_command(command)
             return []
 
-        messages = [
-            f"Sustituye la orden anterior `{current}`." for current in current_commands
-        ]
+        messages = ["Sustituye la orden anterior."]
+
         for current in current_commands:
+            current_txt = CommandReporter.format_report(
+                current, self.game.map, self.game.turn_number
+            )
+            messages.append(f"`{current_txt}`")
             player.remove_command(current)
         player.add_command(command)
         return messages
@@ -126,12 +134,15 @@ class OrderProcessor:
             None,
         )
         if expense is not None:
+            expense_txt = CommandReporter.format_report(
+                expense, self.game.map, self.game.turn_number
+            )
             if int(command.command) == 0:
-                message = f"Elimina el gasto anterior `{expense}`."
+                message = f"Elimina el gasto anterior `{expense_txt}`."
                 player.remove_command(expense)
                 return [message]
 
-            message = f"Sustituye la orden anterior `{expense}`."
+            message = f"Sustituye el gasto anterior `{expense_txt}`."
             expense.command = command.command
             return [message]
 
