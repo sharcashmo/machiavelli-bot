@@ -72,7 +72,10 @@ class OrderProcessor:
             return []
 
         current = current_commands[0]
-        messages = [f"Sustituye la orden anterior `{current}`."]
+        current_txt = CommandReporter.format_report(
+            current, self.game.map, self.game.turn_number
+        )
+        messages = [f"Sustituye la orden anterior `{current_txt}`."]
         current.command = command.command
         current.target = command.target
 
