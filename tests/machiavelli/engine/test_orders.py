@@ -97,8 +97,8 @@ class TestMaintenanceTurn(BaseOrdersTestCase):
     ) -> None:
         self.game.turn_number = 1
         command = Command(self.game, self.player, "A origin", "M")
-        texto_mockeado = "A origin | M"
-        mock_format_report.return_value = texto_mockeado
+        mocked_text = "A origin | M"
+        mock_format_report.return_value = mocked_text
 
         report = self.player.cmd_add_command(TurnType.MAINTENANCE, command)
 
@@ -111,18 +111,20 @@ class TestMaintenanceTurn(BaseOrdersTestCase):
         self.assertEqual(
             report,
             [
-                f"Orden `{texto_mockeado}` enviada.",
+                f"Orden `{mocked_text}` enviada.",
                 "**Órdenes recibidas hasta ahora:**",
-                f"`{texto_mockeado}`",
+                f"`{mocked_text}`",
             ],
         )
 
-    def test_replace_existing_command(self) -> None:
+    @patch("machiavelli.engine.orders.CommandReporter.format_report")
+    def test_replace_existing_command(self, mock_format_report: MagicMock) -> None:
         self.game.turn_number = 1
         current = Command(self.game, self.player, "A origin", "M")
         self.player.add_command(current)
-        previous_text = str(current)
         replacement = Command(self.game, self.player, "A origin", "D")
+        mocked_text = "A origin | M"
+        mock_format_report.return_value = mocked_text
 
         report = self.processor.process_command(
             self.player, TurnType.MAINTENANCE, replacement
@@ -131,7 +133,7 @@ class TestMaintenanceTurn(BaseOrdersTestCase):
         self.assertEqual(self.player.commands, [current])
         self.assertEqual(current.command, "D")
         self.assertIsNone(current.target)
-        self.assertEqual(report[1], f"Sustituye la orden anterior `{previous_text}`.")
+        self.assertEqual(report[1], f"Sustituye la orden anterior `{mocked_text}`.")
 
     def test_disband_removes_order_for_new_unit(self) -> None:
         self.game.turn_number = 1
