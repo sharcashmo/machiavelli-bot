@@ -47,8 +47,8 @@ class RetreatHandler:
         """Devuelve la retirada preferida por la unidad."""
         unit: UnitKey = outcome.unit
 
+        my_invalid_destinations = set(invalid_destinations)
         if outcome.attack_origin:
-            my_invalid_destinations = set(invalid_destinations)
             my_invalid_destinations.add(outcome.attack_origin)
 
         # Las guarniciones no se retiran

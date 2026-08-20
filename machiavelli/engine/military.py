@@ -188,8 +188,6 @@ def _cancel_moves_towards(
     if not blocked_origins:
         return
 
-    logger.debug("Eliminando movimientos dirigidos a: %s", blocked_origins)
-
     successful_moves -= {
         m for m in successful_moves if effective_positions.get(m) in blocked_origins
     }
@@ -680,8 +678,6 @@ class MilitaryResolver:
             # Cada iteración parte de un estado canónico para comparar firmas fiables.
             state = self._normalise_state(state)
             groups, moving = self._conflict_groups(state)
-            # logger.debug("State: %s", state)
-            logger.debug("Iteration: %s. Groups: %s", iteration, groups)
             pending = tuple(
                 sorted(
                     location
@@ -866,14 +862,11 @@ class MilitaryResolver:
                 )
                 location = conflict_location(position or key.origin, unit_type)
             locations.setdefault(location, []).append(key)
-            # logger.debug("Locations: %s", locations)
         groups: dict[str, tuple[tuple[str, ...], tuple[UnitKey, ...]]] = {}
         crossed: set[str] = set()
-        logger.debug("Direct: %s", direct)
         for (origin, target), unit in direct.items():
             opponent = direct.get((target, origin))
             if opponent is None or opponent.player_id == unit.player_id:
-                logger.debug("Skipping %s -> %s", unit, opponent)
                 continue
             endpoints = tuple(
                 sorted(
@@ -1037,6 +1030,9 @@ class MilitaryResolver:
         """Adjudica un grupo independiente y devuelve su nuevo estado."""
         logger.debug("En _resolve_group")
         locations, units = definition
+        logger.debug("Locations: %s", locations)
+        logger.debug("Units: %s", units)
+        logger.debug("Active supports: %s", state.active_supports)
         movers = frozenset(set(units) & moving)
         if blocked := self._blocked_strait_movers(movers, state):
             return (
@@ -1104,7 +1100,6 @@ class MilitaryResolver:
             for unit in units:
                 if unit == winner:
                     continue
-                logger.debug("Unit %s", unit)
                 if unit in movers:
                     winner_target = conflict_location(
                         self.orders_by_unit[winner].target_location or winner.origin,
@@ -1178,8 +1173,8 @@ class MilitaryResolver:
         attack_origin = (
             order.path[-2]
             if order.order_type == "A" and order.is_convoy
-            else winner.origin
-            if order.order_type == "A"
+            else conflict_location(winner.origin, winner.unit_type)
+            if order.order_type in ("A", "C")
             else None
         )
         dislodgements[unit] = DislodgementRecord(unit, attack_origin)
@@ -1197,6 +1192,14 @@ class MilitaryResolver:
             if order.order_type == "A"
             else conflict_location(unit.origin, unit.unit_type)
         )
+        if order.order_type == "A":
+            target = conflict_location(
+                order.target_location or unit.origin, unit.unit_type
+            )
+        elif order.order_type == "C" and order.target_location in ("A", "F"):
+            target = conflict_location(unit.origin, order.target_location)
+        else:
+            target = conflict_location(unit.origin, unit.unit_type)
         faction = self._player_power(unit)
         return sum(
             1
@@ -1402,7 +1405,6 @@ class MilitaryResolver:
             for locations in collections.values():
                 locations.sort()
         independent.sort()
-        logger.debug("Llamamos a _validate_final_collections")
         self._validate_final_collections(players, independent)
         return players, independent, list(self.game.besieges)
 
@@ -1413,7 +1415,6 @@ class MilitaryResolver:
         occupied_campaign: set[str] = set()
         occupied_garrisons: set[str] = set()
         for collections in players.values():
-            logger.debug("Collections: %s", collections)
             for unit_type, locations in collections.items():
                 for location in locations:
                     if unit_type == "A" and location not in self.map.provinces:
@@ -1424,13 +1425,11 @@ class MilitaryResolver:
                         occupied_garrisons if unit_type == "G" else occupied_campaign
                     )
                     conflict = conflict_location(location, unit_type)
-                    logger.debug("Conflict: %s. Occupied: %s", conflict, occupied)
                     if conflict in occupied:
                         raise MilitaryResolutionError("Ocupación final duplicada")
                     occupied.add(conflict)
         for location in independent:
             conflict = conflict_location(location, "G")
-            logger.debug("Conflicto es %s. Garrisons: %s", conflict, occupied_garrisons)
             if conflict in occupied_garrisons:
                 raise MilitaryResolutionError("Ocupación final duplicada")
             occupied_garrisons.add(conflict)
@@ -1720,8 +1719,6 @@ class MilitaryResolver:
                 "El gestor de desalojos no cubre exactamente las unidades desalojadas"
             )
         outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
-        logger.debug("Ahora con los dislodgements. Outcomes es %s", outcomes)
-        logger.debug("Decisions es %r", decisions)
         for key, decision in decisions.items():
             destination = decision.destination
             decision_type = decision.decision_type
@@ -1800,7 +1797,6 @@ class MilitaryResolver:
             for locations in collections.values():
                 locations.sort()
         independent.sort()
-        logger.debug("Llamamos a _validate_final_collections")
         self._validate_final_collections(player_collections, independent)
 
     def _apply_final_collections(
@@ -1922,10 +1918,6 @@ class MilitaryResolver:
             provisional_independent,
         )
         resolution = self._build_resolution(state, siege_dislodged)
-        logger.debug(
-            "Llamamos a _build_final_collections. resolution is %s",
-            resolution,
-        )
         collections, independent, _ = self._build_final_collections(resolution)
 
         # Fase 5: resolver retiradas antes de validar el estado definitivo
