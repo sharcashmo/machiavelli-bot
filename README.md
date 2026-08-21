@@ -92,26 +92,26 @@ Añade una orden nueva al turno actual.
 
 Añade un gasto nuevo al turno actual.
 
-### `/mach exchange`
+#### `/mach exchange`
 
 > Versión 0.7.0
 
 Realiza un intercambio con otro jugador. Para que un intercambio tenga éxito los dos
 jugadores tienen que realizarlo.
 
-### `/mach give`
+#### `/mach give`
 
 > Versión 0.7.0
 
 Da recursos (ducados o fichas de asesinato) a otro jugador.
 
-### `/mach retreats`
+#### `/mach retreats`
 
 > Versión 0.7.0
 
 Da a una unidad sus provincias prioritarias de retirada.
 
-### `/shar` (administrador)
+#### `/shar` (administrador)
 
 > Versión 0.2.0
 
