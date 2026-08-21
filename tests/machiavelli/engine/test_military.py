@@ -609,6 +609,7 @@ class TestAtomicResolution(unittest.TestCase):
             frozenset(),
             (),
             frozenset(),
+            tuple(),
         )
         resolver = MilitaryResolver(game)
         dislodgement_resolver = Mock()
@@ -1383,9 +1384,7 @@ class TestStraits(unittest.TestCase):
         self.assertEqual(resolver.orders_by_unit[mover].straits, ("piomb",))
         self.assertEqual(
             next(
-                outcome
-                for outcome in resolution.outcomes
-                if outcome.unit == mover
+                outcome for outcome in resolution.outcomes if outcome.unit == mover
             ).final_location,
             "W",
         )
@@ -1402,9 +1401,7 @@ class TestStraits(unittest.TestCase):
         mover = UnitKey("P1", "F", "W")
         self.assertEqual(
             next(
-                outcome
-                for outcome in resolution.outcomes
-                if outcome.unit == mover
+                outcome for outcome in resolution.outcomes if outcome.unit == mover
             ).final_location,
             "E",
         )
@@ -1485,9 +1482,7 @@ class TestStraits(unittest.TestCase):
         self.assertEqual(resolver.orders_by_unit[army].straits, ("piomb",))
         self.assertEqual(
             next(
-                outcome
-                for outcome in resolution.outcomes
-                if outcome.unit == army
+                outcome for outcome in resolution.outcomes if outcome.unit == army
             ).final_location,
             "a",
         )

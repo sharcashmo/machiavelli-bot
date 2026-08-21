@@ -717,7 +717,10 @@ class TurnReporter:
                 if target_location in GameTables.actors
                 else None
             )
-            order_description = f"{order_type_text} a {target_unit_txt}"
+            if target_unit_txt:
+                order_description = f"{order_type_text} a {target_unit_txt}"
+            else:
+                order_description = "desbandar"
 
         if unit_text and order_description:
             return f"> {unit_text} {order_description}"

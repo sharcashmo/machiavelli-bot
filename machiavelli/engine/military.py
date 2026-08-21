@@ -74,7 +74,7 @@ class ResolutionState:
     cancelled_by_self_conflict: frozenset[UnitKey]
     effective_positions: tuple[tuple[UnitKey, str | None], ...]
     resolved_conflicts: frozenset[str]
-    dislodgements: tuple[DislodgementRecord, ...] = ()
+    dislodgements: tuple[DislodgementRecord, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -213,6 +213,7 @@ class MilitaryResolver:
         self.orders_by_unit: dict[UnitKey, MilitaryOrder] = {}
         self.invalid_orders: dict[UnitKey, str] = {}
         self._broken_convoys: set[UnitKey] = set()
+        self.disbanded_units: frozenset[UnitKey] = frozenset()
 
     @property
     def map(self) -> Map:
@@ -233,6 +234,7 @@ class MilitaryResolver:
         self.campaign_unit_by_conflict_location.clear()
         self.rebellions_by_location.clear()
         self._broken_convoys.clear()
+        self.disbanded_units = frozenset()
         campaign_locations: set[str] = set()
         garrison_locations: set[str] = set()
 
@@ -321,6 +323,32 @@ class MilitaryResolver:
                     if location in self.rebellions_by_location:
                         raise InvalidMilitaryState(f"Rebelión duplicada: {location}")
                     self.rebellions_by_location[location] = (player.player_id, kind)
+
+    def _remove_disbanded_units(self) -> tuple[UnitKey, ...]:
+        """Retira las unidades con orden de combate de desbandarse."""
+        disbanded = tuple(
+            key
+            for key in sorted(self.orders_by_unit, key=_key_sort)
+            if self.orders_by_unit[key].order_type == "C"
+            and self.orders_by_unit[key].target_location == "0"
+        )
+        for key in disbanded:
+            del self.units_by_key[key]
+            del self.orders_by_unit[key]
+            self.invalid_orders.pop(key, None)
+            if key.player_id is not None:
+                self.actor_to_unit.pop(
+                    (key.player_id, f"{key.unit_type} {key.origin}"), None
+                )
+            location = conflict_location(key.origin, key.unit_type)
+            if self.campaign_unit_by_conflict_location.get(location) == key:
+                del self.campaign_unit_by_conflict_location[location]
+            if key.unit_type == "A":
+                self.army_by_origin.pop(key.origin, None)
+            elif key.unit_type == "F":
+                self.fleet_by_conflict_location.pop(location, None)
+        self.disbanded_units = frozenset(disbanded)
+        return disbanded
 
     def _compile_orders(self) -> None:
         """Convierte filas existentes en una intención por unidad, sin ejecutarlas."""
@@ -546,6 +574,8 @@ class MilitaryResolver:
                 key, "T", target, transported_army=army
             )
         elif order.order_type == "C":
+            if target == "0":
+                return None
             location = self.map.provinces.get(province)
             if location is None:
                 return "conversión fuera de provincia"
@@ -763,6 +793,7 @@ class MilitaryResolver:
                 (key, key.origin) for key in sorted(self.units_by_key, key=_key_sort)
             ),
             frozenset(),
+            tuple(),
         )
 
     def _normalise_state(self, state: ResolutionState) -> ResolutionState:
@@ -1028,11 +1059,7 @@ class MilitaryResolver:
         state: ResolutionState,
     ) -> tuple[ResolutionState, frozenset[str]]:
         """Adjudica un grupo independiente y devuelve su nuevo estado."""
-        logger.debug("En _resolve_group")
         locations, units = definition
-        logger.debug("Locations: %s", locations)
-        logger.debug("Units: %s", units)
-        logger.debug("Active supports: %s", state.active_supports)
         movers = frozenset(set(units) & moving)
         if blocked := self._blocked_strait_movers(movers, state):
             return (
@@ -1079,9 +1106,6 @@ class MilitaryResolver:
         factions = {unit.player_id for unit in units}
         effective_positions = dict(self._effective_positions_for(state))
         # Las colisiones propias se cancelan; los empates enemigos tampoco avanzan.
-        logger.debug("Factions: %s", factions)
-        logger.debug("Units: %s", units)
-        logger.debug("Movers: %s", movers)
         if len(factions) == 1 and len(units) > 1:
             cancelled.update(movers)
             cancelled_self.update(movers)
@@ -1089,7 +1113,6 @@ class MilitaryResolver:
                 movers, effective_positions, successful_moves, successful_conversions
             )
         elif len(winners) != 1 or next(iter(winners)) not in movers:
-            logger.debug("Empate, y cancelaré %s", movers)
             cancelled.update(movers)
             _cancel_moves_towards(
                 movers, effective_positions, successful_moves, successful_conversions
@@ -1397,7 +1420,7 @@ class MilitaryResolver:
                 raise MilitaryResolutionError("Resultado sin localización")
             if outcome.unit.player_id is None:
                 independent.append(outcome.final_location)
-            else:
+            elif outcome.final_unit_type in ("A", "F", "G"):
                 players[outcome.unit.player_id][outcome.final_unit_type].append(
                     outcome.final_location
                 )
@@ -1433,6 +1456,15 @@ class MilitaryResolver:
             if conflict in occupied_garrisons:
                 raise MilitaryResolutionError("Ocupación final duplicada")
             occupied_garrisons.add(conflict)
+
+    def _siege_target_present(self, location: str) -> bool:
+        """Comprueba si un asedio conserva su objetivo aplicar desbandar."""
+        if any(
+            key.unit_type == "G" and key.origin == location for key in self.units_by_key
+        ):
+            return True
+        rebellion = self.rebellions_by_location.get(location)
+        return rebellion is not None and rebellion[1] == "city"
 
     def _build_rule_transitions(
         self,
@@ -1495,6 +1527,7 @@ class MilitaryResolver:
                 and key not in state.cancelled_orders
                 and key not in state.dislodged_units
                 and location not in self.game.besieges
+                and self._siege_target_present(location)
             ):
                 active_sieges.add(location)
                 siege_events.append([self._primitive_key(key), location, "started"])
@@ -1894,6 +1927,11 @@ class MilitaryResolver:
                 "No se pudo construir el evento de resumen de órdenes"
             ) from error
         self.game.turn_events.append(event)
+
+        # Antes de comenzar la fase 3, retiramos las unidades desbandadas
+        disbanded = self._remove_disbanded_units()
+        if disbanded:
+            logger.info("Unidades desbandadas: %s", len(disbanded))
 
         # Fase 3: alcanzar un estado estable y verificar que no quedan conflictos
         state = self._resolve_conflicts()
