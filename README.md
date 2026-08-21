@@ -165,10 +165,6 @@ distinta al uso de `/mach expense`, por ejemplo enviando la plantilla rellena.
 
 Se prevén las siguientes versiones
 
-### Versión 0.8.1
-
-- [ ] Solución de bugs.
-
 ### Versión 0.9.0
 
 - [ ] Tratamiento de la eliminación de jugadores.
@@ -239,3 +235,6 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
   con dos costas. Resueltos varios bugs en el tratamiento de conflictos encadenados producidos por unidades que al
   cancelar sus órdenes y quedarse en su provincia de origen provocaban nuevos conflictos. Se ha implementado el control
   de los estrechos.
+- Versión 0.8.1: Corrección de bugs en órdenes militares: conflictos en los que participa una guarnición convirtiéndose,
+  órdenes de desbandar en campaña (convesión a 0) y manejo de estas unidades desbandadas. Corregida también alguna
+  representación de Commands errónea.
