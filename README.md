@@ -167,11 +167,15 @@ Se prevén las siguientes versiones
 
 ### Versión 0.9.0
 
+- [ ] Mejoras en los reportes.
+  - [ ] Mostrar un evento para los desastres, incluso en el caso de años excelentes.
 - [ ] Tratamiento de la eliminación de jugadores.
 - [ ] Tratamiento del fin de partida.
 - [ ] Añadir un chequeo de órdenes incorrectas, ilegales o inconsistentes.
   - [ ] Fase de mantenimiento.
   - [ ] Fase de campaña.
+- [ ] Añadir más escenarios.
+  - [X] Todos las variantes de "B. Balance of power".
 
 ### Desarrollos futuros
 

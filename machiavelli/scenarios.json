@@ -1,4 +1,536 @@
 {
+  "Ba1": {
+    "name": "The balance of power (two players, four powers each)",
+    "year": 1454,
+    "victory_conditions": {
+      "cities": 0,
+      "home_countries": 8
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
+      "V": [
+        "padua",
+        "veron",
+        "venic",
+        "dalma",
+        "bresc",
+        "berga",
+        "vicen",
+        "trevi",
+        "friul",
+        "istri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "P": [
+        "bolog",
+        "ancon",
+        "perug",
+        "rome",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "N": [
+        "bari",
+        "naple",
+        "messi",
+        "paler",
+        "otran",
+        "saler",
+        "aquil",
+        "capua"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni"],
+      "A": ["hunga", "austr", "tyrol", "carin"],
+      "F": ["swiss", "avign", "marse", "prove"]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M", "A", "P", "N"],
+        "armies": [
+          "pavia",
+          "cremo",
+          "milan",
+          "hunga",
+          "austr",
+          "tyrol",
+          "bolog",
+          "perug",
+          "rome",
+          "bari",
+          "messi"
+        ],
+        "fleets": ["ancon", "naple", "paler"]
+      },
+      "V": {
+        "home_countries": ["V", "F", "L", "T"],
+        "armies": [
+          "padua",
+          "veron",
+          "swiss",
+          "avign",
+          "arezz",
+          "flore",
+          "alban"
+        ],
+        "fleets": ["dalma", "marse", "pisa", "duraz", "tunis"],
+        "garrisons": ["venic"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": [
+      "P",
+      "N",
+      "M",
+      "T",
+      "A",
+      "F",
+      "L",
+      "L",
+      "V",
+      "V"
+    ],
+    "variable_income_provinces": ["genoa", "naple", "milan"]
+  },
+  "Ba2": {
+    "name": "The balance of power (two players, five powers)",
+    "year": 1454,
+    "victory_conditions": {
+      "cities": 0,
+      "home_countries": 5
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
+      "V": [
+        "padua",
+        "veron",
+        "venic",
+        "dalma",
+        "bresc",
+        "berga",
+        "vicen",
+        "trevi",
+        "friul",
+        "istri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "P": [
+        "bolog",
+        "ancon",
+        "perug",
+        "rome",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "N": [
+        "bari",
+        "naple",
+        "messi",
+        "paler",
+        "otran",
+        "saler",
+        "aquil",
+        "capua"
+      ]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M", "L", "N"],
+        "armies": [
+          "pavia",
+          "cremo",
+          "milan",
+          "arezz",
+          "flore",
+          "bari",
+          "messi"
+        ],
+        "fleets": ["pisa", "naple", "paler"]
+      },
+      "V": {
+        "home_countries": ["V", "P"],
+        "armies": ["padua", "veron", "bolog", "perug", "rome"],
+        "fleets": ["dalma", "ancon"],
+        "garrisons": ["venic"]
+      }
+    },
+    "excluded_locations": [
+      "hunga",
+      "austr",
+      "tyrol",
+      "carin",
+      "swiss",
+      "avign",
+      "marse",
+      "prove",
+      "alban",
+      "duraz",
+      "tunis",
+      "herze",
+      "bosni"
+    ],
+    "variable_income_home_countries": ["P", "N", "M", "L", "L", "V", "V"],
+    "variable_income_provinces": ["genoa", "naple", "milan"]
+  },
+  "Bb1": {
+    "name": "The balance of power (three players, two powers each)",
+    "year": 1454,
+    "victory_conditions": {
+      "cities": 0,
+      "home_countries": 4
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
+      "V": [
+        "padua",
+        "veron",
+        "venic",
+        "dalma",
+        "bresc",
+        "berga",
+        "vicen",
+        "trevi",
+        "friul",
+        "istri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "P": [
+        "bolog",
+        "ancon",
+        "perug",
+        "rome",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "N": [
+        "bari",
+        "naple",
+        "messi",
+        "paler",
+        "otran",
+        "saler",
+        "aquil",
+        "capua"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni"]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M", "N"],
+        "armies": ["pavia", "cremo", "milan", "bari", "messi"],
+        "fleets": ["naple", "paler"]
+      },
+      "V": {
+        "home_countries": ["V", "T"],
+        "armies": ["padua", "veron", "alban"],
+        "fleets": ["dalma", "duraz", "tunis"],
+        "garrisons": ["venic"]
+      },
+      "L": {
+        "home_countries": ["L", "P"],
+        "armies": ["arezz", "flore", "bolog", "perug", "rome"],
+        "fleets": ["pisa", "ancon"]
+      }
+    },
+    "excluded_locations": [
+      "hunga",
+      "austr",
+      "tyrol",
+      "carin",
+      "swiss",
+      "avign",
+      "marse",
+      "prove"
+    ],
+    "variable_income_home_countries": ["P", "N", "M", "T", "L", "L", "V", "V"],
+    "variable_income_provinces": ["genoa", "naple", "milan"]
+  },
+  "Bb2": {
+    "name": "The balance of power (three players, tree powers each)",
+    "year": 1454,
+    "victory_conditions": {
+      "cities": 0,
+      "home_countries": 6
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
+      "V": [
+        "padua",
+        "veron",
+        "venic",
+        "dalma",
+        "bresc",
+        "berga",
+        "vicen",
+        "trevi",
+        "friul",
+        "istri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "P": [
+        "bolog",
+        "ancon",
+        "perug",
+        "rome",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "N": [
+        "bari",
+        "naple",
+        "messi",
+        "paler",
+        "otran",
+        "saler",
+        "aquil",
+        "capua"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni"],
+      "A": ["hunga", "austr", "tyrol", "carin"],
+      "F": ["swiss", "avign", "marse", "prove"],
+      "G": ["genoa"]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M", "A", "G"],
+        "armies": ["pavia", "cremo", "milan", "hunga", "austr", "tyrol"],
+        "garrisons": ["genoa"]
+      },
+      "V": {
+        "home_countries": ["V", "F", "T"],
+        "armies": ["padua", "veron", "swiss", "avign", "alban"],
+        "fleets": ["dalma", "marse", "duraz", "tunis"],
+        "garrisons": ["venic"]
+      },
+      "L": {
+        "home_countries": ["L", "P", "N"],
+        "armies": ["arezz", "flore", "bolog", "perug", "rome", "bari", "messi"],
+        "fleets": ["pisa", "ancon", "naple", "paler"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": [
+      "P",
+      "N",
+      "M",
+      "T",
+      "A",
+      "F",
+      "L",
+      "L",
+      "V",
+      "V"
+    ],
+    "variable_income_provinces": ["genoa", "naple", "milan"]
+  },
+  "Bc": {
+    "name": "The balance of power (four players)",
+    "year": 1454,
+    "victory_conditions": {
+      "cities": 0,
+      "home_countries": 4
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
+      "V": [
+        "padua",
+        "veron",
+        "venic",
+        "dalma",
+        "bresc",
+        "berga",
+        "vicen",
+        "trevi",
+        "friul",
+        "istri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "P": [
+        "bolog",
+        "ancon",
+        "perug",
+        "rome",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "N": [
+        "bari",
+        "naple",
+        "messi",
+        "paler",
+        "otran",
+        "saler",
+        "aquil",
+        "capua"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni"],
+      "A": ["hunga", "austr", "tyrol", "carin"],
+      "F": ["swiss", "avign", "marse", "prove"]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M", "A"],
+        "armies": ["pavia", "cremo", "milan", "hunga", "austr", "tyrol"]
+      },
+      "V": {
+        "home_countries": ["V", "F"],
+        "armies": ["padua", "veron", "swiss", "avign"],
+        "fleets": ["dalma", "marse"],
+        "garrisons": ["venic"]
+      },
+      "L": {
+        "home_countries": ["L", "T"],
+        "armies": ["arezz", "flore", "alban"],
+        "fleets": ["pisa", "duraz", "tunis"]
+      },
+      "P": {
+        "home_countries": ["P", "N"],
+        "armies": ["bolog", "perug", "rome", "bari", "messi"],
+        "fleets": ["ancon", "naple", "paler"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": [
+      "P",
+      "N",
+      "M",
+      "T",
+      "A",
+      "F",
+      "L",
+      "L",
+      "V",
+      "V"
+    ],
+    "variable_income_provinces": ["genoa", "naple", "milan"]
+  },
+  "Bd": {
+    "name": "The balance of power (five players)",
+    "year": 1454,
+    "victory_conditions": {
+      "cities": 15,
+      "home_countries": 2
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
+      "V": [
+        "padua",
+        "veron",
+        "venic",
+        "dalma",
+        "bresc",
+        "berga",
+        "vicen",
+        "trevi",
+        "friul",
+        "istri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "P": [
+        "bolog",
+        "ancon",
+        "perug",
+        "rome",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "N": [
+        "bari",
+        "naple",
+        "messi",
+        "paler",
+        "otran",
+        "saler",
+        "aquil",
+        "capua"
+      ]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M"],
+        "armies": ["pavia", "cremo", "milan"]
+      },
+      "V": {
+        "home_countries": ["V"],
+        "armies": ["padua", "veron"],
+        "fleets": ["dalma"],
+        "garrisons": ["venic"]
+      },
+      "L": {
+        "home_countries": ["L"],
+        "armies": ["arezz", "flore"],
+        "fleets": ["pisa"]
+      },
+      "P": {
+        "home_countries": ["P"],
+        "armies": ["bolog", "perug", "rome"],
+        "fleets": ["ancon"]
+      },
+      "N": {
+        "home_countries": ["N"],
+        "armies": ["bari", "messi"],
+        "fleets": ["naple", "paler"]
+      }
+    },
+    "excluded_locations": [
+      "hunga",
+      "austr",
+      "tyrol",
+      "carin",
+      "swiss",
+      "avign",
+      "marse",
+      "prove",
+      "alban",
+      "duraz",
+      "tunis",
+      "herze",
+      "bosni"
+    ],
+    "variable_income_home_countries": ["P", "N", "M", "L", "L", "V", "V"],
+    "variable_income_provinces": ["genoa", "naple", "milan"]
+  },
   "Be": {
     "name": "The balance of power (six players)",
     "year": 1454,
@@ -91,6 +623,214 @@
       "prove"
     ],
     "variable_income_home_countries": ["P", "N", "M", "T", "L", "L", "V", "V"],
+    "variable_income_provinces": ["genoa", "naple", "milan"]
+  },
+  "Bf": {
+    "name": "The balance of power (seven players)",
+    "year": 1454,
+    "victory_conditions": {
+      "cities": 15,
+      "home_countries": 2
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
+      "V": [
+        "padua",
+        "veron",
+        "venic",
+        "dalma",
+        "bresc",
+        "berga",
+        "vicen",
+        "trevi",
+        "friul",
+        "istri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "P": [
+        "bolog",
+        "ancon",
+        "perug",
+        "rome",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "N": [
+        "bari",
+        "naple",
+        "messi",
+        "paler",
+        "otran",
+        "saler",
+        "aquil",
+        "capua"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni"],
+      "F": ["swiss", "avign", "marse", "prove"]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M"],
+        "armies": ["pavia", "cremo", "milan"]
+      },
+      "V": {
+        "home_countries": ["V"],
+        "armies": ["padua", "veron"],
+        "fleets": ["dalma"],
+        "garrisons": ["venic"]
+      },
+      "L": {
+        "home_countries": ["L"],
+        "armies": ["arezz", "flore"],
+        "fleets": ["pisa"]
+      },
+      "P": {
+        "home_countries": ["P"],
+        "armies": ["bolog", "perug", "rome"],
+        "fleets": ["ancon"]
+      },
+      "N": {
+        "home_countries": ["N"],
+        "armies": ["bari", "messi"],
+        "fleets": ["naple", "paler"]
+      },
+      "T": {
+        "home_countries": ["T"],
+        "armies": ["alban"],
+        "fleets": ["duraz", "tunis"]
+      },
+      "F": {
+        "home_countries": ["F"],
+        "armies": ["swiss", "avign"],
+        "fleets": ["marse"]
+      }
+    },
+    "excluded_locations": ["hunga", "austr", "tyrol", "carin"],
+    "variable_income_home_countries": [
+      "P",
+      "N",
+      "M",
+      "T",
+      "F",
+      "L",
+      "L",
+      "V",
+      "V"
+    ],
+    "variable_income_provinces": ["genoa", "naple", "milan"]
+  },
+  "Bg": {
+    "name": "The balance of power (eight players)",
+    "year": 1454,
+    "victory_conditions": {
+      "cities": 15,
+      "home_countries": 2
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
+      "V": [
+        "padua",
+        "veron",
+        "venic",
+        "dalma",
+        "bresc",
+        "berga",
+        "vicen",
+        "trevi",
+        "friul",
+        "istri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "P": [
+        "bolog",
+        "ancon",
+        "perug",
+        "rome",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "N": [
+        "bari",
+        "naple",
+        "messi",
+        "paler",
+        "otran",
+        "saler",
+        "aquil",
+        "capua"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni"],
+      "A": ["hunga", "austr", "tyrol", "carin"],
+      "F": ["swiss", "avign", "marse", "prove"]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M"],
+        "armies": ["pavia", "cremo", "milan"]
+      },
+      "V": {
+        "home_countries": ["V"],
+        "armies": ["padua", "veron"],
+        "fleets": ["dalma"],
+        "garrisons": ["venic"]
+      },
+      "L": {
+        "home_countries": ["L"],
+        "armies": ["arezz", "flore"],
+        "fleets": ["pisa"]
+      },
+      "P": {
+        "home_countries": ["P"],
+        "armies": ["bolog", "perug", "rome"],
+        "fleets": ["ancon"]
+      },
+      "N": {
+        "home_countries": ["N"],
+        "armies": ["bari", "messi"],
+        "fleets": ["naple", "paler"]
+      },
+      "T": {
+        "home_countries": ["T"],
+        "armies": ["alban"],
+        "fleets": ["duraz", "tunis"]
+      },
+      "A": {
+        "home_countries": ["A"],
+        "armies": ["hunga", "austr", "tyrol"]
+      },
+      "F": {
+        "home_countries": ["F"],
+        "armies": ["swiss", "avign"],
+        "fleets": ["marse"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": [
+      "P",
+      "N",
+      "M",
+      "T",
+      "A",
+      "F",
+      "L",
+      "L",
+      "V",
+      "V"
+    ],
     "variable_income_provinces": ["genoa", "naple", "milan"]
   }
 }

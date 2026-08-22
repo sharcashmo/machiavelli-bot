@@ -82,6 +82,7 @@ class GameTables:
         "F": "France",
         "T": "Turks",
         "A": "Austria",
+        "G": "Genoa",
     }
 
     actors: Final[dict[str, str]] = {
