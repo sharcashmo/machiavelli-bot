@@ -162,16 +162,15 @@ class DisastersManager:
                 ):
                     affected_provinces.append(p)
 
-        if affected_provinces:
-            self.game.add_event(
-                TurnEvent(
-                    type=event_type,
-                    data={
-                        "severity_roll": severity_roll,
-                        "provinces": affected_provinces,
-                    },
-                )
+        self.game.add_event(
+            TurnEvent(
+                type=event_type,
+                data={
+                    "severity_roll": severity_roll,
+                    "provinces": affected_provinces,
+                },
             )
+        )
 
         return affected_provinces
 

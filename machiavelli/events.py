@@ -321,7 +321,7 @@ def _spawn(data: Mapping[str, object]) -> dict[str, JSONValue]:
         raise ValueError("Tirada fuera de rango")
     return {
         "severity_roll": roll,
-        "provinces": _string_list(data["provinces"], non_empty=True),
+        "provinces": _string_list(data["provinces"], non_empty=False),
     }
 
 

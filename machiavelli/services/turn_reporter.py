@@ -132,12 +132,13 @@ class TurnReporter:
             case EventType.START_SEASON:
                 season = _SEASONS[cast(int, data["season"])]
                 return [f"### 🗓️ Comenzó {season} de {cast(int, data['year'])}."]
-            case EventType.FAMINE_SPAWN:
-                provinces = TurnReporter._locations(
-                    game, cast(tuple[str, ...], data["provinces"])
+            case EventType.FAMINE_SPAWN | EventType.PLAGUE_SPAWN:
+                return TurnReporter._spawn_lines(
+                    game,
+                    event.type,
+                    cast(int, data["severity_roll"]),
+                    cast(tuple[str, ...], data["provinces"]),
                 )
-                severity = GameTables.disasters[cast(int, data["severity_roll"])][1]
-                return [f"### 🌾 Hambre: {severity}.", f"> Apareció en {provinces}."]
             case EventType.FAMINE_RELIEF:
                 player = TurnReporter._player(game, cast(str, data["player"]))
                 province = TurnReporter._location(game, cast(str, data["province"]))
@@ -151,12 +152,6 @@ class TurnReporter:
                     game, cast(tuple[str, ...], data["provinces"])
                 )
                 return [f"Terminó el hambre en {provinces}."]
-            case EventType.PLAGUE_SPAWN:
-                provinces = TurnReporter._locations(
-                    game, cast(tuple[str, ...], data["provinces"])
-                )
-                severity = GameTables.disasters[cast(int, data["severity_roll"])][1]
-                return [f"### :skull: Plaga {severity}.", f"> Apareció en {provinces}."]
             case EventType.PLAGUE_DEATH:
                 player = TurnReporter._nullable_player(game, data["player"])
                 units = TurnReporter._units(game, cast(tuple[str, ...], data["units"]))
@@ -291,6 +286,25 @@ class TurnReporter:
         if len(values) == 1:
             return values[0]
         return " y ".join([", ".join(values[:-1]), values[-1]])
+
+    @staticmethod
+    def _spawn_lines(
+        game: Game, event_type: EventType, severity_roll: int, provinces: list[str]
+    ) -> list[str]:
+        """Devuelve las líneas que reportan la aparición de desastres."""
+        type_text = (
+            ":ear_of_rice: Hambre"
+            if event_type == EventType.FAMINE_SPAWN
+            else ":skull: Plaga"
+        )
+        severity = GameTables.disasters[cast(int, severity_roll)][1]
+        if provinces:
+            provinces_text = TurnReporter._locations(
+                game, cast(tuple[str, ...], provinces)
+            )
+            return [f"### {type_text}: {severity}.", f"> Apareció en {provinces_text}."]
+        else:
+            return [f"### {type_text}: {severity}."]
 
     @staticmethod
     def _rebellion_line(
