@@ -49,34 +49,62 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # --- COMANDO DE SINCRONIZACIÓN MANUAL ---
 @bot.command(name="sync")
 @commands.is_owner()
-async def sync_commands(ctx, modo: str | None = None):
-    """Sincroniza los slash commands bajo demanda (Solo Dueño del Bot)
+async def sync_commands(ctx, mode: str | None = None):
+    """Gestión de los slash commands (Solo Dueño del Bot)
 
     Uso:
-        !sync        -> Sincroniza en ESTE servidor (Instantáneo)
-        !sync global -> Sincroniza en TODO Discord (Tarda unos minutos/hora)"""
-    if modo == "global":
-        await ctx.send(
-            "🌍 Sincronizando comandos GLOBALMENTE (puede tardar en aparecer)..."
-        )
+        !sync                -> Sincroniza en ESTE servidor (instantáneo)
+        !sync global         -> Sincroniza en TODO Discord (tarda en verse)
+        !sync status         -> Lista lo registrado global y en el servidor
+        !sync clean          -> Borra los comandos de ESTE servidor (deja los globales)
+        !sync clean_global   -> Borra los comandos globales (deja los de servidor)
+    """
+    if mode == "global":
+        await ctx.send("🌍 Sincronizando comandos GLOBALMENTE...")
         try:
             synced = await bot.tree.sync()
+            await ctx.send(f"✅ {len(synced)} comandos globales sincronizados.")
+        except Exception as e:
+            await ctx.send(f"❌ Error: {e}")
+
+    elif mode == "clean":
+        await ctx.send("🧹 Borrando los comandos de ESTE servidor...")
+        try:
+            # Vaciar el árbol de servidor y sincronizar => Discord los borra
+            bot.tree.clear_commands(guild=ctx.guild)
+            await bot.tree.sync(guild=ctx.guild)
             await ctx.send(
-                f"✅ Éxito: Sincronizados {len(synced)} comandos globalmente."
+                "✅ Comandos de servidor eliminados. Solo quedan los globales."
             )
         except Exception as e:
             await ctx.send(f"❌ Error: {e}")
-    else:
-        await ctx.send("🏠 Sincronizando comandos en este servidor específico...")
-        try:
-            # Clona los comandos que tenemos en memoria dentro de este servidor concreto
-            bot.tree.copy_global_to(guild=ctx.guild)
 
-            # Sincroniza solo este servidor
+    elif mode == "clean_global":
+        await ctx.send("🧹 Borrando los comandos GLOBALES...")
+        try:
+            # Se borran en Discord sin vaciar el árbol en memoria,
+            # así un futuro !sync global puede volver a registrarlos.
+            app_id = bot.application_id or bot.user.id
+            for cmd in await bot.tree.fetch_commands():
+                await bot.http.delete_global_command(app_id, cmd.id)
+            await ctx.send("✅ Comandos globales eliminados. Solo quedan los locales.")
+        except Exception as e:
+            await ctx.send(f"❌ Error: {e}")
+
+    elif mode == "status":
+        globals = await bot.tree.fetch_commands()
+        locals = await bot.tree.fetch_commands(guild=ctx.guild)
+        await ctx.send(
+            f"🌍 Globales ({len(globals)}): {[c.name for c in globals]}\n"
+            f"🏠 En este servidor ({len(locals)}): {[c.name for c in locals]}"
+        )
+
+    else:
+        await ctx.send("🏠 Sincronizando comandos en este servidor...")
+        try:
+            bot.tree.copy_global_to(guild=ctx.guild)
             synced = await bot.tree.sync(guild=ctx.guild)
-            await ctx.send(
-                f"✅ Éxito: Sincronizados {len(synced)} comandos en este servidor."
-            )
+            await ctx.send(f"✅ {len(synced)} comandos sincronizados en este servidor.")
         except Exception as e:
             await ctx.send(f"❌ Error local: {e}")
 

@@ -1,17 +1,19 @@
 # Machiavelli Bot
 
-Este es un bot de Discord desarrollado para automatizar partidas de Machiavelli. Este bot permite (permitirá) a un
-administrador (rol de Juez) crear partidas, seleccionar escenario y condiciones de victoria, añadir jugadores, repartir
-facciones entre esos jugadores, fijar deadlines para la entrega de órdenes, y ejecutar esas órdenes de forma automática
-o manual.
+Este es un bot de Discord desarrollado para automatizar partidas de Machiavelli. Este
+bot permite (permitirá) a un administrador (rol de Juez) crear partidas, seleccionar
+escenario y condiciones de victoria, añadir jugadores, repartir facciones entre esos
+jugadores, fijar deadlines para la entrega de órdenes, y ejecutar esas órdenes de forma
+automática o manual.
 
-Además permitirá a los jugadores recibir el estado actual de la partida, enviar sus órdenes para el turno actual, y
-realizar intercambios de recursos con el resto de jugadores.
+Además permitirá a los jugadores recibir el estado actual de la partida, enviar sus
+órdenes para el turno actual, y realizar intercambios de recursos con el resto de
+jugadores.
 
 ## El bot de Discord
 
-Tenemos dos versiones del bot registrada: sharcashvelli para la versión ya en marcha, y sharcashvelli-bot con la versión
-de desarrollo.
+Tenemos dos versiones del bot registrada: sharcashvelli para la versión ya en marcha, y
+sharcashvelli-bot con la versión de desarrollo.
 
 Los dos bots necesitan los siguientes permisos:
 
@@ -28,7 +30,8 @@ En el apartado de Bot, Privileged Gateway Intents, deben marcarse:
 - Server Members Intent
 - Message Content Intent
 
-Los parámetros que necesita el bot los fijamos en un fichero .env. Se puede tomar .env.example como punto de partida:
+Los parámetros que necesita el bot los fijamos en un fichero .env. Se puede tomar
+.env.example como punto de partida:
 
 ```env
 DISCORD_TOKEN=tu_token_aqui
@@ -57,7 +60,11 @@ Versión de desarrollo actual: 0.9.0. Última versión estable publicada: 0.8.1.
 
 > Versión 0.0.1
 
-Sincroniza los comandos disponibles. Ejecutar cuando se deban registrar nuevos comandos de slash.
+Sincroniza los comandos disponibles. Ejecutar cuando se deban registrar nuevos comandos
+de slash.
+
+Desde la versión `0.9.0` un parámetro de `mode` para sincronizar y/o limpiar comandos
+locales o globales.
 
 ### `/mach` (todos)
 
@@ -115,7 +122,8 @@ Da a una unidad sus provincias prioritarias de retirada.
 
 > Versión 0.2.0
 
-Conjunto de comandos para su uso por el administrador. Todos estos comandos son públicos.
+Conjunto de comandos para su uso por el administrador. Todos estos comandos son
+públicos.
 
 #### `/shar create`
 
@@ -151,15 +159,25 @@ Ejecuta las órdenes de la partida y genera el informe para el siguiente turno.
 
 > Versión 0.3.0
 
-Introduce las órdenes para un jugador determinado, cuando este jugador ha hecho llegar las órdenes de forma
-distinta al uso de `/mach cmd`, por ejemplo enviando la plantilla rellena.
+Introduce las órdenes para un jugador determinado, cuando este jugador ha hecho llegar
+las órdenes de forma distinta al uso de `/mach cmd`, por ejemplo enviando la plantilla
+rellena.
 
 #### `/shar expense_user`
 
 > Versión 0.4.0
 
-Introduce gastos para un jugador determinado, cuando este jugador ha hecho llegar los gastos de forma
-distinta al uso de `/mach expense`, por ejemplo enviando la plantilla rellena.
+Introduce gastos para un jugador determinado, cuando este jugador ha hecho llegar los
+gastos de forma distinta al uso de `/mach expense`, por ejemplo enviando la plantilla
+rellena.
+
+#### `/shar status`
+
+> Versión 0.9.0
+
+Muestra el estado de una partida para el administrador. A diferencia de
+`/mach game_status`, este comando no necesita que quién lo ejecute sea jugador de la
+partida, ni devuelve las órdenes enviadas.
 
 ## Futuras versiones
 
@@ -179,17 +197,22 @@ Se prevén las siguientes versiones
 - [ ] Refactorización.
   - [X] Mover el módulo `events` a `machiavelli.game`.
 - [ ] Mejora en el ciclo de creación de la partida.
-  - [ ] Crear un comando `/shar game_status` que muestre el estado de la partida al administrador.
+  - [X] Crear un comando `/shar status` que muestre el estado de la partida al
+  administrador.
+- [X] Mejora de `!sync` para evitar comandos duplicados y limpiar comandos registrados
+  a nivel local o global.
 
 ### Desarrollos futuros
 
-Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a las versiones conforme se completen.
+Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a las
+versiones conforme se completen.
 
 - [ ] Ejecutar todas las acciones del turno. Todavía faltan:
   - [ ] Tratamiento del fin de partida.
   - [X] Tratamiento de eliminación de jugadores.
-- [ ] Incluir algún tipo de chequeo del turno para advertir de órdenes incorrectas, ilegales o inconsistentes.
-- [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades en él.
+- [ ] Incluir algún tipo de chequeo del turno para advertir de órdenes incorrectas,
+ilegales o inconsistentes.
+- [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades.
 - [ ] Refactorización.
   - [ ] Reorganizar la jerarquía de módulos.
     - [X] Mover el módulo `events` a `machiavelli.game`.
@@ -216,58 +239,79 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
 ## Histórico de versiones
 
 - Versión 0.0.1:
-  Primera versión, incluye comandos para enviar las órdenes como fichero adjunto, para ver quién los ha mandado y para
-  descargarlos. Este primer bot no tiene ninguna lógica relacionada con el juego, solo es un "almacenador" de mensajes.
-- Versión 0.1.0: Primer bot que tiene la lógica del juego. Incorpora sus tablas; las potencias, los jugadores, la
-  información de la situación del tablero y la ejecución y reporte del primerísimo turno, el inicio de Primavera
-  (Hambre e Ingresos).
+  Primera versión, incluye comandos para enviar las órdenes como fichero adjunto, para
+  ver quién los ha mandado y para descargarlos. Este primer bot no tiene ninguna lógica
+  relacionada con el juego, solo es un "almacenador" de mensajes.
+- Versión 0.1.0: Primer bot que tiene la lógica del juego. Incorpora sus tablas; las
+  potencias, los jugadores, la información de la situación del tablero y la ejecución y
+  reporte del primerísimo turno, el inicio de Primavera (Hambre e Ingresos).
 
-  Estos comandos (bajo el grupo `/sharcashvelli` y `/sharcashvelli_admin`) conviven con los de la *versión 0.0.1* ya
-  que no tienen forma de permitir el envío de órdenes de juego, que todavía deben enviarse con `!send`.
+  Estos comandos (bajo el grupo `/sharcashvelli` y `/sharcashvelli_admin`) conviven con
+  los de la *versión 0.0.1* ya que no tienen forma de permitir el envío de órdenes de
+  juego, que todavía deben enviarse con `!send`.
 - Versión 0.1.1: Se añade información sobre los asedios.
-- Versión 0.2.1: Se renombran los grupos `/sharcashvelli` y `/sharcashvelli_admin` a `/mach` y `/shar` respectivamente;
-  se añaden dos nuevos comandos `/mach cmd` y `/mach cmdlist`; el comando `/mach game_report` ahora envía un mensaje
-  privado.
-- Versión 0.3.0: Se ejecutan las órdenes del turno (fase de mantenimiento solo). nuevo comando `/shar cmd_user` para
-  introducir en el bot las órdenes de un jugador que las haya mandado usando `/send`. Se ha mejorado el formato de
-  `/mach game_report` y de `/mach game_status`.
+- Versión 0.2.1: Se renombran los grupos `/sharcashvelli` y `/sharcashvelli_admin` a
+  `/mach` y `/shar` respectivamente; se añaden dos nuevos comandos `/mach cmd` y
+  `/mach cmdlist`; el comando `/mach game_report` ahora envía un mensaje privado.
+- Versión 0.3.0: Se ejecutan las órdenes del turno (fase de mantenimiento solo). Nuevo
+  comando `/shar cmd_user` para introducir en el bot las órdenes de un jugador que las
+  haya mandado usando `/send`. Se ha mejorado el formato de `/mach game_report` y de
+  `/mach game_status`.
 - Versión 0.3.1: Corrección de algunos bugs.
-- Versión 0.4.0: Se eliminan definitivamente los comandos `/send`, `/list`, `/view`, `/dice`, `/file` y `/clean`.
-  Se expanden `/mach cmd`, `/mach cmdlist` y `/shar cmd_user` para tratar las órdenes de una campaña, y se añaden
-  los nuevos comandos `/mach expense` y `/shar expense_user` para enviar los gastos para el turno actual, que se
-  separan del envío de órdenes a las tropas.
+- Versión 0.4.0: Se eliminan definitivamente los comandos `/send`, `/list`, `/view`,
+  `/dice`, `/file` y `/clean`. Se expanden `/mach cmd`, `/mach cmdlist` y
+  `/shar cmd_user` para tratar las órdenes de una campaña, y se añaden los nuevos
+  comandos `/mach expense` y `/shar expense_user` para enviar los gastos para el turno
+  actual, que se separan del envío de órdenes a las tropas.
 - Versión 0.4.1: Corrección de algunos bugs importantes.
 - Versión 0.4.2: Corrección de un bug en el envío de órdenes de conversión.
-- Versión 0.5.0: Primera versión con implementación de las fases de campaña. Incluye gestión completa de desastres
-  (hambre y plagas), gestión de todos los gastos EXCEPTO el asesinato, pero sí todos los SOBORNOS. De las órdenes
-  militares solo resuelve el AVANCE, la CONVERSIÓN y MANTENER, y NO gestiona conflictos.
+- Versión 0.5.0: Primera versión con implementación de las fases de campaña. Incluye
+  gestión completa de desastres (hambre y plagas), gestión de todos los gastos EXCEPTO
+  el asesinato, pero sí todos los SOBORNOS. De las órdenes militares solo resuelve el
+  AVANCE, la CONVERSIÓN y MANTENER, y NO gestiona conflictos.
   
-  La generación de eventos se ha modificado, y los eventos ya no se generan ya formateados, sino de forma abstracta
-  (tipo de evento y los datos asociados), pero todavía es necesario implementar un gestor de eventos que los muestre
-  en el reporte correctamente (actualmente, solo muestra el tipo de evento).
+  La generación de eventos se ha modificado, y los eventos ya no se generan ya
+  formateados, sino de forma abstracta (tipo de evento y los datos asociados), pero
+  todavía es necesario implementar un gestor de eventos que los muestre en el reporte
+  correctamente (actualmente, solo muestra el tipo de evento).
 
-  La gestión de la lógica del juego se ha trasladado a un nuevo componente, GameEngine, que actúa de orquestador entre
-  distintos componentes (gestores de Desastres, de Control, de Gastos, de Rebeliones, de Sobornos, Militares, etc) y
-  que está prácticamente terminado, pero le quedan las partes más complejas (TRANSPORTE y, sobre todo, CONFLICTOS).
+  La gestión de la lógica del juego se ha trasladado a un nuevo componente, GameEngine,
+  que actúa de orquestador entre distintos componentes (gestores de Desastres, de
+  Control, de Gastos, de Rebeliones, de Sobornos, Militares, etc) y que está
+  prácticamente terminado, pero le quedan las partes más complejas (TRANSPORTE y, sobre
+  todo, CONFLICTOS).
 - Versión 0.5.1: `/mach game_status` devuelve ahora un mensaje privado.
-- Versión 0.5.2: Todos los comandos `/mach` (de jugador) devuelven un mensaje privado, y todos los comandos `/shar`
-  (de administrador) devuelven un mensaje público.
-- Versión 0.6.0: Refactorización y reescritura de buena parte del código. Se ha completado el módulo de engine con la
-  resolución de conflictos militares, y las retiradas; se comprueban las reglas activas; nuevos servicios de Reporter
-  para separar el reporte de la lógica del juego; el módulo de discord se ha simplificado y apartado de allí la lógica
-  del juego y de la base de datos; se ha mejorado la gestión de eventos y la generación de reportes, etc.
-- Versión 0.7.0: Nuevos comandos `/mach exchange` y `/mach give`. `/mach game_status` ahora incluye el listado de
-  órdenes enviadas por lo que `/mach cmdlist` queda eliminada. Presentación del reporte de turno ordenada y mejorada.
-  Cambio en el algoritmo de retiradas: ahora las unidades con una retirada preferible (ie, hacia su propio territorio)
-  actúan primero. Se ha implementado el asesinato.
-- Versión 0.7.1: Corrección de un bug que no permitía reclutar ejércitos si hay una guarnición presente.
-- Versión 0.8.0: Corrección de bugs en el tratamiento de órdenes de mantenimiento en el caso de flotas en provincias
-  con dos costas. Resueltos varios bugs en el tratamiento de conflictos encadenados producidos por unidades que al
-  cancelar sus órdenes y quedarse en su provincia de origen provocaban nuevos conflictos. Se ha implementado el control
-  de los estrechos.
-- Versión 0.8.1: Corrección de bugs en órdenes militares: conflictos en los que participa una guarnición convirtiéndose,
-  órdenes de desbandar en campaña (convesión a 0) y manejo de estas unidades desbandadas. Corregida también alguna
-  representación de Commands errónea.
-- Versión 0.9.0: Tratamiento de los jugadores eliminados. Se añade al reporte información sobre el hambre y las plagas
-  aunque ninguna provincia sea afectada. Se han incluido todas las varianbes del escenario "B. The balance of power".
-  Comienzan algunas refactorizaciones de código.
+- Versión 0.5.2: Todos los comandos `/mach` (de jugador) devuelven un mensaje privado, y
+  todos los comandos `/shar` (de administrador) devuelven un mensaje público.
+- Versión 0.6.0: Refactorización y reescritura de buena parte del código. Se ha
+  completado el módulo de engine con la resolución de conflictos militares, y las
+  retiradas; se comprueban las reglas activas; nuevos servicios de Reporter para separar
+  el reporte de la lógica del juego; el módulo de discord se ha simplificado y apartado
+  de allí la lógica del juego y de la base de datos; se ha mejorado la gestión de
+  eventos y la generación de reportes, etc.
+- Versión 0.7.0: Nuevos comandos `/mach exchange` y `/mach give`. `/mach game_status`
+  ahora incluye el listado de órdenes enviadas por lo que `/mach cmdlist` queda
+  eliminada. Presentación del reporte de turno ordenada y mejorada. Cambio en el
+  algoritmo de retiradas: ahora las unidades con una retirada preferible (ie, hacia su
+  propio territorio) actúan primero. Se ha implementado el asesinato.
+- Versión 0.7.1: Corrección de un bug que no permitía reclutar ejércitos si hay una
+  guarnición presente.
+- Versión 0.8.0: Corrección de bugs en el tratamiento de órdenes de mantenimiento en el
+  caso de flotas en provincias con dos costas. Resueltos varios bugs en el tratamiento
+  de conflictos encadenados producidos por unidades que al cancelar sus órdenes y
+  quedarse en su provincia de origen provocaban nuevos conflictos. Se ha implementado el
+  control de los estrechos.
+- Versión 0.8.1: Corrección de bugs en órdenes militares: conflictos en los que
+  participa una guarnición convirtiéndose, órdenes de desbandar en campaña (conversión a
+  0) y manejo de estas unidades desbandadas. Corregida también alguna representación de
+  Commands errónea.
+- Versión 0.9.0: Tratamiento de los jugadores eliminados. Se añade al reporte
+  información sobre el hambre y las plagas aunque ninguna provincia sea afectada. Se han
+  incluido todas las varianbes del escenario "B. The balance of power". Comienzan
+  algunas refactorizaciones de código.
+
+  Se ha repasado la creación de la partida (ya que se hizo bastante manualmente) y se ha
+  creado un nuevo comando para el administrador, `/shar status`, que permite ver el
+  estado de una partida sin ser jugador de ésta. Se ha modificado `!sync` para evitar
+  comandos duplicados y hacer limpieza de los comandos registrados en discord a nivel
+  local y global.

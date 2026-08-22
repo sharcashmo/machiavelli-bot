@@ -608,7 +608,7 @@ async def set_scenario(interaction: discord.Interaction, scenario_id: str):
         )
 
 
-@admin_group.command(name="game_status", description="Muestra el estado de la partida")
+@game_group.command(name="game_status", description="Muestra el estado de la partida")
 async def game_status(interaction: discord.Interaction):
     await interaction.response.defer(ephemeral=True)
 
