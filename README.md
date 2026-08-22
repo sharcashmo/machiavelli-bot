@@ -174,6 +174,7 @@ Se prevén las siguientes versiones
   - [ ] Fase de mantenimiento.
   - [ ] Fase de campaña.
 - [ ] Añadir más escenarios.
+  - [X] Todas las variantes de "A. The expansion of states".
   - [X] Todos las variantes de "B. Balance of power".
 - [ ] Refactorización.
   - [X] Mover el módulo `events` a `machiavelli.game`.
@@ -184,7 +185,7 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
 
 - [ ] Ejecutar todas las acciones del turno. Todavía faltan:
   - [ ] Tratamiento del fin de partida.
-  - [ ] Tratamiento de eliminación de jugadores.
+  - [X] Tratamiento de eliminación de jugadores.
 - [ ] Incluir algún tipo de chequeo del turno para advertir de órdenes incorrectas, ilegales o inconsistentes.
 - [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades en él.
 - [ ] Refactorización.
@@ -197,7 +198,7 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
     - [ ] Package `machiavelli.repositories`
     - [ ] Package `machiavelli.services`
 - [ ] Añadir más escenarios.
-  - [ ] Todas las variantes de "A. The expansion of states".
+  - [X] Todas las variantes de "A. The expansion of states".
   - [X] Todas las variantes de "B. The balance of power".
   - [ ] Todas las variantes de "C1. The struggle for dominance (part one)".
   - [ ] Todas las variantes de "C2. The struggle for dominance (part two)".

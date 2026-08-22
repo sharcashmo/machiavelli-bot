@@ -1,4 +1,147 @@
 {
+  "Aa": {
+    "name": "The expansion of states (two players)",
+    "year": 1385,
+    "victory_conditions": {
+      "cities": 0,
+      "home_countries": 4
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": true
+    },
+    "home_countries": {
+      "M": ["pavia", "milan", "cremo", "como", "bolog", "genoa"],
+      "V": ["dalma", "venic", "ragus"],
+      "N": ["bari", "aquil", "naple", "saler", "otran", "capua"],
+      "L": ["pisto", "flore", "pisa"]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M", "N"],
+        "armies": ["pavia", "milan", "cremo", "bolog", "bari", "aquil"],
+        "fleets": ["genoa", "naple", "saler"]
+      },
+      "V": {
+        "home_countries": ["V", "L"],
+        "armies": ["pisto", "flore"],
+        "fleets": ["dalma", "ragus", "pisa"],
+        "garrisons": ["venic"]
+      }
+    },
+    "excluded_locations": [
+      "avign",
+      "marse",
+      "prove",
+      "swiss",
+      "tyrol",
+      "austr",
+      "carin",
+      "hunga"
+    ],
+    "variable_income_home_countries": ["M", "L", "V", "N"],
+    "variable_income_provinces": ["rome"]
+  },
+  "Ab": {
+    "name": "The expansion of states (three players)",
+    "year": 1385,
+    "victory_conditions": {
+      "cities": 0,
+      "home_countries": 4
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": true
+    },
+    "home_countries": {
+      "M": ["pavia", "milan", "cremo", "como", "bolog", "genoa"],
+      "V": ["dalma", "venic", "ragus"],
+      "N": ["bari", "aquil", "naple", "saler", "otran", "capua"],
+      "L": ["pisto", "flore", "pisa"]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M"],
+        "armies": ["pavia", "milan", "cremo", "bolog"],
+        "fleets": ["genoa"]
+      },
+      "V": {
+        "home_countries": ["V", "L"],
+        "armies": ["pisto", "flore"],
+        "fleets": ["dalma", "ragus", "pisa"],
+        "garrisons": ["venic"]
+      },
+      "N": {
+        "home_countries": ["N"],
+        "armies": ["bari", "aquil"],
+        "fleets": ["naple", "saler"]
+      }
+    },
+    "excluded_locations": [
+      "avign",
+      "marse",
+      "prove",
+      "swiss",
+      "tyrol",
+      "austr",
+      "carin",
+      "hunga"
+    ],
+    "variable_income_home_countries": ["M", "L", "V", "N"],
+    "variable_income_provinces": ["rome"]
+  },
+  "Ac": {
+    "name": "The expansion of states (four players)",
+    "year": 1385,
+    "victory_conditions": {
+      "cities": 15,
+      "home_countries": 2
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": true
+    },
+    "home_countries": {
+      "M": ["pavia", "milan", "cremo", "como", "bolog", "genoa"],
+      "V": ["dalma", "venic", "ragus"],
+      "N": ["bari", "aquil", "naple", "saler", "otran", "capua"],
+      "L": ["pisto", "flore", "pisa"]
+    },
+    "powers": {
+      "M": {
+        "home_countries": ["M"],
+        "armies": ["pavia", "milan", "cremo", "bolog"],
+        "fleets": ["genoa"]
+      },
+      "V": {
+        "home_countries": ["V"],
+        "fleets": ["dalma", "ragus"],
+        "garrisons": ["venic"]
+      },
+      "N": {
+        "home_countries": ["N"],
+        "armies": ["bari", "aquil"],
+        "fleets": ["naple", "saler"]
+      },
+      "L": {
+        "home_countries": ["L"],
+        "armies": ["pisto", "flore"],
+        "fleets": ["pisa"]
+      }
+    },
+    "excluded_locations": [
+      "avign",
+      "marse",
+      "prove",
+      "swiss",
+      "tyrol",
+      "austr",
+      "carin",
+      "hunga"
+    ],
+    "variable_income_home_countries": ["M", "L", "V", "N"],
+    "variable_income_provinces": ["rome"]
+  },
   "Ba1": {
     "name": "The balance of power (two players, four powers each)",
     "year": 1454,
