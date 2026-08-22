@@ -183,6 +183,15 @@ def _update_deadlines_record(
         )
 
 
+def _get_admin_status(
+    db_path: str,
+    channel_id: int,
+) -> tuple[str, ...]:
+    """Carga el informe público de estado a través de la capa del servicio."""
+    with game_service_session(db_path) as service:
+        return tuple(service.get_admin_status(channel_id))
+
+
 def _get_status_report(
     db_path: str,
     channel_id: int,
@@ -599,6 +608,31 @@ async def set_scenario(interaction: discord.Interaction, scenario_id: str):
         )
 
 
+@admin_group.command(name="game_status", description="Muestra el estado de la partida")
+async def game_status(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+
+    try:
+        report = await asyncio.to_thread(
+            _get_status_report,
+            game_group.db_path,
+            _require_channel_id(interaction),
+            interaction.user.id,
+        )
+        messages = _chunk_lines(report) or ["No hay datos de estado disponibles."]
+        for message in messages:
+            await interaction.followup.send(message, ephemeral=True)
+    except GameNotFoundException:
+        await interaction.followup.send(
+            "**Error:** No hay ninguna partida activa en este canal.\n"
+            "Crea una primero usando `/shar create`."
+        )
+    except Exception as error:
+        await interaction.followup.send(
+            f"**Error inesperado:** `{type(error).__name__}: {error}`"
+        )
+
+
 # Precarga de la lista de escenarios
 @set_scenario.autocomplete("scenario_id")
 async def set_scenario_autocomplete(
@@ -848,20 +882,17 @@ async def game_report(interaction: discord.Interaction):
         )
 
 
-@game_group.command(name="game_status", description="Muestra el estado de la partida")
-async def game_status(interaction: discord.Interaction):
-    await interaction.response.defer(ephemeral=True)
+@admin_group.command(name="status", description="Muestra el estado de la partida")
+async def admin_game_status(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=False)
 
     try:
         report = await asyncio.to_thread(
-            _get_status_report,
-            game_group.db_path,
-            _require_channel_id(interaction),
-            interaction.user.id,
+            _get_admin_status, game_group.db_path, _require_channel_id(interaction)
         )
         messages = _chunk_lines(report) or ["No hay datos de estado disponibles."]
         for message in messages:
-            await interaction.followup.send(message, ephemeral=True)
+            await interaction.followup.send(message, ephemeral=False)
     except GameNotFoundException:
         await interaction.followup.send(
             "**Error:** No hay ninguna partida activa en este canal.\n"

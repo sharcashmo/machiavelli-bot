@@ -178,6 +178,8 @@ Se prevén las siguientes versiones
   - [X] Todos las variantes de "B. Balance of power".
 - [ ] Refactorización.
   - [X] Mover el módulo `events` a `machiavelli.game`.
+- [ ] Mejora en el ciclo de creación de la partida.
+  - [ ] Crear un comando `/shar game_status` que muestre el estado de la partida al administrador.
 
 ### Desarrollos futuros
 

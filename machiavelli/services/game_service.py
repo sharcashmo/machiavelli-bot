@@ -196,6 +196,11 @@ class GameService:
         self.repo.save(game)
         return game.name
 
+    def get_admin_status(self, channel_id: int) -> list[str]:
+        """Devuelve el informe de estado de la partida para el administrador."""
+        lines = self.get_game(channel_id).report_status()
+        return lines
+
     def get_status_report(
         self,
         channel_id: int,
@@ -206,7 +211,7 @@ class GameService:
         """
         game = self.get_game(channel_id)
         player = self.resolve_player(game, discord_id)
-        lines = self.get_game(channel_id).report_status()
+        lines = game.report_status()
         lines.append(
             f"### :scroll: **Comandos actuales para "
             f"{GameTables.powers[player.power]}:**"
