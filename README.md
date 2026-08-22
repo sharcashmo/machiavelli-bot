@@ -168,9 +168,8 @@ Se prevén las siguientes versiones
 ### Versión 0.9.0
 
 - [ ] Mejoras en los reportes.
-  - [ ] Mostrar un evento para los desastres, incluso en el caso de años excelentes.
-- [ ] Tratamiento de la eliminación de jugadores.
-- [ ] Tratamiento del fin de partida.
+  - [X] Mostrar un evento para los desastres, incluso en el caso de años excelentes.
+- [X] Tratamiento de la eliminación de jugadores.
 - [ ] Añadir un chequeo de órdenes incorrectas, ilegales o inconsistentes.
   - [ ] Fase de mantenimiento.
   - [ ] Fase de campaña.
@@ -186,6 +185,19 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
   - [ ] Tratamiento de eliminación de jugadores.
 - [ ] Incluir algún tipo de chequeo del turno para advertir de órdenes incorrectas, ilegales o inconsistentes.
 - [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades en él.
+- [ ] Añadir más escenarios.
+  - [ ] Todas las variantes de "A. The expansion of states".
+  - [X] Todas las variantes de "B. The balance of power".
+  - [ ] Todas las variantes de "C1. The struggle for dominance (part one)".
+  - [ ] Todas las variantes de "C2. The struggle for dominance (part two)".
+  - [ ] Todas las variantes de "D. The spanish preponderance".
+  - [ ] Escenario de Alea "AL1. Decline of Milan".
+  - [ ] Escenario de Alea "AL2. Alfons V, Lord of Italy".
+  - [ ] Escenario de Alea "AL3. Ferdinand the Catholic".
+  - [ ] Escenario de Alea "AL4. The end of Lombard Dominion".
+  - [ ] Escenario de Alea "AL5. Coronation of Karl V".
+  - [ ] Escenario de Alea "AL6. The Neapolitan Rebellion".
+  - [ ] Escenario de Alea "AL7. The Battle of Lepanto".
 
 ## Histórico de versiones
 
@@ -224,13 +236,13 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
   distintos componentes (gestores de Desastres, de Control, de Gastos, de Rebeliones, de Sobornos, Militares, etc) y
   que está prácticamente terminado, pero le quedan las partes más complejas (TRANSPORTE y, sobre todo, CONFLICTOS).
 - Versión 0.5.1: `/mach game_status` devuelve ahora un mensaje privado.
-- Versión 0.5.2: todos los comandos `/mach` (de jugador) devuelven un mensaje privado, y todos los comandos `/shar`
+- Versión 0.5.2: Todos los comandos `/mach` (de jugador) devuelven un mensaje privado, y todos los comandos `/shar`
   (de administrador) devuelven un mensaje público.
-- Versión 0.6.0: refactorización y reescritura de buena parte del código. Se ha completado el módulo de engine con la
+- Versión 0.6.0: Refactorización y reescritura de buena parte del código. Se ha completado el módulo de engine con la
   resolución de conflictos militares, y las retiradas; se comprueban las reglas activas; nuevos servicios de Reporter
   para separar el reporte de la lógica del juego; el módulo de discord se ha simplificado y apartado de allí la lógica
   del juego y de la base de datos; se ha mejorado la gestión de eventos y la generación de reportes, etc.
-- Versión 0.7.0: nuevos comandos `/mach exchange` y `/mach give`. `/mach game_status` ahora incluye el listado de
+- Versión 0.7.0: Nuevos comandos `/mach exchange` y `/mach give`. `/mach game_status` ahora incluye el listado de
   órdenes enviadas por lo que `/mach cmdlist` queda eliminada. Presentación del reporte de turno ordenada y mejorada.
   Cambio en el algoritmo de retiradas: ahora las unidades con una retirada preferible (ie, hacia su propio territorio)
   actúan primero. Se ha implementado el asesinato.
@@ -242,3 +254,6 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
 - Versión 0.8.1: Corrección de bugs en órdenes militares: conflictos en los que participa una guarnición convirtiéndose,
   órdenes de desbandar en campaña (convesión a 0) y manejo de estas unidades desbandadas. Corregida también alguna
   representación de Commands errónea.
+- Versión 0.9.0: Tratamiento de los jugadores eliminados. Se añade al reporte información sobre el hambre y las plagas
+  aunque ninguna provincia sea afectada. Se han incluido todas las varianbes del escenario "B. The balance of power".
+  

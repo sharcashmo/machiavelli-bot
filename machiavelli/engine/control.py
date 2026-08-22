@@ -137,6 +137,7 @@ class ControlManager:
     def check_player_status(self, player: Player) -> None:
         """Comprueba si el jugador es eliminado o cumple las condiciones de victoria."""
         if not player.home_countries:
+            player.eliminate()
             self.game.add_event(
                 TurnEvent(
                     type=EventType.PLAYER_ELIMINATED, data={"player": player.player_id}

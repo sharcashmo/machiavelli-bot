@@ -661,7 +661,7 @@ ACTIVE_CAMPAIGN_SNAPSHOT_V1 = {
     "turn_number": 3,
     "famine": (),
     "military": (
-        (("P0", "fort"),),
+        (),
         (),
         (),
         ("fort",),
@@ -669,7 +669,7 @@ ACTIVE_CAMPAIGN_SNAPSHOT_V1 = {
         (),
     ),
     "players": (
-        ("P0", 1000, "M", (), (), 0, ("V",), ()),
+        ("P0", 1000, "M", (), (), 0, (), ()),
         ("P1", 1001, "V", ("other",), ("V",), 0, ("M",), ()),
     ),
     "events": (

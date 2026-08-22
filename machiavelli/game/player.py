@@ -125,8 +125,7 @@ class Player:
         PlayerRepository(conn).save(self)
 
     def save_commands(self, conn: sqlite3.Connection) -> None:
-        """Sustituye los comandos mediante la fachada de compatibilidad del repositorio.
-        """
+        """Sustituye los comandos mediante la fachada compatibilidad del repositorio."""
         from machiavelli.repositories.player_repository import PlayerRepository
 
         PlayerRepository(conn).save_commands(self)
@@ -203,3 +202,15 @@ class Player:
         from machiavelli.engine.orders import OrderProcessor
 
         return OrderProcessor(self.game).process_command(self, turn_type, command)
+
+    def eliminate(self) -> None:
+        """Elimina al jugador."""
+        self.controlled_locations = []
+        self.armies = []
+        self.fleets = []
+        self.garrisons = []
+        self.ass_counters = []
+        self.ducats = 0
+        self.rebelled_cities = []
+        self.rebelled_provinces = []
+        self.commands = []
