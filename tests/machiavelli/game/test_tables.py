@@ -59,7 +59,7 @@ def test_province_code_formatting():
 
 def test_table_lengths_and_counts():
     """Verifica las dimensiones de los diccionarios y listas de datos."""
-    assert len(GameTables.powers) == 8
+    assert len(GameTables.powers) == 9
     assert len(GameTables.actors) == 4
     assert len(GameTables.expenses) == 11
     assert len(GameTables.military_orders) == 7
