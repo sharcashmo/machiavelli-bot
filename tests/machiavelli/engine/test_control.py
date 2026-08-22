@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import Mock, call, patch
 
 from machiavelli.engine.control import ControlManager
-from machiavelli.events import EventType, TurnEvent
+from machiavelli.game.events import EventType, TurnEvent
 
 
 class TestProvincesWithOwnUnits(unittest.TestCase):

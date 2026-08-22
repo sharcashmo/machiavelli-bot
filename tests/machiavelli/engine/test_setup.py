@@ -12,7 +12,7 @@ from machiavelli.engine.exceptions import (
     ScenarioNotSelectedError,
 )
 from machiavelli.engine.setup import SetupManager
-from machiavelli.events import EventType, TurnEvent
+from machiavelli.game.events import EventType, TurnEvent
 from machiavelli.game.scenario import Power, Rules, Scenario, VictoryConditions
 
 from .helpers import create_mock_game, create_mock_player

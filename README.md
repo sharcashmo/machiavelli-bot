@@ -175,6 +175,8 @@ Se prevén las siguientes versiones
   - [ ] Fase de campaña.
 - [ ] Añadir más escenarios.
   - [X] Todos las variantes de "B. Balance of power".
+- [ ] Refactorización.
+  - [X] Mover el módulo `events` a `machiavelli.game`.
 
 ### Desarrollos futuros
 
@@ -185,6 +187,15 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
   - [ ] Tratamiento de eliminación de jugadores.
 - [ ] Incluir algún tipo de chequeo del turno para advertir de órdenes incorrectas, ilegales o inconsistentes.
 - [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades en él.
+- [ ] Refactorización.
+  - [ ] Reorganizar la jerarquía de módulos.
+    - [X] Mover el módulo `events` a `machiavelli.game`.
+  - [ ] Reescribir todos los tests unitarios
+    - [ ] Package `machiavelli.db`
+    - [ ] Package `machiavelli.engine`
+    - [ ] Package `machiavelli.game`
+    - [ ] Package `machiavelli.repositories`
+    - [ ] Package `machiavelli.services`
 - [ ] Añadir más escenarios.
   - [ ] Todas las variantes de "A. The expansion of states".
   - [X] Todas las variantes de "B. The balance of power".
@@ -256,4 +267,4 @@ Cambios que afectan a los comandos del bot. Los cambios se irán incorporando a 
   representación de Commands errónea.
 - Versión 0.9.0: Tratamiento de los jugadores eliminados. Se añade al reporte información sobre el hambre y las plagas
   aunque ninguna provincia sea afectada. Se han incluido todas las varianbes del escenario "B. The balance of power".
-  
+  Comienzan algunas refactorizaciones de código.

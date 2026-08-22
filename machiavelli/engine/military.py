@@ -9,8 +9,8 @@ from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, replace
 from enum import StrEnum
 
-from ..events import TurnEvent
 from ..game.command import Command
+from ..game.events import TurnEvent
 from ..game.game import Game
 from ..game.map import Map, MovementMode
 from ..game.player import Player

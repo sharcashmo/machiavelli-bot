@@ -6,8 +6,8 @@ from random import Random
 from unittest.mock import Mock
 
 from machiavelli.engine.core import GameEngine
-from machiavelli.events import EventType, TurnEvent
 from machiavelli.game.command import Command
+from machiavelli.game.events import EventType, TurnEvent
 from machiavelli.game.game import Game
 from machiavelli.game.map import Map
 from machiavelli.game.player import Player

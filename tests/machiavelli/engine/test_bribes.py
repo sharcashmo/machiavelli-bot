@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 from machiavelli.engine.bribes import Bribe, BribeResolver
-from machiavelli.events import EventType
+from machiavelli.game.events import EventType
 from machiavelli.game.map import MovementMode
 from tests.machiavelli.engine.helpers import create_mock_game, create_mock_player
 

@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 import pytest
 
 from machiavelli.engine.maintenance import MaintenanceResolver
-from machiavelli.events import EventType
 from machiavelli.game.command import Command
+from machiavelli.game.events import EventType
 
 
 class DummyProvince:

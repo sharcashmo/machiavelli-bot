@@ -7,8 +7,13 @@ from pathlib import Path
 import pytest
 
 from machiavelli import database
-from machiavelli.events import EventType, InvalidTurnEventError, JSONValue, TurnEvent
 from machiavelli.game.command import Command
+from machiavelli.game.events import (
+    EventType,
+    InvalidTurnEventError,
+    JSONValue,
+    TurnEvent,
+)
 from machiavelli.game.game import Game
 from machiavelli.game.player import Player
 from machiavelli.repositories.game_repository import GameRepository

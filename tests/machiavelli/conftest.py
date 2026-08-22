@@ -5,7 +5,7 @@ from copy import deepcopy
 
 import pytest
 
-from machiavelli.events import EventType, JSONValue
+from machiavelli.game.events import EventType, JSONValue
 
 
 @pytest.fixture

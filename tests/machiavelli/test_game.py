@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 
 from machiavelli import database
-from machiavelli.events import EventType, TurnEvent
 from machiavelli.game.command import Command
+from machiavelli.game.events import EventType, TurnEvent
 from machiavelli.game.game import (
     DuplicatedGameException,
     Game,

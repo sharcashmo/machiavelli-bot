@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from machiavelli.engine.rebellions import RebellionManager
-from machiavelli.events import EventType, TurnEvent
+from machiavelli.game.events import EventType, TurnEvent
 
 
 class TestExpenseRebellionPacify(unittest.TestCase):

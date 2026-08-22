@@ -2,7 +2,7 @@
 
 import unittest
 
-from machiavelli.events import EventType, TurnEvent
+from machiavelli.game.events import EventType, TurnEvent
 from machiavelli.game.game import Game
 from tests.machiavelli.engine.helpers import (
     create_mock_game,

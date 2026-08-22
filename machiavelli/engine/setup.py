@@ -3,7 +3,7 @@
 
 from random import Random
 
-from ..events import EventType, TurnEvent
+from ..game.events import EventType, TurnEvent
 from ..game.game import Game
 from .exceptions import (
     DuplicatePlayerError,

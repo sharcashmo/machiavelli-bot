@@ -3,7 +3,7 @@
 from unittest.mock import Mock, patch
 
 from machiavelli.engine.income import IncomeManager
-from machiavelli.events import EventType, TurnEvent
+from machiavelli.game.events import EventType, TurnEvent
 from tests.machiavelli.engine.helpers import create_mock_game, create_mock_player
 
 

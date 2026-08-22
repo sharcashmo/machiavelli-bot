@@ -19,7 +19,6 @@ import pytest
 from machiavelli import database
 from machiavelli.engine import GameEngine
 from machiavelli.engine.military import DislodgementResolverRequired
-from machiavelli.events import InvalidTurnEventError
 from machiavelli.game import Command as PublicCommand
 from machiavelli.game import (
     DuplicatePlayerException,
@@ -29,6 +28,7 @@ from machiavelli.game import (
 from machiavelli.game import Game as PublicGame
 from machiavelli.game import Player as PublicPlayer
 from machiavelli.game.command import Command
+from machiavelli.game.events import InvalidTurnEventError
 from machiavelli.game.game import Game
 from machiavelli.game.player import Player
 from machiavelli.game.scenario import Power, Rules, Scenario, VictoryConditions

@@ -4,8 +4,8 @@ import unittest
 from unittest.mock import Mock, call, patch
 
 from machiavelli.engine.assassination import AssassinationResolver
-from machiavelli.events import EventType, TurnEvent
 from machiavelli.game.command import Command
+from machiavelli.game.events import EventType, TurnEvent
 
 from .helpers import create_mock_game, create_mock_player
 

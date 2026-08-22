@@ -28,7 +28,7 @@ from machiavelli.engine.military import (
     UnresolvedMilitaryConflict,
     conflict_location,
 )
-from machiavelli.events import EventType, TurnEvent
+from machiavelli.game.events import EventType, TurnEvent
 from machiavelli.game.game import Game
 from machiavelli.game.map import Map, Province, Route, Sea
 from machiavelli.game.scenario import Rules, Scenario, VictoryConditions

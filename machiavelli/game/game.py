@@ -9,9 +9,8 @@ from dataclasses import dataclass, field, fields
 from datetime import datetime, timedelta
 from typing import Self
 
-from machiavelli.events import TurnEvent
-
 from .command import Command
+from .events import TurnEvent
 from .exceptions import (
     DuplicatedGameException,
     DuplicatePlayerException,

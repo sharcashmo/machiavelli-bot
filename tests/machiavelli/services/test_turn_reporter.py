@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 import pytest
 
-from machiavelli.events import EventType, JSONValue, TurnEvent
+from machiavelli.game.events import EventType, JSONValue, TurnEvent
 from machiavelli.game.game import Game
 from machiavelli.game.map import Map
 from machiavelli.game.scenario import Scenario

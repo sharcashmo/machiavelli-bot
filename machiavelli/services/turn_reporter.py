@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, cast
 
 from discord.utils import escape_markdown, escape_mentions
 
-from machiavelli.events import (
+from machiavelli.game.events import (
     EventType,
     FrozenJSONValue,
     InvalidTurnEventError,

@@ -8,8 +8,8 @@ from unittest.mock import Mock, call, patch
 import pytest
 
 from machiavelli.engine.core import GameEngine
-from machiavelli.events import EventType, TurnEvent
 from machiavelli.game.command import Command
+from machiavelli.game.events import EventType, TurnEvent
 from machiavelli.game.game import Game
 from machiavelli.game.map import Map, Province
 from machiavelli.game.scenario import (

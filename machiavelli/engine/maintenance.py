@@ -1,7 +1,7 @@
 """Fase de mantenimiento con un resultado auditable por cada orden intentada."""
 
-from ..events import EventType, TurnEvent
 from ..game.command import Command
+from ..game.events import EventType, TurnEvent
 from ..game.game import Game
 from ..game.player import Player
 

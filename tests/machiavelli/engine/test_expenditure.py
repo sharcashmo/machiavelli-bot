@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import Mock
 
 from machiavelli.engine.expenditure import ExpenditureProcessor
-from machiavelli.events import EventType
+from machiavelli.game.events import EventType
 
 
 class TestExpenditureProcessor(unittest.TestCase):

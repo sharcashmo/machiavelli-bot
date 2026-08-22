@@ -101,7 +101,7 @@ def test_discord_has_no_public_dislodgement_resolver_parameter() -> None:
 
 def test_turn_producers_do_not_build_presentation_or_legacy_records() -> None:
     paths = (
-        Path("machiavelli/events.py"),
+        Path("machiavelli/game/events.py"),
         Path("machiavelli/engine/setup.py"),
         Path("machiavelli/engine/income.py"),
         Path("machiavelli/engine/maintenance.py"),

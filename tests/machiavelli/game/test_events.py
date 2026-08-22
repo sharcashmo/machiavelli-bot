@@ -7,7 +7,12 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from machiavelli.events import EventType, InvalidTurnEventError, JSONValue, TurnEvent
+from machiavelli.game.events import (
+    EventType,
+    InvalidTurnEventError,
+    JSONValue,
+    TurnEvent,
+)
 
 EXPECTED_EVENT_TYPES = {
     "start_game",

@@ -2,7 +2,7 @@
 
 from random import Random
 
-from ..events import EventType, JSONValue, TurnEvent
+from ..game.events import EventType, JSONValue, TurnEvent
 from ..game.game import Game
 from ..game.player import Player
 from ..game.tables import GameTables

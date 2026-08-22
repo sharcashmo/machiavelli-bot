@@ -4,7 +4,7 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass
 
-from ..events import EventType, TurnEvent
+from ..game.events import EventType, TurnEvent
 from ..game.game import Command, Game, Player
 from ..game.map import Map, MovementMode
 from ..game.tables import GameTables
