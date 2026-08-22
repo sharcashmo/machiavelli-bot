@@ -8,7 +8,7 @@ logging.getLogger("machiavelli").addHandler(logging.NullHandler())
 try:
     __version__ = version("machiavelli")
 except PackageNotFoundError:
-    __version__ = "0.8.1"
+    __version__ = "0.9.0"
 
 VERSION = __version__
 
