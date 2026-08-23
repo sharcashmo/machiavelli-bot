@@ -8,7 +8,7 @@ from datetime import datetime
 import discord
 from discord import app_commands
 
-from machiavelli.engine.exceptions import TooManyExpenses
+from machiavelli.engine.exceptions import GameInitializationError, TooManyExpenses
 from machiavelli.engine.military import (
     DislodgementResolverRequired,
     InvalidMilitaryState,
@@ -123,6 +123,13 @@ def _create_game_record(db_path: str, name: str, channel_id: int) -> tuple[str, 
         if game.database_id is None:
             raise RuntimeError("La partida creada no recibió un ID de persistencia")
         return game.name, game.database_id
+
+
+def _remove_game_record(db_path: str, channel_id: int) -> str:
+    """Elimina una partida a través de la capa del servicio de aplicación."""
+    with game_service_session(db_path) as service:
+        game_name = service.delete_game(channel_id=channel_id)
+        return game_name
 
 
 def _add_player_record(
@@ -484,6 +491,25 @@ async def create(interaction: discord.Interaction, name: str):
         await interaction.followup.send(f"Error al crear partida: {error}")
 
 
+@admin_group.command(name="delete", description="Elimina la partida de este canal")
+async def delete(interaction: discord.Interaction):
+    # Deferimos la respuesta para evitar el timeout de 3 segundos de Discord
+    await interaction.response.defer(ephemeral=False)
+
+    try:
+        game_name = await asyncio.to_thread(
+            _remove_game_record,
+            admin_group.db_path,
+            _require_channel_id(interaction),
+        )
+        await interaction.followup.send(
+            f"**¡Partida Eliminada!**\nSe eliminó la partida *'{game_name}'* "
+            f"en el canal <#{interaction.channel_id}>."
+        )
+    except GameNotFoundException as error:
+        await interaction.followup.send(f"Error al eliminar la partida: {error}")
+
+
 @admin_group.command(
     name="add_player", description="Añade un jugador a la partida de este canal"
 )
@@ -492,7 +518,7 @@ async def create(interaction: discord.Interaction, name: str):
     name="El nombre político o ID interno del jugador (ej: 'Francia' o 'Carlos')",
 )
 async def add_player(
-    interaction: discord.Interaction, discord_player: discord.Member, name: str
+    interaction: discord.Interaction, discord_player: discord.User, name: str
 ):
     # Deferimos la respuesta para evitar el timeout de 3 segundos
     await interaction.response.defer(ephemeral=False)
@@ -536,7 +562,7 @@ async def add_player(
     name="remove_player", description="Elimina a un jugador de la partida de este canal"
 )
 @app_commands.describe(discord_user="El usuario de Discord que deseas eliminar")
-async def remove_player(interaction: discord.Interaction, discord_user: discord.Member):
+async def remove_player(interaction: discord.Interaction, discord_user: discord.User):
     await interaction.response.defer(ephemeral=False)
 
     try:
@@ -818,6 +844,9 @@ async def run_game(interaction: discord.Interaction):
             extra={"cycle_diagnostic": getattr(error, "diagnostic", None)},
         )
         await interaction.edit_original_response(content=_military_error_message(error))
+        return
+    except GameInitializationError as error:
+        await interaction.followup.send(f"**Error:** {error}.")
         return
     except Exception:
         logger.exception("Error inesperado al ejecutar el turno")

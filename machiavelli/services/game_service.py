@@ -123,6 +123,12 @@ class GameService:
         self.repo.save(game)
         return game
 
+    def delete_game(self, channel_id: int) -> str:
+        """Elimina la partida del canal, si existe."""
+        game = self.repo.get_by_channel(channel_id)
+        self.repo.delete(game)
+        return game.name
+
     def get_game(self, channel_id: int) -> Game:
         """Carga un agregado completo de partida mediante el canal de Discord."""
         return self.repo.get_by_channel(channel_id)

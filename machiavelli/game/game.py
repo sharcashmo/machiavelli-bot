@@ -204,6 +204,11 @@ class Game:
                 ],
             )
 
+    def delete(self, conn: sqlite3.Connection) -> None:
+        """Delete the game from the database."""
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM games WHERE id = ?", (self.database_id,))
+
     def report_status(
         self,
         safe_text: Callable[[str], str] = str,

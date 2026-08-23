@@ -131,6 +131,12 @@ públicos.
 
 Crea una partida en el canal en que se ejecuta.
 
+#### `/shar delete`
+
+> Versión 0.9.0
+
+Elimina la partida activa en el canal que se ejecuta.
+
 #### `/shar set_scenario`
 
 > Versión 0.2.0
@@ -197,8 +203,11 @@ Se prevén las siguientes versiones
 - [ ] Refactorización.
   - [X] Mover el módulo `events` a `machiavelli.game`.
 - [ ] Mejora en el ciclo de creación de la partida.
-  - [X] Crear un comando `/shar status` que muestre el estado de la partida al
+  - [X] Creado un comando `/shar status` que muestre el estado de la partida al
   administrador.
+  - [X] Creado un comando `/shar delete` que elimine la partida activa en el canal.
+  - [X] Capturados los errores producidos durante el inicio de la partida para mostrar
+  un mensaje comprensible al usuario.
 - [X] Mejora de `!sync` para evitar comandos duplicados y limpiar comandos registrados
   a nivel local o global.
 
@@ -312,6 +321,9 @@ ilegales o inconsistentes.
 
   Se ha repasado la creación de la partida (ya que se hizo bastante manualmente) y se ha
   creado un nuevo comando para el administrador, `/shar status`, que permite ver el
-  estado de una partida sin ser jugador de ésta. Se ha modificado `!sync` para evitar
-  comandos duplicados y hacer limpieza de los comandos registrados en discord a nivel
-  local y global.
+  estado de una partida sin ser jugador de ésta. También se ha creado el comando
+  `/shar delete` para eliminar la partida activa del canal, y se han capturado los
+  errores al inicio de la partida para mostrar un mensaje comprensible al usuario.
+  
+  Se ha modificado `!sync` para evitar comandos duplicados y hacer limpieza de los
+  comandos registrados en discord a nivel local y global.

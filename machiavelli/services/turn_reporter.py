@@ -118,8 +118,8 @@ class TurnReporter:
         data = event.data
         match event.type:
             case EventType.START_GAME:
-                scenario = TurnReporter._safe(cast(str, data["scenario"]))
-                return [f"Se inició la partida con el escenario {scenario}."]
+                scenario = game.scenario.name
+                return [f"> Se inició la partida con el escenario {scenario}."]
             case EventType.START_GAME_POWER_ASSIGNED:
                 discord_id = cast(int | None, data["discord_id"])
                 player = (
@@ -128,7 +128,7 @@ class TurnReporter:
                     else TurnReporter._player(game, cast(str, data["player_id"]))
                 )
                 power = TurnReporter._power(game, cast(str, data["power_id"]))
-                return [f"{player} recibió la potencia {power}."]
+                return [f"> {player} recibió la potencia {power}."]
             case EventType.START_SEASON:
                 season = _SEASONS[cast(int, data["season"])]
                 return [f"### 🗓️ Comenzó {season} de {cast(int, data['year'])}."]

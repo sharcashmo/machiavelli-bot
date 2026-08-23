@@ -28,6 +28,17 @@ class GameRepository:
             game.database_id = original_database_id
             raise
 
+    def delete(self, game: Game) -> None:
+        """Elimina una partida de la base de datos."""
+        try:
+            if self.conn.in_transaction:
+                game.delete(self.conn)
+                return
+            with self.conn:
+                game.delete(self.conn)
+        except Exception:
+            raise
+
     def get_by_id(self, game_id: int) -> Game:
         """Carga una partida mediante su identificador de SQLite."""
         return Game.load_game(self.conn, game_id=game_id)

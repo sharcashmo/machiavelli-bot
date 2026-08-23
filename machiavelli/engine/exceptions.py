@@ -18,7 +18,8 @@ class InvalidPlayerCountError(GameInitializationError):
 
     def __init__(self, current: int, scenario_players: int):
         super().__init__(
-            f"El escenario requiere {scenario_players} y se inscribieron {current}."
+            f"El escenario requiere {scenario_players} jugadores "
+            f"y se inscribieron {current}."
         )
         self.current = current
         self.scenario_players = scenario_players
