@@ -200,6 +200,7 @@ Se prevén las siguientes versiones
 - [ ] Añadir más escenarios.
   - [X] Todas las variantes de "A. The expansion of states".
   - [X] Todos las variantes de "B. Balance of power".
+  - [X] Todas las variantes de "C1. The struggle for dominance (part one)".
 - [ ] Refactorización.
   - [X] Mover el módulo `events` a `machiavelli.game`.
 - [ ] Mejora en el ciclo de creación de la partida.
@@ -234,7 +235,7 @@ ilegales o inconsistentes.
 - [ ] Añadir más escenarios.
   - [X] Todas las variantes de "A. The expansion of states".
   - [X] Todas las variantes de "B. The balance of power".
-  - [ ] Todas las variantes de "C1. The struggle for dominance (part one)".
+  - [X] Todas las variantes de "C1. The struggle for dominance (part one)".
   - [ ] Todas las variantes de "C2. The struggle for dominance (part two)".
   - [ ] Todas las variantes de "D. The spanish preponderance".
   - [ ] Escenario de Alea "AL1. Decline of Milan".
@@ -316,8 +317,9 @@ ilegales o inconsistentes.
   Commands errónea.
 - Versión 0.9.0: Tratamiento de los jugadores eliminados. Se añade al reporte
   información sobre el hambre y las plagas aunque ninguna provincia sea afectada. Se han
-  incluido todas las varianbes del escenario "B. The balance of power". Comienzan
-  algunas refactorizaciones de código.
+  incluido todas las varianbes del escenario "B. The balance of power" y del escenario
+  "C. The struggle for dominance, part one". Comienzan algunas refactorizaciones de
+  código.
 
   Se ha repasado la creación de la partida (ya que se hizo bastante manualmente) y se ha
   creado un nuevo comando para el administrador, `/shar status`, que permite ver el
