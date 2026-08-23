@@ -315,11 +315,14 @@ ilegales o inconsistentes.
   participa una guarnición convirtiéndose, órdenes de desbandar en campaña (conversión a
   0) y manejo de estas unidades desbandadas. Corregida también alguna representación de
   Commands errónea.
-- Versión 0.9.0: Tratamiento de los jugadores eliminados. Se añade al reporte
-  información sobre el hambre y las plagas aunque ninguna provincia sea afectada. Se han
-  incluido todas las varianbes del escenario "B. The balance of power" y del escenario
-  "C. The struggle for dominance, part one". Comienzan algunas refactorizaciones de
-  código.
+- Versión 0.9.0: Tratamiento de los jugadores eliminados. A este respecto se ha
+  introducido un cambio importante en las reglas, y es que un jugador ya no es eliminado
+  si conserva una guarnición en alguna de sus ciudades natales.
+  
+  Se añade al reporte información sobre el hambre y las plagas aunque ninguna provincia
+  sea afectada. Se han incluido todas las varianbes del escenario "B. The balance of
+  power" y del escenario "C. The struggle for dominance, part one". Comienzan algunas
+  refactorizaciones de código.
 
   Se ha repasado la creación de la partida (ya que se hizo bastante manualmente) y se ha
   creado un nuevo comando para el administrador, `/shar status`, que permite ver el

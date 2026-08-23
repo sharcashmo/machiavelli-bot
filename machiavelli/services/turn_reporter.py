@@ -201,7 +201,7 @@ class TurnReporter:
                 return [TurnReporter._home_country_line(game, data, gained=False)]
             case EventType.PLAYER_ELIMINATED:
                 player = TurnReporter._player(game, cast(str, data["player"]))
-                return [f"{player} fue eliminado de la partida."]
+                return [f"> {player} fue eliminado de la partida."]
             case EventType.PLAYER_WON:
                 player = TurnReporter._player(game, cast(str, data["player"]))
                 return [

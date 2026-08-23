@@ -235,6 +235,7 @@ class TestHomeCountryControlLoses(unittest.TestCase):
     def test_home_country_control_loses_keeps_a_city(self):
         """Retiene el país natal si controla al menos una ciudad."""
         self.player.controlled_locations = ["flore"]
+        self.player.garrisons = []
 
         self.manager.home_country_control_loses(self.player)
 
@@ -244,6 +245,7 @@ class TestHomeCountryControlLoses(unittest.TestCase):
     def test_home_country_control_loses_keeps_a_fortified_city(self):
         """Retiene el país natal si controla al menos una ciudad fortificada."""
         self.player.controlled_locations = ["pisa"]
+        self.player.garrisons = []
 
         self.manager.home_country_control_loses(self.player)
 
@@ -253,6 +255,7 @@ class TestHomeCountryControlLoses(unittest.TestCase):
     def test_home_country_control_loses_keeps_no_city(self):
         """Pierde el país natal si solo controla provincias sin ciudad."""
         self.player.controlled_locations = ["rural"]
+        self.player.garrisons = []
 
         self.manager.home_country_control_loses(self.player)
 
@@ -268,6 +271,7 @@ class TestHomeCountryControlLoses(unittest.TestCase):
     def test_home_country_control_loses_keeps_no_province(self):
         """Pierde el país natal si no controla ninguna localización del país natal."""
         self.player.controlled_locations = []
+        self.player.garrisons = []
 
         self.manager.home_country_control_loses(self.player)
 

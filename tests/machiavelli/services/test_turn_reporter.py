@@ -75,9 +75,9 @@ def test_report_preserves_general_order_event_order_and_repetitions() -> None:
         "⚠️ **EVENTOS DEL TURNO ANTERIOR**",
     ]
     assert rendered == [
-        "Se inició la partida con el escenario Be.",
-        "Venice <@456> fue eliminado de la partida.",
-        "Se inició la partida con el escenario Be.",
+        "> Se inició la partida con el escenario The balance of power (six players).",
+        "> Venice <@456> fue eliminado de la partida.",
+        "> Se inició la partida con el escenario The balance of power (six players).",
     ]
 
 
@@ -128,7 +128,7 @@ def test_power_assignment_prefers_persisted_discord_id_with_safe_fallback(
     ]
 
     assert event_lines(TurnReporter.generate(game)) == [
-        f"{expected_player} recibió la potencia Milan."
+        f"> {expected_player} recibió la potencia Milan."
     ]
 
 

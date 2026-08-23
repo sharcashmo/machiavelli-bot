@@ -92,12 +92,12 @@ class ControlManager:
         """Comprueba si un jugador piede el control sobre algún país natal."""
 
         # Se pierde el control de un país natal si se pierde el control de todas las
-        # ciudades de éste. Una guarnición no basta para controlar una ciudad
+        # ciudades de éste. Una guarnición permite controlar la ciudad
         for home_country in player.home_countries[:]:
             target_hc = self.game.scenario.home_countries.get(home_country)
             if target_hc:
                 controls_any_city = any(
-                    p in player.controlled_locations
+                    (p in player.controlled_locations or p in player.garrisons)
                     and self.game.map.provinces[p].city in ("city", "fortified")
                     for p in target_hc.provinces
                 )
