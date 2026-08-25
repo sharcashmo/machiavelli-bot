@@ -988,7 +988,7 @@
       "fortress_active": false
     },
     "home_countries": {
-      "F": ["avig", "marse", "prove"],
+      "F": ["avign", "marse", "prove"],
       "A": [
         "tyrol",
         "austr",
@@ -1038,7 +1038,7 @@
     "powers": {
       "F": {
         "home_countries": ["F", "T"],
-        "armies": ["avig", "milan", "naple", "bari", "saluz", "alban"],
+        "armies": ["avign", "milan", "naple", "bari", "saluz", "alban"],
         "fleets": ["marse", "genoa", "tunis", "duraz"],
         "extra_provinces": ["milan", "genoa", "naple", "bari", "saluz"]
       },
@@ -1088,7 +1088,7 @@
       "fortress_active": false
     },
     "home_countries": {
-      "F": ["avig", "marse", "prove"],
+      "F": ["avign", "marse", "prove"],
       "A": [
         "tyrol",
         "austr",
@@ -1138,7 +1138,7 @@
     "powers": {
       "F": {
         "home_countries": ["F"],
-        "armies": ["avig", "milan", "naple", "bari", "saluz"],
+        "armies": ["avign", "milan", "naple", "bari", "saluz"],
         "fleets": ["marse", "genoa"],
         "extra_provinces": ["milan", "genoa", "naple", "bari", "saluz"]
       },
@@ -1185,7 +1185,7 @@
       "fortress_active": false
     },
     "home_countries": {
-      "F": ["avig", "marse", "prove"],
+      "F": ["avign", "marse", "prove"],
       "A": [
         "tyrol",
         "austr",
@@ -1234,7 +1234,7 @@
     "powers": {
       "F": {
         "home_countries": ["F"],
-        "armies": ["avig", "milan", "naple", "bari", "saluz"],
+        "armies": ["avign", "milan", "naple", "bari", "saluz"],
         "fleets": ["marse", "genoa"],
         "extra_provinces": ["milan", "genoa", "naple", "bari", "saluz"]
       },
@@ -1276,7 +1276,7 @@
       "fortress_active": false
     },
     "home_countries": {
-      "F": ["avig", "marse", "prove"],
+      "F": ["avign", "marse", "prove"],
       "A": [
         "tyrol",
         "austr",
@@ -1326,7 +1326,7 @@
     "powers": {
       "F": {
         "home_countries": ["F"],
-        "armies": ["avig", "milan", "naple", "bari", "saluz"],
+        "armies": ["avign", "milan", "naple", "bari", "saluz"],
         "fleets": ["marse", "genoa"],
         "extra_provinces": ["milan", "genoa", "naple", "bari", "saluz"]
       },
@@ -1370,5 +1370,701 @@
       "V"
     ],
     "variable_income_provinces": ["genoa", "flore"]
+  },
+  "C2a": {
+    "name": "The struggle for dominance, part two (four players)",
+    "year": 1513,
+    "victory_conditions": {
+      "cities": 23,
+      "home_countries": 3
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "F": ["avign", "marse", "prove", "saluz"],
+      "T": ["duraz", "alban", "tunis", "herze", "bosni", "hunga"],
+      "M": ["pavia", "cremo", "swiss", "moden", "ferra"],
+      "A": [
+        "tyrol",
+        "austr",
+        "carin",
+        "paler",
+        "messi",
+        "naple",
+        "bari",
+        "capua",
+        "aquil",
+        "saler",
+        "otran",
+        "sardi"
+      ],
+      "P": [
+        "ancon",
+        "perug",
+        "rome",
+        "bolog",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "V": [
+        "padua",
+        "trevi",
+        "venic",
+        "dalma",
+        "istri",
+        "berga",
+        "bresc",
+        "veron",
+        "vicen",
+        "friul"
+      ]
+    },
+    "powers": {
+      "F": {
+        "home_countries": ["F", "T"],
+        "armies": ["avign", "saluz", "duraz", "hunga"],
+        "fleets": ["marse", "alban", "tunis"],
+        "garrisons": ["milan"]
+      },
+      "M": {
+        "home_countries": ["M", "P"],
+        "armies": [
+          "pavia",
+          "cremo",
+          "swiss",
+          "moden",
+          "ferra",
+          "perug",
+          "rome",
+          "bolog"
+        ],
+        "fleets": ["ancon"]
+      },
+      "A": {
+        "home_countries": ["A"],
+        "armies": ["tyrol", "austr", "messi", "bari", "milan"],
+        "fleets": ["paler", "naple", "sardi"]
+      },
+      "V": {
+        "home_countries": ["V"],
+        "armies": ["padua", "trevi"],
+        "fleets": ["dalma"],
+        "garrisons": ["venic"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": ["F", "T", "M", "P", "A", "A", "V", "V"],
+    "variable_income_provinces": ["genoa", "flore"]
+  },
+  "C2b": {
+    "name": "The struggle for dominance, part two (five players)",
+    "year": 1513,
+    "victory_conditions": {
+      "cities": 23,
+      "home_countries": 3
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "F": ["avign", "marse", "prove", "saluz"],
+      "T": ["duraz", "alban", "tunis", "herze", "bosni", "hunga"],
+      "M": ["pavia", "cremo", "swiss", "moden", "ferra"],
+      "A": [
+        "tyrol",
+        "austr",
+        "carin",
+        "paler",
+        "messi",
+        "naple",
+        "bari",
+        "capua",
+        "aquil",
+        "saler",
+        "otran",
+        "sardi"
+      ],
+      "P": [
+        "ancon",
+        "perug",
+        "rome",
+        "bolog",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "V": [
+        "padua",
+        "trevi",
+        "venic",
+        "dalma",
+        "istri",
+        "berga",
+        "bresc",
+        "veron",
+        "vicen",
+        "friul"
+      ]
+    },
+    "powers": {
+      "F": {
+        "home_countries": ["F", "T"],
+        "armies": ["avign", "saluz", "duraz", "hunga"],
+        "fleets": ["marse", "alban", "tunis"],
+        "garrisons": ["milan"]
+      },
+      "M": {
+        "home_countries": ["M"],
+        "armies": ["pavia", "cremo", "swiss", "moden", "ferra"]
+      },
+      "A": {
+        "home_countries": ["A"],
+        "armies": ["tyrol", "austr", "messi", "bari", "milan"],
+        "fleets": ["paler", "naple", "sardi"]
+      },
+      "P": {
+        "home_countries": ["P"],
+        "armies": ["perug", "rome", "bolog"],
+        "fleets": ["ancon"]
+      },
+      "V": {
+        "home_countries": ["V"],
+        "armies": ["padua", "trevi"],
+        "fleets": ["dalma"],
+        "garrisons": ["venic"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": ["F", "T", "M", "P", "A", "A", "V", "V"],
+    "variable_income_provinces": ["genoa", "flore"]
+  },
+  "C2c": {
+    "name": "The struggle for dominance, part two (six players)",
+    "year": 1513,
+    "victory_conditions": {
+      "cities": 15,
+      "home_countries": 2
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "F": ["avign", "marse", "prove", "saluz"],
+      "T": ["duraz", "alban", "tunis", "herze", "bosni", "hunga"],
+      "M": ["pavia", "cremo", "swiss", "moden", "ferra"],
+      "A": [
+        "tyrol",
+        "austr",
+        "carin",
+        "paler",
+        "messi",
+        "naple",
+        "bari",
+        "capua",
+        "aquil",
+        "saler",
+        "otran",
+        "sardi"
+      ],
+      "P": [
+        "ancon",
+        "perug",
+        "rome",
+        "bolog",
+        "patri",
+        "spole",
+        "urbin",
+        "romag",
+        "tivol"
+      ],
+      "V": [
+        "padua",
+        "trevi",
+        "venic",
+        "dalma",
+        "istri",
+        "berga",
+        "bresc",
+        "veron",
+        "vicen",
+        "friul"
+      ]
+    },
+    "powers": {
+      "F": {
+        "home_countries": ["F"],
+        "armies": ["avign", "saluz"],
+        "fleets": ["marse"],
+        "garrisons": ["milan"]
+      },
+      "T": {
+        "home_countries": ["T"],
+        "armies": ["duraz", "hunga"],
+        "fleets": ["alban", "tunis"]
+      },
+      "M": {
+        "home_countries": ["M"],
+        "armies": ["pavia", "cremo", "swiss", "moden", "ferra"]
+      },
+      "A": {
+        "home_countries": ["A"],
+        "armies": ["tyrol", "austr", "messi", "bari", "milan"],
+        "fleets": ["paler", "naple", "sardi"]
+      },
+      "P": {
+        "home_countries": ["P"],
+        "armies": ["perug", "rome", "bolog"],
+        "fleets": ["ancon"]
+      },
+      "V": {
+        "home_countries": ["V"],
+        "armies": ["padua", "trevi"],
+        "fleets": ["dalma"],
+        "garrisons": ["venic"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": ["F", "T", "M", "P", "A", "A", "V", "V"],
+    "variable_income_provinces": ["genoa", "flore"]
+  },
+  "Da": {
+    "name": "The spanish preponderance (two players)",
+    "year": 1521,
+    "victory_conditions": {
+      "cities": 0,
+      "home_countries": 5
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "F": ["swiss", "avign", "marse", "saluz", "prove"],
+      "A": [
+        "tyrol",
+        "austr",
+        "carin",
+        "carni",
+        "milan",
+        "bari",
+        "messi",
+        "paler",
+        "naple",
+        "capua",
+        "aquil",
+        "saler",
+        "otran",
+        "sardi"
+      ],
+      "P": [
+        "bolog",
+        "perug",
+        "rome",
+        "ancon",
+        "romag",
+        "urbin",
+        "spole",
+        "tivol",
+        "patri"
+      ],
+      "V": [
+        "padua",
+        "trevi",
+        "venic",
+        "dalma",
+        "berga",
+        "bresc",
+        "veron",
+        "vicen",
+        "friul",
+        "istri"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni", "hunga"]
+    },
+    "powers": {
+      "F": {
+        "home_countries": ["F", "T", "V"],
+        "armies": [
+          "swiss",
+          "avign",
+          "saluz",
+          "padua",
+          "trevi",
+          "alban",
+          "hunga"
+        ],
+        "fleets": ["marse", "venic", "dalma", "duraz", "tunis"]
+      },
+      "A": {
+        "home_countries": ["A", "P"],
+        "armies": [
+          "tyrol",
+          "austr",
+          "milan",
+          "bari",
+          "messi",
+          "naple",
+          "bolog",
+          "perug",
+          "rome"
+        ],
+        "fleets": ["paler", "sardi", "ancon"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": ["F", "T", "P", "V", "A", "A"],
+    "variable_income_provinces": ["genoa"]
+  },
+  "Db": {
+    "name": "The spanish preponderance (three players)",
+    "year": 1521,
+    "victory_conditions": {
+      "cities": 0,
+      "home_countries": 6
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "F": ["swiss", "avign", "marse", "saluz", "prove"],
+      "A": [
+        "tyrol",
+        "austr",
+        "carin",
+        "carni",
+        "milan",
+        "bari",
+        "messi",
+        "paler",
+        "naple",
+        "capua",
+        "aquil",
+        "saler",
+        "otran",
+        "sardi"
+      ],
+      "P": [
+        "bolog",
+        "perug",
+        "rome",
+        "ancon",
+        "romag",
+        "urbin",
+        "spole",
+        "tivol",
+        "patri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "V": [
+        "padua",
+        "trevi",
+        "venic",
+        "dalma",
+        "berga",
+        "bresc",
+        "veron",
+        "vicen",
+        "friul",
+        "istri"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni", "hunga"]
+    },
+    "powers": {
+      "F": {
+        "home_countries": ["F", "T", "L"],
+        "armies": [
+          "swiss",
+          "avign",
+          "saluz",
+          "alban",
+          "hunga",
+          "arezz",
+          "flore"
+        ],
+        "fleets": ["marse", "duraz", "tunis", "pisa"]
+      },
+      "A": {
+        "home_countries": ["A"],
+        "armies": ["tyrol", "austr", "milan", "bari", "messi", "naple"],
+        "fleets": ["paler", "sardi"]
+      },
+      "P": {
+        "home_countries": ["P", "V"],
+        "armies": ["bolog", "perug", "rome", "padua", "trevi"],
+        "fleets": ["ancon", "venic", "dalma"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": ["F", "T", "L", "P", "V", "A", "A"],
+    "variable_income_provinces": ["genoa"]
+  },
+  "Dc": {
+    "name": "The spanish preponderance (four players)",
+    "year": 1521,
+    "victory_conditions": {
+      "cities": 23,
+      "home_countries": 3
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "F": ["swiss", "avign", "marse", "saluz", "prove"],
+      "A": [
+        "tyrol",
+        "austr",
+        "carin",
+        "carni",
+        "milan",
+        "bari",
+        "messi",
+        "paler",
+        "naple",
+        "capua",
+        "aquil",
+        "saler",
+        "otran",
+        "sardi"
+      ],
+      "P": [
+        "bolog",
+        "perug",
+        "rome",
+        "ancon",
+        "romag",
+        "urbin",
+        "spole",
+        "tivol",
+        "patri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "V": [
+        "padua",
+        "trevi",
+        "venic",
+        "dalma",
+        "berga",
+        "bresc",
+        "veron",
+        "vicen",
+        "friul",
+        "istri"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni", "hunga"]
+    },
+    "powers": {
+      "F": {
+        "home_countries": ["F", "T"],
+        "armies": ["swiss", "avign", "saluz", "alban", "hunga"],
+        "fleets": ["marse", "duraz", "tunis"]
+      },
+      "A": {
+        "home_countries": ["A"],
+        "armies": ["tyrol", "austr", "milan", "bari", "messi", "naple"],
+        "fleets": ["paler", "sardi"]
+      },
+      "P": {
+        "home_countries": ["P", "V"],
+        "armies": ["bolog", "perug", "rome", "padua", "trevi"],
+        "fleets": ["ancon", "venic", "dalma"]
+      },
+      "L": {
+        "home_countries": ["L"],
+        "armies": ["arezz", "flore"],
+        "fleets": ["pisa", "genoa"],
+        "extra_provinces": ["genoa"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": ["F", "T", "L", "P", "V", "A", "A"],
+    "variable_income_provinces": ["genoa"]
+  },
+  "Dd": {
+    "name": "The spanish preponderance (five players)",
+    "year": 1521,
+    "victory_conditions": {
+      "cities": 23,
+      "home_countries": 3
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "F": ["swiss", "avign", "marse", "saluz", "prove"],
+      "A": [
+        "tyrol",
+        "austr",
+        "carin",
+        "carni",
+        "milan",
+        "bari",
+        "messi",
+        "paler",
+        "naple",
+        "capua",
+        "aquil",
+        "saler",
+        "otran",
+        "sardi"
+      ],
+      "P": [
+        "bolog",
+        "perug",
+        "rome",
+        "ancon",
+        "romag",
+        "urbin",
+        "spole",
+        "tivol",
+        "patri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "V": [
+        "padua",
+        "trevi",
+        "venic",
+        "dalma",
+        "berga",
+        "bresc",
+        "veron",
+        "vicen",
+        "friul",
+        "istri"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni", "hunga"]
+    },
+    "powers": {
+      "F": {
+        "home_countries": ["F", "L"],
+        "armies": ["swiss", "avign", "saluz", "arezz", "flore"],
+        "fleets": ["marse", "pisa"]
+      },
+      "A": {
+        "home_countries": ["A"],
+        "armies": ["tyrol", "austr", "milan", "bari", "messi", "naple"],
+        "fleets": ["paler", "sardi"]
+      },
+      "P": {
+        "home_countries": ["P"],
+        "armies": ["bolog", "perug", "rome"],
+        "fleets": ["ancon"]
+      },
+      "V": {
+        "home_countries": ["V"],
+        "armies": ["padua", "trevi"],
+        "fleets": ["venic", "dalma"]
+      },
+      "T": {
+        "home_countries": ["T"],
+        "armies": ["alban", "hunga"],
+        "fleets": ["duraz", "tunis"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": ["F", "T", "L", "P", "V", "A", "A"],
+    "variable_income_provinces": ["genoa"]
+  },
+  "De": {
+    "name": "The spanish preponderance (six players)",
+    "year": 1521,
+    "victory_conditions": {
+      "cities": 15,
+      "home_countries": 2
+    },
+    "rules": {
+      "first_turn_famine": false,
+      "fortress_active": false
+    },
+    "home_countries": {
+      "F": ["swiss", "avign", "marse", "saluz", "prove"],
+      "A": [
+        "tyrol",
+        "austr",
+        "carin",
+        "carni",
+        "milan",
+        "bari",
+        "messi",
+        "paler",
+        "naple",
+        "capua",
+        "aquil",
+        "saler",
+        "otran",
+        "sardi"
+      ],
+      "P": [
+        "bolog",
+        "perug",
+        "rome",
+        "ancon",
+        "romag",
+        "urbin",
+        "spole",
+        "tivol",
+        "patri"
+      ],
+      "L": ["arezz", "flore", "pisa", "pisto"],
+      "V": [
+        "padua",
+        "trevi",
+        "venic",
+        "dalma",
+        "berga",
+        "bresc",
+        "veron",
+        "vicen",
+        "friul",
+        "istri"
+      ],
+      "T": ["alban", "duraz", "tunis", "herze", "bosni", "hunga"]
+    },
+    "powers": {
+      "F": {
+        "home_countries": ["F"],
+        "armies": ["swiss", "avign", "saluz"],
+        "fleets": ["marse"]
+      },
+      "A": {
+        "home_countries": ["A"],
+        "armies": ["tyrol", "austr", "milan", "bari", "messi", "naple"],
+        "fleets": ["paler", "sardi"]
+      },
+      "P": {
+        "home_countries": ["P"],
+        "armies": ["bolog", "perug", "rome"],
+        "fleets": ["ancon"]
+      },
+      "L": {
+        "home_countries": ["L"],
+        "armies": ["arezz", "flore"],
+        "fleets": ["pisa"]
+      },
+      "V": {
+        "home_countries": ["V"],
+        "armies": ["padua", "trevi"],
+        "fleets": ["venic", "dalma"]
+      },
+      "T": {
+        "home_countries": ["T"],
+        "armies": ["alban", "hunga"],
+        "fleets": ["duraz", "tunis"]
+      }
+    },
+    "excluded_locations": [],
+    "variable_income_home_countries": ["F", "T", "L", "P", "V", "A", "A"],
+    "variable_income_provinces": ["genoa"]
   }
 }

@@ -201,6 +201,8 @@ Se prevén las siguientes versiones
   - [X] Todas las variantes de "A. The expansion of states".
   - [X] Todos las variantes de "B. Balance of power".
   - [X] Todas las variantes de "C1. The struggle for dominance (part one)".
+  - [X] Todas las variantes de "C2. The struggle for dominance (part two)".
+  - [X] Todas las variantes de "D. The spanish preponderance".
 - [ ] Refactorización.
   - [X] Refactorizado el módulo `machiavelli.game.game`
   - [X] Mover el módulo `events` a `machiavelli.game`.
@@ -239,8 +241,8 @@ ilegales o inconsistentes.
   - [X] Todas las variantes de "A. The expansion of states".
   - [X] Todas las variantes de "B. The balance of power".
   - [X] Todas las variantes de "C1. The struggle for dominance (part one)".
-  - [ ] Todas las variantes de "C2. The struggle for dominance (part two)".
-  - [ ] Todas las variantes de "D. The spanish preponderance".
+  - [X] Todas las variantes de "C2. The struggle for dominance (part two)".
+  - [X] Todas las variantes de "D. The spanish preponderance".
   - [ ] Escenario de Alea "AL1. Decline of Milan".
   - [ ] Escenario de Alea "AL2. Alfons V, Lord of Italy".
   - [ ] Escenario de Alea "AL3. Ferdinand the Catholic".
