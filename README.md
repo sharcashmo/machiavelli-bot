@@ -202,6 +202,7 @@ Se prevén las siguientes versiones
   - [X] Todos las variantes de "B. Balance of power".
   - [X] Todas las variantes de "C1. The struggle for dominance (part one)".
 - [ ] Refactorización.
+  - [X] Refactorizado el módulo `machiavelli.game.game`
   - [X] Mover el módulo `events` a `machiavelli.game`.
 - [ ] Mejora en el ciclo de creación de la partida.
   - [X] Creado un comando `/shar status` que muestre el estado de la partida al
@@ -224,6 +225,8 @@ versiones conforme se completen.
 ilegales o inconsistentes.
 - [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades.
 - [ ] Refactorización.
+  - [X] Refactorizaciones del package `machiavelli.game`
+    - [X] Módulo `machiavelli.game.game`
   - [ ] Reorganizar la jerarquía de módulos.
     - [X] Mover el módulo `events` a `machiavelli.game`.
   - [ ] Reescribir todos los tests unitarios

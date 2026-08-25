@@ -6,19 +6,16 @@ from machiavelli.db.database import upgrade_connection
 from machiavelli.game.game import Game
 from machiavelli.game.trading import ExchangeProposal, TradeResource
 from machiavelli.repositories.exchange_repository import ExchangeRepository
-
-
-def make_game(conn: sqlite3.Connection) -> Game:
-    upgrade_connection(conn)
-    game = Game.create_game("Intercambios", 8400, conn)
-    conn.commit()
-    return game
+from machiavelli.repositories.game_repository import GameRepository
 
 
 def test_exchange_repository_round_trips_and_replaces_authoritatively() -> None:
     conn = sqlite3.connect(":memory:")
+    upgrade_connection(conn)
     try:
-        game = make_game(conn)
+        game = Game("Intercambios", 8400)
+        game_repo = GameRepository(conn)
+        game_repo.save(game)
         repository = ExchangeRepository(conn)
         proposals = [
             ExchangeProposal(
@@ -56,6 +53,7 @@ def test_exchange_repository_round_trips_and_replaces_authoritatively() -> None:
 
 def test_exchange_repository_requires_persisted_game_id() -> None:
     conn = sqlite3.connect(":memory:")
+    upgrade_connection(conn)
     try:
         upgrade_connection(conn)
         repository = ExchangeRepository(conn)
@@ -71,8 +69,11 @@ def test_exchange_repository_requires_persisted_game_id() -> None:
 
 def test_exchange_repository_does_not_commit_outer_transaction() -> None:
     conn = sqlite3.connect(":memory:")
+    upgrade_connection(conn)
     try:
-        game = make_game(conn)
+        game = Game("Intercambios", 8400)
+        game_repo = GameRepository(conn)
+        game_repo.save(game)
         repository = ExchangeRepository(conn)
         proposal = ExchangeProposal(
             "N", "L", TradeResource("ducats", 9), TradeResource("ducats", 4)

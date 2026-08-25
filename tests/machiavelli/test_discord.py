@@ -57,11 +57,11 @@ from machiavelli.engine.military import (
 )
 from machiavelli.game import (
     DuplicatePlayerException,
-    GameNotFoundException,
     PlayerNotFoundException,
     TradeRuleException,
 )
 from machiavelli.game.events import InvalidTurnEventError
+from machiavelli.game.exceptions import GameNotFoundException
 from machiavelli.game.scenario import Scenario
 from machiavelli.services import game_service_session
 

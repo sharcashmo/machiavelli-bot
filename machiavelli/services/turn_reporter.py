@@ -801,6 +801,3 @@ class TurnReporter:
             "lifted": "levantado",
         }[state]
         return f"> {rendered_unit} en {province}: {state_name}."
-
-
-__all__ = ["TurnReporter"]

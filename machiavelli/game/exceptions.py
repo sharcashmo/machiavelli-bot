@@ -2,26 +2,25 @@
 
 
 class FailedToStartError(Exception):
-    """Se lanza cuando una partida no puede comenzar porque faltan requisitos previos.
-    """
+    """Se lanza cuando una partida no puede comenzar porque faltan requisitos."""
 
     def __init__(self, message: str) -> None:
         self.message = message
         super().__init__(message)
 
 
-class DuplicatedGameException(Exception):
-    """Se lanza cuando el nombre o el canal de una partida ya están registrados."""
-
-
-class GameNotFoundException(Exception):
-    """Se lanza cuando la partida solicitada no existe en la persistencia."""
-
-
 class GameRuleException(Exception):
     """Clase base para las operaciones no válidas del agregado solicitadas por el
     llamador.
     """
+
+
+class DuplicatedGameException(Exception):
+    """La partida ya está registrada en la base de datos."""
+
+
+class GameNotFoundException(Exception):
+    """La partida buscada no existe."""
 
 
 class DuplicatePlayerException(GameRuleException):
@@ -42,9 +41,7 @@ class TradeRuleException(GameRuleException):
 
 __all__ = [
     "DuplicatePlayerException",
-    "DuplicatedGameException",
     "FailedToStartError",
-    "GameNotFoundException",
     "GameRuleException",
     "PlayerNotFoundException",
     "TradeRuleException",

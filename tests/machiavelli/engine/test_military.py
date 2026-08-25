@@ -32,6 +32,7 @@ from machiavelli.game.events import EventType, TurnEvent
 from machiavelli.game.game import Game
 from machiavelli.game.map import Map, Province, Route, Sea
 from machiavelli.game.scenario import Rules, Scenario, VictoryConditions
+from machiavelli.repositories.game_repository import GameRepository
 from tests.machiavelli.engine.helpers import (
     create_military_game,
     iter_military_orderings,
@@ -1762,17 +1763,18 @@ class TestCyclesAndCancellationSemantics(unittest.TestCase):
             diagnostics = []
             conn = sqlite3.connect(db_path)
             try:
-                game.save(conn)
+                repo = GameRepository(conn)
+                repo.save(game)
                 conn.commit()
                 for _ in range(2):
-                    loaded = Game.load_game(conn, game_id=game.database_id)
+                    loaded = repo.load_game(game_id=game.database_id)
                     loaded.map = game.map
                     before = military_snapshot(loaded)
                     with self.assertRaises(UnresolvedMilitaryConflict) as raised:
                         MilitaryResolver(loaded).run()
                     diagnostics.append(raised.exception.diagnostic)
                     self.assertEqual(military_snapshot(loaded), before)
-                    loaded.save(conn)
+                    repo.save(loaded)
                     conn.commit()
             finally:
                 conn.close()

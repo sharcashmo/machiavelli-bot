@@ -1,27 +1,18 @@
-"""Agregado canónico de partida y fachada de compatibilidad de persistencia."""
+"""Mantiene los datos de una partida."""
 
 from __future__ import annotations
 
-import json
-import sqlite3
-from collections.abc import Callable
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Self
 
-from .command import Command
 from .events import TurnEvent
 from .exceptions import (
-    DuplicatedGameException,
     DuplicatePlayerException,
-    FailedToStartError,
-    GameNotFoundException,
     PlayerNotFoundException,
 )
 from .map import Map
 from .player import Player
 from .scenario import Scenario
-from .tables import GameTables
 from .trading import ExchangeProposal
 
 
@@ -122,9 +113,7 @@ class Game:
         return player
 
     def advance_turn(self) -> None:
-        """Actualiza los metadatos del ciclo de vida tras una ejecución del motor
-        completada correctamente.
-        """
+        """Actualiza los datos con el avance de turno"""
         self.turn_number += 1
         if self.next_deadline:
             deadline = datetime.fromisoformat(self.next_deadline)
@@ -135,246 +124,8 @@ class Game:
             player.commands.clear()
         self.pending_exchanges.clear()
 
-    def save(self, conn: sqlite3.Connection) -> None:
-        """Guarda el agregado completo utilizando la transacción del llamador."""
-        cursor = conn.cursor()
-        columns = [
-            item.name
-            for item in fields(self)
-            if item.name
-            not in (
-                "database_id",
-                "players",
-                "scenario",
-                "map",
-                "famine",
-                "independent_garrisons",
-                "besieges",
-                "turn_events",
-                "pending_exchanges",
-            )
-        ]
-        values = [getattr(self, column) for column in columns]
-
-        for column, value in (
-            ("famine", self.famine),
-            ("independent_garrisons", self.independent_garrisons),
-            ("besieges", self.besieges),
-        ):
-            columns.append(column)
-            values.append(json.dumps(value))
-
-        if self.database_id is None:
-            try:
-                placeholders = ", ".join(["?"] * len(columns))
-                query = (
-                    f"INSERT INTO games ({', '.join(columns)}) VALUES ({placeholders})"
-                )
-                cursor.execute(query, tuple(values))
-                self.database_id = cursor.lastrowid
-            except sqlite3.IntegrityError as error:
-                raise DuplicatedGameException(
-                    "No se pudo crear la partida. "
-                    f"El nombre '{self.name}' o el canal "
-                    f"'{self.channel_id}' ya están en uso."
-                ) from error
-        else:
-            set_clause = ", ".join([f"{column} = ?" for column in columns])
-            query = f"UPDATE games SET {set_clause} WHERE id = ?"
-            cursor.execute(query, tuple(values) + (self.database_id,))
-
-        from machiavelli.repositories.exchange_repository import ExchangeRepository
-        from machiavelli.repositories.player_repository import PlayerRepository
-
-        PlayerRepository(conn).replace_for_game(self)
-        ExchangeRepository(conn).replace_for_game(self)
-
-        cursor.execute("DELETE FROM game_events WHERE game_id = ?", (self.database_id,))
-        if self.turn_events:
-            if not all(isinstance(event, TurnEvent) for event in self.turn_events):
-                raise TypeError("El historial solo admite TurnEvent")
-            cursor.executemany(
-                """
-                INSERT INTO game_events (game_id, event_type, data_json)
-                VALUES (?, ?, ?)
-                """,
-                [
-                    (self.database_id, event.type.value, event.to_json())
-                    for event in self.turn_events
-                ],
-            )
-
-    def delete(self, conn: sqlite3.Connection) -> None:
-        """Delete the game from the database."""
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM games WHERE id = ?", (self.database_id,))
-
-    def report_status(
-        self,
-        safe_text: Callable[[str], str] = str,
-    ) -> list[str]:
-        """Devuelve el estado público actual de la partida como líneas de informe."""
-        report = [f"## __**Partida**: {safe_text(self.name)}__"]
-        report.append(
-            f"**Escenario:** {self.scenario.name if self.scenario else 'Por definir'}."
-        )
-        report.append(
-            f"**Horario de los turnos:** {self.weekly_deadline or 'Por definir'}."
-        )
-
-        if self.turn_number == 0:
-            report.append("### __**Estado:** Por comenzar.__")
-            if self.players:
-                players = ", ".join(
-                    f"{safe_text(player.player_id)} (<@{player.discord_id}>)"
-                    for player in self.players
-                )
-                if self.scenario:
-                    report.append(
-                        f"**Jugadores {len(self.players)}/"
-                        f"{len(self.scenario.powers)}:** {players}"
-                    )
-                else:
-                    report.append(f"**Jugadores {len(self.players)}:** {players}")
-            else:
-                report.append("**Jugadores:** Ninguno")
-        else:
-            if self.scenario is None:
-                raise ValueError("Una partida iniciada debe tener escenario")
-            year = (self.turn_number - 1) // 4 + self.scenario.year
-            season = (
-                "Primavera (mantenimiento)",
-                "Primavera (campaña)",
-                "Verano",
-                "Otoño",
-            )[(self.turn_number - 1) % 4]
-            report.append(f"### __**Estado:** {season} de {year}__")
-            report.append("### :crossed_swords: **Han enviado sus órdenes:**")
-            ordered_players = [player for player in self.players if player.commands]
-            if ordered_players:
-                report.extend(
-                    f"- {safe_text(GameTables.powers[player.power])} "
-                    f"(<@{player.discord_id}>)"
-                    for player in ordered_players
-                )
-            else:
-                report.append("- Nadie :wink:.")
-
-        report.append(f"**Próximo turno:** {self.next_deadline or 'Por definir'}.")
-        return report
-
-    @classmethod
-    def create_game(cls, name: str, channel_id: int, conn: sqlite3.Connection) -> Self:
-        """Crea e inserta una partida mediante la fachada histórica de persistencia."""
-        cursor = conn.cursor()
-        try:
-            cursor.execute(
-                "INSERT INTO games (name, channel_id) VALUES (?, ?)",
-                (name, channel_id),
-            )
-        except sqlite3.IntegrityError as error:
-            raise DuplicatedGameException(
-                f"No se pudo crear la partida. El nombre '{name}' o el canal "
-                f"'{channel_id}' ya están en uso."
-            ) from error
-        return cls(name=name, channel_id=channel_id, database_id=cursor.lastrowid)
-
-    @classmethod
-    def load_game(
-        cls,
-        conn: sqlite3.Connection,
-        *,
-        game_id: int | None = None,
-        name: str | None = None,
-        channel_id: int | None = None,
-    ) -> Self:
-        """Carga un agregado completo e internamente coherente desde SQLite."""
-        cursor = conn.cursor()
-        columns = [
-            item.name
-            for item in fields(cls)
-            if item.name
-            not in (
-                "database_id",
-                "players",
-                "scenario",
-                "map",
-                "turn_events",
-                "pending_exchanges",
-            )
-        ]
-        select_clause = ", ".join(["id"] + columns)
-
-        if game_id is not None:
-            cursor.execute(
-                f"SELECT {select_clause} FROM games WHERE id = ?", (game_id,)
-            )
-        elif name is not None:
-            cursor.execute(f"SELECT {select_clause} FROM games WHERE name = ?", (name,))
-        elif channel_id is not None:
-            cursor.execute(
-                f"SELECT {select_clause} FROM games WHERE channel_id = ?", (channel_id,)
-            )
-        else:
-            raise ValueError("Debes proporcionar al menos un criterio de búsqueda.")
-
-        game_row = cursor.fetchone()
-        if not game_row:
-            raise GameNotFoundException("No se encontró ninguna partida.")
-
-        init_kwargs = {
-            columns[index]: game_row[index + 1] for index in range(len(columns))
-        }
-        for column in ("famine", "independent_garrisons", "besieges"):
-            init_kwargs[column] = (
-                json.loads(init_kwargs[column]) if init_kwargs[column] else []
-            )
-
-        game = cls(**init_kwargs)
-        game.database_id = game_row[0]
-
-        from machiavelli.repositories.exchange_repository import ExchangeRepository
-        from machiavelli.repositories.player_repository import PlayerRepository
-
-        game.players = PlayerRepository(conn).get_by_game(game)
-        game.pending_exchanges = ExchangeRepository(conn).get_by_game(game)
-        cursor.execute(
-            """
-            SELECT id, event_type, data_json
-            FROM game_events
-            WHERE game_id = ?
-            ORDER BY id ASC
-            """,
-            (game.database_id,),
-        )
-        game.turn_events = [
-            TurnEvent.from_persisted(
-                row_id=row[0],
-                event_type=row[1],
-                data_json=row[2],
-            )
-            for row in cursor.fetchall()
-        ]
-
-        if game.scenario_id:
-            scenarios = Scenario.load_scenarios()
-            try:
-                game.scenario = scenarios[game.scenario_id]
-            except KeyError as error:
-                raise ValueError(
-                    f"Escenario persistido desconocido: {game.scenario_id}"
-                ) from error
-            excluded_locations = game.scenario.excluded_locations
-        else:
-            game.scenario = None
-            excluded_locations = None
-        game.map = Map.load_map(exclude_ids=excluded_locations)
-        return game
-
     def add_event(self, turn_event: TurnEvent) -> None:
-        """Añade un evento validado sin serializarlo ni renderizarlo."""
-        if not isinstance(turn_event, TurnEvent):
-            raise TypeError("El historial solo admite TurnEvent")
+        """Añade un evento."""
         self.turn_events.append(turn_event)
 
     def get_unit_owner(self, unit_id: str) -> Player | None:
@@ -402,26 +153,3 @@ class Game:
         if unit_type == "G" and base_location in self.independent_garrisons:
             return None
         raise ValueError(f"No existe ninguna unidad '{unit_id}' en el juego.")
-
-
-def __getattr__(name: str) -> object:
-    """Resuelve exportaciones temporales de compatibilidad sin crear ciclos de
-    importación.
-    """
-    if name == "TooManyExpenses":
-        from machiavelli.engine.exceptions import TooManyExpenses
-
-        return TooManyExpenses
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-__all__ = [
-    "Command",
-    "DuplicatePlayerException",
-    "DuplicatedGameException",
-    "FailedToStartError",
-    "Game",
-    "GameNotFoundException",
-    "Player",
-    "PlayerNotFoundException",
-]

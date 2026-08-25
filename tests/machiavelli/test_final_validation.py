@@ -4,6 +4,7 @@ completada.
 
 from __future__ import annotations
 
+import logging
 import sqlite3
 from contextlib import closing
 from pathlib import Path
@@ -16,10 +17,11 @@ from machiavelli.game.game import Game
 from machiavelli.repositories.game_repository import GameRepository
 from machiavelli.services import GameService
 
+logger = logging.getLogger(__name__)
+
 
 def _state(game: Game) -> dict[str, object]:
-    """Devuelve el estado persistido relevante para el contrato final de ida y vuelta.
-    """
+    """Devuelve el estado persistido relevant."""
     return {
         "database_id": game.database_id,
         "name": game.name,

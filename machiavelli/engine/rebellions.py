@@ -1,9 +1,11 @@
 # machiavelli/engine/rebellions.py
 
 
+from ..game.command import Command
 from ..game.events import EventType, TurnEvent
-from ..game.game import Command, Game, Player
+from ..game.game import Game
 from ..game.map import Map
+from ..game.player import Player
 from ..game.scenario import Scenario
 
 

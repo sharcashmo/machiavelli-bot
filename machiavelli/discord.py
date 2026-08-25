@@ -16,13 +16,15 @@ from machiavelli.engine.military import (
     UnresolvedMilitaryConflict,
 )
 from machiavelli.game import (
-    DuplicatedGameException,
     DuplicatePlayerException,
-    GameNotFoundException,
     PlayerNotFoundException,
     TradeRuleException,
 )
 from machiavelli.game.events import InvalidTurnEventError
+from machiavelli.game.exceptions import (
+    DuplicatedGameException,
+    GameNotFoundException,
+)
 from machiavelli.game.scenario import Scenario
 from machiavelli.game.tables import GameTables
 from machiavelli.services import game_service_session

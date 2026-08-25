@@ -14,7 +14,6 @@ from machiavelli.engine import GameEngine
 from machiavelli.game import (
     Command,
     Game,
-    GameNotFoundException,
     Player,
     PlayerNotFoundException,
     TradeRuleException,
@@ -31,7 +30,11 @@ from machiavelli.game.trading import (
     player_has_trade_resource,
     transfer_trade_resource,
 )
-from machiavelli.repositories.game_repository import GameRepository
+from machiavelli.repositories.game_repository import (
+    GameNotFoundException,
+    GameRepository,
+)
+from machiavelli.services.status_reporter import StatusReporter
 
 from .command_reporter import CommandReporter
 from .turn_reporter import TurnReporter
@@ -204,7 +207,7 @@ class GameService:
 
     def get_admin_status(self, channel_id: int) -> list[str]:
         """Devuelve el informe de estado de la partida para el administrador."""
-        lines = self.get_game(channel_id).report_status()
+        lines = StatusReporter.generate(self.get_game(channel_id))
         return lines
 
     def get_status_report(
@@ -217,7 +220,7 @@ class GameService:
         """
         game = self.get_game(channel_id)
         player = self.resolve_player(game, discord_id)
-        lines = game.report_status()
+        lines = StatusReporter.generate(game)
         lines.append(
             f"### :scroll: **Comandos actuales para "
             f"{GameTables.powers[player.power]}:**"

@@ -7,27 +7,7 @@ from unittest.mock import MagicMock, call, patch
 
 from machiavelli.engine.exceptions import TooManyExpenses
 from machiavelli.engine.orders import OrderProcessor
-from machiavelli.game import (
-    DuplicatedGameException,
-    FailedToStartError,
-    GameNotFoundException,
-)
 from machiavelli.game.command import Command
-from machiavelli.game.exceptions import (
-    DuplicatedGameException as DomainDuplicatedGameException,
-)
-from machiavelli.game.exceptions import FailedToStartError as DomainFailedToStartError
-from machiavelli.game.exceptions import (
-    GameNotFoundException as DomainGameNotFoundException,
-)
-from machiavelli.game.game import (
-    DuplicatedGameException as CompatibilityDuplicatedGameException,
-)
-from machiavelli.game.game import FailedToStartError as CompatibilityFailedToStartError
-from machiavelli.game.game import (
-    GameNotFoundException as CompatibilityGameNotFoundException,
-)
-from machiavelli.game.game import TooManyExpenses as CompatibilityTooManyExpenses
 from machiavelli.game.map import Map, Province, Route, Sea
 from machiavelli.game.player import TurnType
 
@@ -53,19 +33,6 @@ def create_test_map() -> Map:
         },
         seas={sea_one.id: sea_one, sea_two.id: sea_two},
     )
-
-
-class TestGameExceptions(unittest.TestCase):
-    def test_game_exceptions_and_expense_exception_have_single_identities(
-        self,
-    ) -> None:
-        self.assertIs(FailedToStartError, DomainFailedToStartError)
-        self.assertIs(FailedToStartError, CompatibilityFailedToStartError)
-        self.assertIs(DuplicatedGameException, DomainDuplicatedGameException)
-        self.assertIs(DuplicatedGameException, CompatibilityDuplicatedGameException)
-        self.assertIs(GameNotFoundException, DomainGameNotFoundException)
-        self.assertIs(GameNotFoundException, CompatibilityGameNotFoundException)
-        self.assertIs(TooManyExpenses, CompatibilityTooManyExpenses)
 
 
 class BaseOrdersTestCase(unittest.TestCase):
