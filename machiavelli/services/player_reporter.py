@@ -41,7 +41,9 @@ class PlayerReporter:
             # Países natales
             hc_names = [GameTables.powers.get(p, p) for p in player.home_countries]
             hc = PlayerReporter._format_joined_names(hc_names, default="Ninguno")
-            report.append(f"> 👑 **Naciones controladas:** {hc}")
+            report.append(
+                f"> 👑 **Naciones controladas ({len(player.home_countries)}):** {hc}"
+            )
 
             # Recursos
             ass_names = [GameTables.powers.get(p, p) for p in player.ass_counters]
@@ -62,7 +64,18 @@ class PlayerReporter:
             provinces_str = PlayerReporter._format_joined_names(
                 province_names, default="Ninguna"
             )
-            report.append(f"> 🗺️ **Provincias controladas:** {provinces_str}")
+
+            # Ciudades
+            cities = [
+                c
+                for c in player.controlled_locations
+                if game_map.provinces[c].city in ("city", "fortified")
+            ]
+
+            report.append(
+                f"> 🗺️ **Provincias controladas ({len(player.controlled_locations)} "
+                f"provincias, {len(cities)} ciudades):** {provinces_str}"
+            )
 
             # Rebeliones
             if player.rebelled_provinces or player.rebelled_cities:

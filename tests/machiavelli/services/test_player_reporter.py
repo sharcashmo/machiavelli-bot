@@ -10,8 +10,9 @@ from machiavelli.services.player_reporter import PlayerReporter
 class FakeLocation:
     """Stub simple para simular provincias y mares del mapa."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, city: str):
         self.name = name
+        self.city = city
 
 
 @pytest.fixture
@@ -19,13 +20,13 @@ def mock_game_map():
     """Mock ligero de GameMap con provincias y mares."""
     game_map = MagicMock()
     game_map.provinces = {
-        "milan": FakeLocation("Milan"),
-        "venic": FakeLocation("Venice"),
-        "flore": FakeLocation("Florence"),
-        "naple": FakeLocation("Naples"),
+        "milan": FakeLocation("Milan", "fortified"),
+        "venic": FakeLocation("Venice", "fortified"),
+        "flore": FakeLocation("Florence", "city"),
+        "naple": FakeLocation("Naples", None),
     }
     game_map.seas = {
-        "UA": FakeLocation("Upper Adriatic"),
+        "UA": FakeLocation("Upper Adriatic", None),
     }
     return game_map
 
@@ -72,10 +73,13 @@ class TestPlayerReporter:
         report = PlayerReporter.generate_report(player)
 
         assert "### 🏰 __**Venice (<@123456789>)**__" in report
-        assert "> 👑 **Naciones controladas:** Venice y Florence" in report
+        assert "> 👑 **Naciones controladas (2):** Venice y Florence" in report
         assert "> 💰 **Recursos:** 75 ducados." in report
         assert "> 🗡️ **Fichas de asesinato (1):** Milan" in report
-        assert "> 🗺️ **Provincias controladas:** Milan y Venice" in report
+        assert (
+            "> 🗺️ **Provincias controladas (2 provincias, 2 ciudades):** Milan y Venice"
+            in report
+        )
         assert "> 🔥 **Rebeliones:** Naples" in report
         assert "> ⚔️ **Ejércitos:** Milan (asediando)" in report
         assert "> ⚓ **Flotas:** Upper Adriatic" in report
