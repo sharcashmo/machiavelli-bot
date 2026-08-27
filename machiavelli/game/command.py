@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import sqlite3
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -34,26 +33,6 @@ class Command:
     def player_id(self) -> str:
         """Devuelve el identificador del jugador, derivado del objeto de dominio."""
         return self.player.player_id
-
-    def save(self, conn: sqlite3.Connection) -> None:
-        """Guarda este comando mediante la fachada de compatibilidad del repositorio."""
-        from machiavelli.repositories.command_repository import CommandRepository
-
-        CommandRepository(conn).save(self)
-
-    @classmethod
-    def load_commands(
-        cls,
-        conn: sqlite3.Connection,
-        game: Game,
-        player: Player,
-    ) -> list[Command]:
-        """Carga los comandos de un jugador."""
-        from machiavelli.repositories.command_repository import CommandRepository
-
-        if player.game is not game:
-            raise ValueError("El jugador no pertenece a la partida indicada")
-        return CommandRepository(conn).get_by_player(player)
 
     def is_valid_expense(
         self,
