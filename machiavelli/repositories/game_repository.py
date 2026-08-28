@@ -188,10 +188,15 @@ class GameRepository:
                     f"Escenario persistido desconocido: {game.scenario_id}"
                 ) from error
             excluded_locations = game.scenario.excluded_locations
+            fortress_active = game.scenario.rules.fortress_active
         else:
             game.scenario = None
             excluded_locations = None
-        game.map = Map.load_map(exclude_ids=excluded_locations)
+            fortress_active = True
+        game.map = Map.load_map(
+            exclude_ids=excluded_locations,
+            fortress_active=fortress_active,
+        )
         return game
 
     def get_by_id(self, game_id: int) -> Game:

@@ -17,10 +17,15 @@ def mock_json_data():
                 "land_routes": [{"destination": "tivol"}],
                 "sea_routes": [{"destination": "ETS"}],
             },
-            {"name": "Tivoli", "land_routes": [{"destination": "rome"}]},
+            {
+                "name": "Tivoli",
+                "city": "fortress",
+                "land_routes": [{"destination": "rome"}],
+            },
             {"name": "Florence"},
             {
                 "name": "Provence",
+                "city": "fortified",
                 "land_routes": [{"destination": "avign"}],
             },
             {
@@ -154,6 +159,19 @@ def test_map_loading_applies_exclusions(mock_json_data):
     assert "rome" in game_map.provinces
     assert "flore" in game_map.provinces
     assert "WTS" in game_map.seas
+
+
+def test_map_loading_without_fortress(mock_json_data):
+    """Se eliminan los fortress del mapa."""
+    # Le pedimos que excluya una provincia terrestre ('tivol') y un mar ('IS')
+    with (
+        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
+        patch("builtins.open"),
+    ):
+        game_map = Map.load_map(fortress_active=False)
+
+    # Verificamos que el fortress de "tivol" no existe
+    assert game_map.provinces["tivol"].city is None
 
 
 def test_route_creation_default_values():

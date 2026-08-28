@@ -121,7 +121,10 @@ class GameService:
                 channel_id=channel_id,
                 scenario_id=scenario_id,
                 scenario=scenario,
-                map=Map.load_map(exclude_ids=scenario.excluded_locations),
+                map=Map.load_map(
+                    exclude_ids=scenario.excluded_locations,
+                    fortress_active=scenario.rules.fortress_active,
+                ),
             )
         self.repo.save(game)
         return game
@@ -183,7 +186,10 @@ class GameService:
         game = self.get_game(channel_id)
         game.scenario_id = scenario_id
         game.scenario = scenario
-        game.map = Map.load_map(exclude_ids=scenario.excluded_locations)
+        game.map = Map.load_map(
+            exclude_ids=scenario.excluded_locations,
+            fortress_active=scenario.rules.fortress_active,
+        )
         self.repo.save(game)
         return scenario.name
 

@@ -189,31 +189,15 @@ partida, ni devuelve las órdenes enviadas.
 
 Se prevén las siguientes versiones
 
-### Versión 0.9.0
+### Versión 0.10.0
 
-- [ ] Mejoras en los reportes.
-  - [X] Mostrar un evento para los desastres, incluso en el caso de años excelentes.
-- [X] Tratamiento de la eliminación de jugadores.
 - [ ] Añadir un chequeo de órdenes incorrectas, ilegales o inconsistentes.
   - [ ] Fase de mantenimiento.
   - [ ] Fase de campaña.
 - [ ] Añadir más escenarios.
-  - [X] Todas las variantes de "A. The expansion of states".
-  - [X] Todos las variantes de "B. Balance of power".
-  - [X] Todas las variantes de "C1. The struggle for dominance (part one)".
-  - [X] Todas las variantes de "C2. The struggle for dominance (part two)".
-  - [X] Todas las variantes de "D. The spanish preponderance".
 - [ ] Refactorización.
-  - [X] Refactorizado el módulo `machiavelli.game.game`
-  - [X] Mover el módulo `events` a `machiavelli.game`.
-- [ ] Mejora en el ciclo de creación de la partida.
-  - [X] Creado un comando `/shar status` que muestre el estado de la partida al
-  administrador.
-  - [X] Creado un comando `/shar delete` que elimine la partida activa en el canal.
-  - [X] Capturados los errores producidos durante el inicio de la partida para mostrar
-  un mensaje comprensible al usuario.
-- [X] Mejora de `!sync` para evitar comandos duplicados y limpiar comandos registrados
-  a nivel local o global.
+  - [X] Modificar `machiavelli.game.map.Map` para que los `fortress` se eliminen en el
+    momento de la carga
 
 ### Desarrollos futuros
 
@@ -224,10 +208,11 @@ versiones conforme se completen.
   - [ ] Tratamiento del fin de partida.
   - [X] Tratamiento de eliminación de jugadores.
 - [ ] Incluir algún tipo de chequeo del turno para advertir de órdenes incorrectas,
-ilegales o inconsistentes.
+  ilegales o inconsistentes.
 - [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades.
 - [ ] Refactorización.
   - [X] Refactorizaciones del package `machiavelli.game`
+    - [X] Módulo `machiavelli.game.command`
     - [X] Módulo `machiavelli.game.game`
   - [ ] Reorganizar la jerarquía de módulos.
     - [X] Mover el módulo `events` a `machiavelli.game`.

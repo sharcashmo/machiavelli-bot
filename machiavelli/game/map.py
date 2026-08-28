@@ -114,7 +114,10 @@ class Map:
 
     @classmethod
     def load_map(
-        cls, exclude_ids: list[str] | None = None, json_path: Path | str | None = None
+        cls,
+        exclude_ids: list[str] | None = None,
+        fortress_active: bool = True,
+        json_path: Path | str | None = None,
     ) -> "Map":
         """Carga el JSON maestro, purga las exclusiones y clasifica tierra y mar."""
         exclude_set = set(exclude_ids) if exclude_ids else set()
@@ -141,13 +144,21 @@ class Map:
                 is_venice=item.get("is_venice", False),
                 custom_id=item.get("custom_id"),
             )
+
+            # Excluimos las provincias que no entran en juego
             if province.id.split()[0] in exclude_set:
                 continue
 
+            # y las rutas que llevan a ellas
             province.land_routes = _parse_routes(
                 item.get("land_routes", []), exclude_set
             )
             province.sea_routes = _parse_routes(item.get("sea_routes", []), exclude_set)
+
+            # Elimina los fuertes si no están activos
+            if not fortress_active and province.city == "fortress":
+                province.city = None
+
             processed_provinces[province.id] = province
 
         for item in raw_data.get("seas", []):
