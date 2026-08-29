@@ -200,9 +200,8 @@ Se prevén las siguientes versiones
     momento de la carga
   - [X] Eliminar la funcion `is_defensible_city`, ya que `Map` ya elimina los `fortress`
     al cargarse si están deshabilitados
-- [ ] Bugs solucionados
-  - [ ] Una guarnición bajo asedio no de generar ingresos
-
+- [X] Bugs solucionados
+  - [X] Una guarnición bajo asedio no de generar ingresos
 
 ### Desarrollos futuros
 

@@ -40,6 +40,7 @@ class IncomeManager:
             if province not in self.game.famine
             and province not in player.rebelled_cities
             and province not in player.rebelled_provinces
+            and province not in self.game.besieges
         } | set(player.garrisons)
         cities = sorted(
             city

@@ -30,6 +30,7 @@ def _manager() -> tuple[IncomeManager, Mock, Mock, Mock]:
     game.map = game_map
     game.require_scenario.return_value = scenario
     game.require_map.return_value = game_map
+    game.besieges = ["flore"]
     return IncomeManager(game), game, player, scenario
 
 
@@ -50,12 +51,12 @@ def test_income_records_sorted_provinces_and_city_breakdown() -> None:
         "player": "player_1",
         "provinces": ("UA", "flore", "paler", "rome", "sienn"),
         "province_income": 5,
-        "cities": ("flore", "venic"),
-        "city_income": 3,
+        "cities": ("venic",),
+        "city_income": 2,
         "variable_income": (),
-        "total_income": 8,
+        "total_income": 7,
     }
-    assert player.ducats == 8
+    assert player.ducats == 7
 
 
 def test_fortress_has_province_income_but_no_city_bonus() -> None:
