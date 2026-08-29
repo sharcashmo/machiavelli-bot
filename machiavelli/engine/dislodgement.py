@@ -65,11 +65,7 @@ class RetreatHandler:
                 temptative_destination not in my_invalid_destinations
                 and
                 # Tiene una ciudad fortificada o un fuerte
-                (
-                    province.city == "fortified"
-                    or province.city == "fortress"
-                    and self.game.scenario.rules.fortress_active
-                )
+                province.city in ("fortified", "fortress")
             ):
                 if unit.unit_type == "A" or unit.unit_type == "F" and province.has_port:
                     # Nos retiramos al fuerte

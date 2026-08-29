@@ -182,24 +182,3 @@ class TestScenario(unittest.TestCase):
         self.assertTrue(rules.famine_active)
         self.assertTrue(rules.first_turn_famine)
         self.assertTrue(rules.plague_active)
-
-    def test_defensible_city_respects_fortress_rule(self):
-        active = Scenario(
-            name="active",
-            year=1454,
-            victory_conditions=self.vc,
-            rules=Rules(fortress_active=True),
-        )
-        inactive = Scenario(
-            name="inactive",
-            year=1454,
-            victory_conditions=self.vc,
-            rules=Rules(fortress_active=False),
-        )
-
-        for scenario in (active, inactive):
-            self.assertTrue(scenario.is_defensible_city("fortified"))
-            self.assertFalse(scenario.is_defensible_city("city"))
-            self.assertFalse(scenario.is_defensible_city(None))
-        self.assertTrue(active.is_defensible_city("fortress"))
-        self.assertFalse(inactive.is_defensible_city("fortress"))

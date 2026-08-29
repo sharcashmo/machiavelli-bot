@@ -95,6 +95,7 @@ def test_cmd_available_commands_campaign(service, mock_game):
     mock_province = MagicMock()
     mock_province.name = "Naples"
     mock_province.has_port = False
+    mock_province.city = "fortress"
     mock_game.map.provinces.get.return_value = mock_province
 
     with pytest.MonkeyPatch.context() as mp:
@@ -207,47 +208,6 @@ def test_inactive_rules_hide_famine_and_assassination_expenses(service, mock_gam
     assert assassination_amounts == []
 
 
-def test_inactive_fortress_hides_garrison_convert_and_besiege(service, mock_game):
-    mock_game.turn_number = 2
-    service.player.armies = ["keep"]
-    service.player.garrisons = ["keep"]
-    mock_game.independent_garrisons = ["keep"]
-    province = MagicMock(
-        name="Keep",
-        city="fortress",
-        has_port=True,
-        land_routes=[],
-        sea_routes=[],
-    )
-    mock_game.map.provinces = {"keep": province}
-    mock_game.map.seas = {}
-    mock_game.scenario.is_defensible_city.return_value = False
-
-    with pytest.MonkeyPatch.context() as mp:
-        from machiavelli.services import player_interaction_service
-
-        mock_gt = MagicMock()
-        mock_gt.military_orders = {
-            "A": {"text": "Avanzar"},
-            "B": {"text": "Asediar"},
-            "H": {"text": "Mantener"},
-            "S": {"text": "Apoyar"},
-            "C": {"text": "Convertir"},
-        }
-        mp.setattr(player_interaction_service, "GameTables", mock_gt)
-
-        actors = service.cmd_available_actors()
-        commands = dict(service.cmd_available_commands("A keep"))
-        hidden_garrison_commands = service.cmd_available_commands("G keep")
-        hidden_convert_targets = service.cmd_available_targets("A keep", "C")
-
-    assert ("G keep", "Guarnición en Keep") not in actors
-    assert "B" not in commands
-    assert "C" not in commands
-    assert hidden_garrison_commands == []
-    assert hidden_convert_targets == []
-
-
 def test_active_fortress_shows_existing_defensible_actions(service, mock_game):
     mock_game.turn_number = 2
     service.player.armies = ["keep"]
@@ -262,7 +222,6 @@ def test_active_fortress_shows_existing_defensible_actions(service, mock_game):
     province.name = "Keep"
     mock_game.map.provinces = {"keep": province}
     mock_game.map.seas = {}
-    mock_game.scenario.is_defensible_city.return_value = True
 
     with pytest.MonkeyPatch.context() as mp:
         from machiavelli.services import player_interaction_service

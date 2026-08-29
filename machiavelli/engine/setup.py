@@ -69,9 +69,7 @@ class SetupManager:
         for power in self.game.scenario.powers.values():
             for location in power.garrisons:
                 province = game_map.provinces.get(location)
-                if province is None or not self.game.scenario.is_defensible_city(
-                    province.city
-                ):
+                if province is None or province.city not in ("fortified", "fortress"):
                     raise GameInitializationError(
                         f"Guarnición inicial inválida en {location}: "
                         "la plaza no está defendible."
@@ -96,7 +94,7 @@ class SetupManager:
         garrisons = [
             key
             for key, province in game_map.provinces.items()
-            if province.city == "fortified"
+            if province.city in ("fortified", "fortress")
         ]
 
         for player, power_id in zip(self.game.players, power_ids, strict=True):

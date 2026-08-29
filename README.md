@@ -198,6 +198,11 @@ Se prevén las siguientes versiones
 - [ ] Refactorización.
   - [X] Modificar `machiavelli.game.map.Map` para que los `fortress` se eliminen en el
     momento de la carga
+  - [X] Eliminar la funcion `is_defensible_city`, ya que `Map` ya elimina los `fortress`
+    al cargarse si están deshabilitados
+- [ ] Bugs solucionados
+  - [ ] Una guarnición bajo asedio no de generar ingresos
+
 
 ### Desarrollos futuros
 

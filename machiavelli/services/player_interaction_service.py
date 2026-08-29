@@ -18,9 +18,7 @@ class PlayerInteractionService:
 
     def _is_defensible_location(self, location: str) -> bool:
         province = self.game.map.provinces.get(location.split()[0])
-        return province is not None and self.game.scenario.is_defensible_city(
-            province.city
-        )
+        return province is not None and province.city in ("fortified", "fortress")
 
     # ---------------------------------------------------------
     # Funciones para la precarga de órdenes disponibles

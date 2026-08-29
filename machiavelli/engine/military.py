@@ -289,13 +289,6 @@ class MilitaryResolver:
         elif key.unit_type == "F":
             self.fleet_by_conflict_location[location] = key
 
-    def _is_defensible_city(self, city: str | None) -> bool:
-        """Comprueba si una ciudad admite defensa con el escenario activo."""
-        scenario = self.game.scenario
-        if scenario is None:
-            return city in {"fortified", "fortress"}
-        return scenario.is_defensible_city(city)
-
     def _build_rebellion_index(self) -> None:
         """Indexa cada rebelión una sola vez sin convertirla en participante."""
         for player in sorted(self.game.players, key=lambda item: item.player_id):
@@ -309,7 +302,10 @@ class MilitaryResolver:
                         raise InvalidMilitaryState(
                             f"Localización de rebelión inválida: {location}"
                         )
-                    if kind == "city" and not self._is_defensible_city(province.city):
+                    if kind == "city" and province.city not in (
+                        "fortified",
+                        "fortress",
+                    ):
                         raise InvalidMilitaryState(
                             f"Rebelión urbana fuera de ciudad defendible: {location}"
                         )
@@ -584,7 +580,7 @@ class MilitaryResolver:
                 rebellion is not None and rebellion[1] == "city"
             ):
                 return "conversión bloqueada por asedio o rebelión urbana"
-            valid = self._is_defensible_city(location.city) and (
+            valid = location.city in ("fortified", "fortress") and (
                 (key.unit_type == "G" and target == "A")
                 or (key.unit_type == "G" and target == "F" and location.has_port)
                 or (key.unit_type == "A" and target == "G")
@@ -611,7 +607,7 @@ class MilitaryResolver:
             key.unit_type not in {"A", "F"}
             or target != province
             or location is None
-            or not self._is_defensible_city(location.city)
+            or location.city not in ("fortified", "fortress")
         ):
             return "objetivo de asedio inválido"
         if key.unit_type == "F" and not location.has_port:
@@ -668,7 +664,7 @@ class MilitaryResolver:
             return self._location_exists(key.origin)
         province = self.map.provinces.get(key.origin)
         if key.unit_type == "G":
-            return province is not None and self._is_defensible_city(province.city)
+            return province is not None and province.city in ("fortified", "fortress")
         return province is not None
 
     def _conflicts(self) -> dict[str, list[UnitKey]]:
@@ -1652,7 +1648,7 @@ class MilitaryResolver:
         ] + independent
         for location in garrison_locations:
             province = self.map.provinces.get(location)
-            if province is None or not self._is_defensible_city(province.city):
+            if province is None or province.city not in ("fortified", "fortress"):
                 raise MilitaryResolutionError(
                     "Estado final de guarnición fuera de ciudad defendible"
                 )
@@ -1668,7 +1664,7 @@ class MilitaryResolver:
                             "Estado final de rebelión inválido"
                         )
                     if kind == "city":
-                        if not self._is_defensible_city(province.city):
+                        if province.city not in ("fortified", "fortress"):
                             raise MilitaryResolutionError(
                                 "Rebelión urbana final fuera de ciudad defendible"
                             )
@@ -1688,7 +1684,7 @@ class MilitaryResolver:
             raise MilitaryResolutionError("Estado final de asedios duplicado")
         for location in besieges:
             province = self.map.provinces.get(location)
-            if province is None or not self._is_defensible_city(province.city):
+            if province is None or province.city not in ("fortified", "fortress"):
                 raise MilitaryResolutionError("Estado final de asedio inválido")
             besiegers = [
                 (player_id, unit_type)

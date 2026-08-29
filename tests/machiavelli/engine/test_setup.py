@@ -7,7 +7,6 @@ import pytest
 from machiavelli.engine.exceptions import (
     DuplicatePlayerError,
     GameAlreadyStartedError,
-    GameInitializationError,
     InvalidPlayerCountError,
     ScenarioNotSelectedError,
 )
@@ -170,19 +169,6 @@ def _scenario_with_rules(
     )
 
 
-def test_setup_rejects_inactive_fortress_garrison_before_first_event():
-    player = create_mock_player("p1")
-    scenario = _scenario_with_rules(Rules(fortress_active=False), garrisons=["keep"])
-    game = create_mock_game(players=[player], scenario=scenario)
-    game.map = Mock(provinces={"keep": Mock(city="fortress")})
-
-    with pytest.raises(GameInitializationError, match="keep"):
-        SetupManager(game).run()
-
-    game.add_event.assert_not_called()
-    player.assign_power_from_scenario.assert_not_called()
-
-
 def test_setup_disables_assassination_counters_and_keeps_automatic_fortified_only():
     player = create_mock_player("p1")
     scenario = _scenario_with_rules(
@@ -200,4 +186,4 @@ def test_setup_disables_assassination_counters_and_keeps_automatic_fortified_onl
     SetupManager(game).run()
 
     assert player.assign_power_from_scenario.call_args.args[2] == []
-    assert game.independent_garrisons == ["fort"]
+    assert game.independent_garrisons == ["keep", "fort"]

@@ -20,7 +20,6 @@ class TestExpenseRebellionPacify(unittest.TestCase):
 
         self.mock_game.players = [self.owner_player]
         self.mock_game.map.provinces = {"flore": Mock(city="fortified")}
-        self.mock_game.scenario.is_defensible_city.return_value = True
         self.mock_command = Mock()
 
     def test_expense_rebellion_pacify_province(self):
@@ -66,16 +65,6 @@ class TestExpenseRebellionPacify(unittest.TestCase):
         self.assertEqual(self.owner_player.rebelled_cities, ["flore"])
         self.mock_game.add_event.assert_not_called()
 
-    def test_inactive_fortress_city_rebellion_cannot_be_pacified(self):
-        self.mock_command.target = "flore"
-        self.mock_game.map.provinces["flore"].city = "fortress"
-        self.mock_game.scenario.is_defensible_city.return_value = False
-
-        self.manager._expense_rebellion_pacify(self.mock_command)
-
-        self.assertEqual(self.owner_player.rebelled_cities, ["flore"])
-        self.mock_game.add_event.assert_not_called()
-
 
 class TestDoRebellion(unittest.TestCase):
     def setUp(self):
@@ -91,10 +80,6 @@ class TestDoRebellion(unittest.TestCase):
 
         # Mock del escenario y mapa
         self.mock_game.scenario.rules.fortress_active = True
-        self.mock_game.scenario.is_defensible_city.side_effect = lambda city: (
-            city == "fortified"
-            or (city == "fortress" and self.mock_game.scenario.rules.fortress_active)
-        )
         self.mock_province = Mock()
         self.mock_game.map.provinces = {"pisa": self.mock_province}
 
@@ -173,21 +158,6 @@ class TestDoRebellion(unittest.TestCase):
         self.mock_game.add_event.assert_called_once()
         event = self.mock_game.add_event.call_args[0][0]
         self.assertEqual(event.type, EventType.REBELLION_CITY)
-        self.assertEqual(event.data, {"player": "FLORENCE", "province": "pisa"})
-
-    def test_do_rebellion_fortress_inactive(self):
-        """Si la ciudad es 'fortress' pero fortress_active=False."""
-        self.mock_province.city = "fortress"
-        self.mock_game.scenario.rules.fortress_active = False
-
-        self.manager.do_rebellion(self.owner, "pisa")
-
-        self.assertEqual(self.owner.rebelled_provinces, ["pisa"])
-        self.assertEqual(self.owner.rebelled_cities, [])
-
-        self.mock_game.add_event.assert_called_once()
-        event = self.mock_game.add_event.call_args[0][0]
-        self.assertEqual(event.type, EventType.REBELLION_PROVINCE)
         self.assertEqual(event.data, {"player": "FLORENCE", "province": "pisa"})
 
 

@@ -2382,72 +2382,6 @@ class TestRebellions(unittest.TestCase):
                 self.assertEqual(military_snapshot(game), before)
                 self.assertEqual(game.turn_events, [BEFORE_EVENT])
 
-    def test_fortress_rebellion_respects_the_scenario_rule(self):
-        invalid = create_military_game(
-            fortress_map(),
-            [
-                {
-                    "player_id": "P1",
-                    "power": "M",
-                    "rebelled_cities": ["keep"],
-                }
-            ],
-            scenario=fortress_scenario(active=False),
-            turn_events=[BEFORE_EVENT],
-        )
-        before = military_snapshot(invalid)
-
-        with self.assertRaises(InvalidMilitaryState):
-            MilitaryResolver(invalid).run(self._remove_all_dislodged)
-
-        self.assertEqual(military_snapshot(invalid), before)
-        self.assertEqual(invalid.turn_events, [BEFORE_EVENT])
-
-        provincial = create_military_game(
-            fortress_map(),
-            [
-                {
-                    "player_id": "P1",
-                    "power": "M",
-                    "rebelled_provinces": ["keep"],
-                }
-            ],
-            scenario=fortress_scenario(active=False),
-        )
-
-        resolution, event = self._run(provincial)
-
-        self.assertEqual(resolution.outcomes, ())
-        self.assertEqual(provincial.players[0].rebelled_provinces, ["keep"])
-        self.assertEqual(provincial.players[0].rebelled_cities, [])
-        self.assertEqual(event["cancelled_orders"], [])
-        self.assertEqual(event["broken_convoys"], [])
-        self.assertEqual(event["dislodgements"], [])
-        self.assertEqual(event["rebellions"], [])
-        self.assertEqual(event["sieges"], [])
-
-    def test_final_validation_rejects_inactive_fortress_city_rebellion(self):
-        game = create_military_game(
-            fortress_map(),
-            [
-                {
-                    "player_id": "P1",
-                    "power": "M",
-                    "rebelled_cities": ["keep"],
-                }
-            ],
-            scenario=fortress_scenario(active=False),
-            turn_events=[BEFORE_EVENT],
-        )
-
-        with (
-            patch.object(MilitaryResolver, "_build_rebellion_index"),
-            self.assertRaises(MilitaryResolutionError),
-        ):
-            MilitaryResolver(game).run(self._remove_all_dislodged)
-
-        self.assertEqual(game.turn_events, [BEFORE_EVENT, EMPTY_ORDERS_EVENT])
-
 
 class TestSiegesAndRestrictedConversions(unittest.TestCase):
     """Cubre asedios y restricciones de conversión asociadas."""
@@ -2514,21 +2448,6 @@ class TestSiegesAndRestrictedConversions(unittest.TestCase):
         )
         return resolution, event
 
-    def test_inactive_fortress_rejects_initial_garrison(self):
-        game = create_military_game(
-            fortress_map(),
-            [{"player_id": "P1", "power": "M", "garrisons": ["keep"]}],
-            scenario=fortress_scenario(active=False),
-            turn_events=[BEFORE_EVENT],
-        )
-        before = military_snapshot(game)
-
-        with self.assertRaises(InvalidMilitaryState):
-            MilitaryResolver(game).run(self._remove_all_dislodged)
-
-        self.assertEqual(military_snapshot(game), before)
-        self.assertEqual(game.turn_events, [BEFORE_EVENT])
-
     def test_active_fortress_accepts_initial_garrison(self):
         game = create_military_game(
             fortress_map(),
@@ -2547,27 +2466,6 @@ class TestSiegesAndRestrictedConversions(unittest.TestCase):
         self.assertEqual(outcome.final_location, "keep")
         self.assertEqual(game.players[0].garrisons, ["keep"])
         self.assertEqual(event["cancelled_orders"], [])
-
-    def test_fortress_conversion_respects_the_scenario_rule(self):
-        inactive = create_military_game(
-            fortress_map(),
-            [{"player_id": "P1", "power": "M", "armies": ["keep"]}],
-            orders=[("A keep", "C", "G")],
-            scenario=fortress_scenario(active=False),
-        )
-        inactive_resolver = self._compiled(inactive)
-        key = UnitKey("P1", "A", "keep")
-        self.assertIn(key, inactive_resolver.invalid_orders)
-
-        active = create_military_game(
-            fortress_map(),
-            [{"player_id": "P1", "power": "M", "armies": ["keep"]}],
-            orders=[("A keep", "C", "G")],
-            scenario=fortress_scenario(active=True),
-        )
-        active_resolver = self._compiled(active)
-        self.assertNotIn(key, active_resolver.invalid_orders)
-        self.assertEqual(active_resolver.orders_by_unit[key].order_type, "C")
 
     def test_first_and_second_besiege_start_and_complete_against_garrison(self):
         first = create_military_game(
