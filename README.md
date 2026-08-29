@@ -52,7 +52,7 @@ distribución wheel generada mediante `python -m build`.
 
 ## Versión
 
-Versión de desarrollo actual: 0.9.0. Última versión estable publicada: 0.8.1.
+Versión de desarrollo actual: 0.10.0. Última versión estable publicada: 0.9.0.
 
 ## Comandos disponibles
 
@@ -326,3 +326,5 @@ versiones conforme se completen.
   
   Se ha modificado `!sync` para evitar comandos duplicados y hacer limpieza de los
   comandos registrados en discord a nivel local y global.
+- Versión 0.10.0: más refactorizaciones. Corregido un bug: las ciudades bajo asedio no
+  proporcionan ingresos.

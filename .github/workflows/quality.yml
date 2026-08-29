@@ -83,7 +83,7 @@ jobs:
           from machiavelli.game.map import Map;
           from machiavelli.game.scenario import Scenario;
           assert machiavelli.__version__ == version('machiavelli');
-          assert machiavelli.__version__ == '0.9.0';
+          assert machiavelli.__version__ == '0.10.0';
           assert 'site-packages' in machiavelli.__file__.lower();
           assert Map.load_map().provinces;
           assert Scenario.load_scenarios();
