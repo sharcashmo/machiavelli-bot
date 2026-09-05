@@ -31,6 +31,11 @@ from machiavelli.services import game_service_session
 
 logger = logging.getLogger(__name__)
 
+# HTTP/Gateway pueden registrar texto, usuarios y destinos, incluso al reintentar.
+# Los rumores no deben dejar esas trazas ni al activar DEBUG en la aplicación.
+for _transport_logger in ("discord.http", "discord.gateway", "discord.webhook.async_"):
+    logging.getLogger(_transport_logger).disabled = True
+
 _INVALID_TURN_EVENT_MESSAGE = (
     "No se pudo generar el informe porque el historial del turno no es válido.\n"
     "Comunícaselo al administrador para que revise los eventos guardados."
@@ -874,7 +879,196 @@ async def run_game(interaction: discord.Interaction):
         await interaction.followup.send(message, ephemeral=False)
 
 
+def _set_rumor_channel_record(
+    db_path: str, channel_id: int, rumor_channel_id: int
+) -> None:
+    with game_service_session(db_path) as service:
+        service.set_rumor_channel(channel_id, rumor_channel_id)
+
+
+def _prepare_rumor_record(
+    db_path: str, channel_id: int, discord_id: int, recipient_id: int | None
+) -> tuple[int, int, str, int | None]:
+    with game_service_session(db_path) as service:
+        return service.prepare_rumor(channel_id, discord_id, recipient_id)
+
+
+def _reserve_rumor_record(
+    db_path: str,
+    game_id: int,
+    turn_number: int,
+    discord_id: int,
+    recipient_id: int | None,
+    rumor_channel_id: int | None,
+) -> int:
+    with game_service_session(db_path) as service:
+        return service.reserve_rumor(
+            game_id, turn_number, discord_id, recipient_id, rumor_channel_id
+        )
+
+
+def _refund_rumor_record(
+    db_path: str, game_id: int, turn_number: int, discord_id: int
+) -> None:
+    with game_service_session(db_path) as service:
+        service.refund_rumor(game_id, turn_number, discord_id)
+
+
+def _check_rumor_channel(channel: discord.TextChannel, guild: discord.Guild) -> None:
+    """El administrador mantiene los accesos; el bot comprueba que puede publicar."""
+    if channel.guild.id != guild.id:
+        raise ValueError("El tablón debe pertenecer a este servidor.")
+    member = guild.me
+    if member is None:
+        raise ValueError("No se pudieron comprobar los permisos del bot.")
+    permissions = channel.permissions_for(member)
+    if not permissions.view_channel or not permissions.send_messages:
+        raise ValueError("El bot necesita ver el tablón y enviar mensajes en él.")
+
+
+async def _reply_rumor(interaction: discord.Interaction, message: str) -> None:
+    """Una confirmación fallida nunca reenvía ni publica datos en los logs."""
+    try:
+        if interaction.response.is_done():
+            await interaction.followup.send(message, ephemeral=True)
+        else:
+            await interaction.response.send_message(message, ephemeral=True)
+    except Exception:
+        # La interacción puede haber caducado después de entregar el rumor.
+        pass
+
+
+@admin_group.command(
+    name="set_rumor_channel", description="Configura el tablón de rumores de la partida"
+)
+@app_commands.guild_only()
+@app_commands.describe(canal="Canal privado del tablón, con accesos gestionados por ti")
+async def set_rumor_channel(
+    interaction: discord.Interaction, canal: discord.TextChannel
+) -> None:
+    try:
+        await interaction.response.defer(ephemeral=True)
+        if interaction.guild is None:
+            raise ValueError("Este comando solo puede usarse en el servidor.")
+        if not interaction.permissions.administrator:
+            raise ValueError("Solo el administrador puede configurar el tablón.")
+        _check_rumor_channel(canal, interaction.guild)
+        await asyncio.to_thread(
+            _set_rumor_channel_record,
+            admin_group.db_path,
+            _require_channel_id(interaction),
+            canal.id,
+        )
+        message = (
+            "Tablón configurado. Sus permisos de lectura los gestiona el administrador."
+        )
+    except GameNotFoundException:
+        message = "No hay ninguna partida en este canal."
+    except ValueError as error:
+        message = str(error)
+    except Exception:
+        message = "No se pudo configurar el tablón."
+    await _reply_rumor(interaction, message)
+
+
 # 5. Comandos de los jugadores
+
+
+@game_group.command(name="rumor", description="Envía un rumor anónimo: tres por turno")
+@app_commands.guild_only()
+@app_commands.describe(
+    texto="Texto del rumor (hasta 1900 caracteres)",
+    destinatario="Otro participante; omítelo para publicar en el tablón",
+)
+async def rumor(
+    interaction: discord.Interaction,
+    texto: app_commands.Range[str, 1, 1900],
+    destinatario: discord.Member | None = None,
+) -> None:
+    remaining: int | None = None
+    try:
+        await interaction.response.defer(ephemeral=True)
+        guild = interaction.guild
+        if guild is None:
+            raise ValueError("Este comando solo puede usarse en el servidor.")
+        if not texto.strip() or len(texto) > 1900:
+            raise ValueError(
+                "El rumor debe contener texto y no superar 1900 caracteres."
+            )
+        recipient_id = destinatario.id if destinatario is not None else None
+        game_id, turn_number, name, board_id = await asyncio.to_thread(
+            _prepare_rumor_record,
+            game_group.db_path,
+            _require_channel_id(interaction),
+            interaction.user.id,
+            recipient_id,
+        )
+        # Consultar miembros actuales evita depender de una caché incompleta o antigua.
+        await guild.fetch_member(interaction.user.id)
+        destination: discord.Member | discord.TextChannel
+        if recipient_id is not None:
+            destination = await guild.fetch_member(recipient_id)
+        else:
+            if board_id is None:
+                raise ValueError(
+                    "El administrador todavía no ha configurado el tablón."
+                )
+            board = await guild.fetch_channel(board_id)
+            if not isinstance(board, discord.TextChannel):
+                raise ValueError("El tablón debe ser un canal de texto.")
+            _check_rumor_channel(board, guild)
+            destination = board
+        remaining = await asyncio.to_thread(
+            _reserve_rumor_record,
+            game_group.db_path,
+            game_id,
+            turn_number,
+            interaction.user.id,
+            recipient_id,
+            board_id,
+        )
+        try:
+            header = " ".join(name.split())[:60]
+            await destination.send(f"Rumor anónimo · {header}\n\n{texto}")
+        except discord.HTTPException as error:
+            if 400 <= error.status < 500 and error.status != 429:
+                await asyncio.to_thread(
+                    _refund_rumor_record,
+                    game_group.db_path,
+                    game_id,
+                    turn_number,
+                    interaction.user.id,
+                )
+                await _reply_rumor(
+                    interaction, "Discord rechazó la entrega. No se consume cuota."
+                )
+                return
+            raise
+        message = f"Rumor enviado. Restantes: {remaining} de 3."
+    except GameNotFoundException:
+        message = "No hay ninguna partida en este canal."
+    except PlayerNotFoundException:
+        message = "Emisor y destinatario deben estar inscritos en esta partida."
+    except ValueError as error:
+        message = (
+            str(error) if remaining is None else "No se pudo confirmar la entrega."
+        )
+    except Exception:
+        message = (
+            "No se pudo preparar el rumor. Comprueba el destinatario o el tablón."
+            if remaining is None
+            else "No se pudo confirmar la entrega. La cuota reservada se conserva."
+        )
+    await _reply_rumor(interaction, message)
+
+
+@rumor.error
+@set_rumor_channel.error
+async def rumor_command_error(
+    interaction: discord.Interaction, error: app_commands.AppCommandError
+) -> None:
+    """También los errores previos al callback se responden sin registrar datos."""
+    await _reply_rumor(interaction, "No se pudo procesar el comando de rumores.")
 
 
 @game_group.command(

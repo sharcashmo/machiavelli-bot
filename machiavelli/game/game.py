@@ -35,6 +35,7 @@ class Game:
     besieges: list[str] = field(default_factory=list)
     turn_events: list[TurnEvent] = field(default_factory=list)
     pending_exchanges: list[ExchangeProposal] = field(default_factory=list)
+    rumor_channel_id: int | None = None
 
     def require_map(self) -> Map:
         """Devuelve el mapa cargado o lanza un error inmediatamente si el estado de la

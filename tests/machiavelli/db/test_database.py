@@ -382,7 +382,7 @@ def _seed_v4(
         conn.close()
 
 
-def test_v4_to_v5_preserves_existing_rows_and_creates_exact_table(
+def test_v4_to_latest_preserves_existing_rows_and_creates_exchange_table(
     db_path: Path,
 ) -> None:
     _game_id, snapshot_before = _seed_v4(db_path)
@@ -390,7 +390,7 @@ def test_v4_to_v5_preserves_existing_rows_and_creates_exact_table(
     try:
         upgrade_connection(conn)
 
-        assert conn.execute("PRAGMA user_version").fetchone() == (5,)
+        assert conn.execute("PRAGMA user_version").fetchone() == (_SCHEMA_VERSION,)
         for table, expected_rows in snapshot_before.items():
             actual_rows = tuple(
                 tuple(row)
@@ -398,7 +398,13 @@ def test_v4_to_v5_preserves_existing_rows_and_creates_exact_table(
                     f"SELECT * FROM {table} ORDER BY rowid"
                 ).fetchall()
             )
-            assert actual_rows == expected_rows
+            if table in ("games", "players"):
+                # La migración 6 añade una columna sin alterar las anteriores.
+                assert tuple(row[:-1] for row in actual_rows) == expected_rows
+                default = None if table == "games" else 0
+                assert all(row[-1] == default for row in actual_rows)
+            else:
+                assert actual_rows == expected_rows
 
         sql = conn.execute(
             "SELECT sql FROM sqlite_master WHERE name = 'exchange_proposals'"
