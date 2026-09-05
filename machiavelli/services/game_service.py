@@ -148,7 +148,7 @@ class GameService:
 
     def prepare_rumor(
         self, channel_id: int, discord_id: int, recipient_id: int | None
-    ) -> tuple[int | None, int]:
+    ) -> tuple[int | None, str, int]:
         """Valida los participantes sin recibir ni almacenar el texto del rumor."""
         game = self.get_game(channel_id)
         actor = self.resolve_player(game, discord_id)
@@ -161,7 +161,8 @@ class GameService:
             self.resolve_player(game, recipient_id)
         elif game.rumor_channel_id is None:
             raise ValueError("El administrador todavía no ha configurado el tablón.")
-        return (game.rumor_channel_id, remaining)
+        season = GameTables.seasons[(game.turn_number - 1) % 4]
+        return (game.rumor_channel_id, season, remaining)
 
     def send_rumor(
         self,

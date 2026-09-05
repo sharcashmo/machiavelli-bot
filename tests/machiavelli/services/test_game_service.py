@@ -182,9 +182,17 @@ def test_send_rumor_updates_and_persists_the_player_quota() -> None:
         service.add_player(70025, 101, "P1")
         service.add_player(70025, 202, "P2")
 
-        assert service.prepare_rumor(70025, 101, 202) == (None, 3)
+        assert service.prepare_rumor(70025, 101, 202) == (
+            None,
+            "Otoño",
+            3,
+        )
         assert service.send_rumor(70025, 101) == 2
-        assert service.prepare_rumor(70025, 101, 202) == (None, 2)
+        assert service.prepare_rumor(70025, 101, 202) == (
+            None,
+            "Otoño",
+            2,
+        )
         assert service.send_rumor(70025, 101) == 1
         assert service.send_rumor(70025, 101) == 0
         with pytest.raises(ValueError, match="tres rumores"):

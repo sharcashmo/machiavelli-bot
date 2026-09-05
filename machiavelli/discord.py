@@ -883,7 +883,7 @@ def _set_rumor_channel_record(
 
 def _prepare_rumor_record(
     db_path: str, channel_id: int, discord_id: int, recipient_id: int | None
-) -> tuple[int | None, int]:
+) -> tuple[int | None, str, int]:
     with game_service_session(db_path) as service:
         return service.prepare_rumor(channel_id, discord_id, recipient_id)
 
@@ -980,7 +980,7 @@ async def rumor(
                 "El rumor debe contener texto y no superar 1900 caracteres."
             )
         recipient_id = destinatario.id if destinatario is not None else None
-        board_id, _remaining = await asyncio.to_thread(
+        board_id, season, _remaining = await asyncio.to_thread(
             _prepare_rumor_record,
             game_group.db_path,
             _require_channel_id(interaction),
@@ -1002,7 +1002,8 @@ async def rumor(
                 raise ValueError("El tablón debe ser un canal de texto.")
             _check_rumor_channel(board, guild)
             destination = board
-        await destination.send(f"RUMOR - *{texto}*")
+        prefix = f"RUMOR - {season} - " if recipient_id is None else "RUMOR - "
+        await destination.send(f"{prefix}*{texto}*")
         delivered = True
         remaining = await asyncio.to_thread(
             _send_rumor_record,
