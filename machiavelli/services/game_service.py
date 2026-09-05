@@ -139,6 +139,45 @@ class GameService:
         """Carga un agregado completo de partida mediante el canal de Discord."""
         return self.repo.get_by_channel(channel_id)
 
+    def set_rumor_channel(self, channel_id: int, rumor_channel_id: int) -> None:
+        """Configura el tablón fijo de la partida."""
+        game = self.get_game(channel_id)
+        game.rumor_channel_id = rumor_channel_id
+        self.repo.save(game)
+
+    def prepare_rumor(
+        self, channel_id: int, discord_id: int, recipient_id: int | None
+    ) -> tuple[int, int, str, int | None]:
+        """Valida los participantes sin recibir ni almacenar el texto del rumor."""
+        game = self.get_game(channel_id)
+        self.resolve_player(game, discord_id)
+        if recipient_id is not None:
+            if recipient_id == discord_id:
+                raise ValueError("El destinatario debe ser otro jugador.")
+            self.resolve_player(game, recipient_id)
+        elif game.rumor_channel_id is None:
+            raise ValueError("El administrador todavía no ha configurado el tablón.")
+        if game.database_id is None:
+            raise RuntimeError("La partida no está guardada.")
+        return (game.database_id, game.turn_number, game.name, game.rumor_channel_id)
+
+    def reserve_rumor(
+        self,
+        game_id: int,
+        turn_number: int,
+        discord_id: int,
+        recipient_id: int | None,
+        rumor_channel_id: int | None,
+    ) -> int:
+        """Revalida el estado y consume una de las tres plazas del turno."""
+        return self.repo.reserve_rumor(
+            game_id, turn_number, discord_id, recipient_id, rumor_channel_id
+        )
+
+    def refund_rumor(self, game_id: int, turn_number: int, discord_id: int) -> None:
+        """Devuelve la cuota de una entrega rechazada inequívocamente."""
+        self.repo.refund_rumor(game_id, turn_number, discord_id)
+
     def get_game_status(self, channel_id: int) -> GameStatusDict:
         """Devuelve un resumen estructurado utilizando los atributos canónicos de la
         partida.

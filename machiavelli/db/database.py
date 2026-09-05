@@ -6,7 +6,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-_SCHEMA_VERSION = 5
+_SCHEMA_VERSION = 6
 
 _UPGRADES: tuple[str, ...] = (
     # SCHEMA 1
@@ -96,6 +96,13 @@ _UPGRADES: tuple[str, ...] = (
         CHECK (receive_type IN ('ducats', 'assassin')),
         FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
     );
+    """,
+    # SCHEMA 6
+    """\
+    BEGIN;
+    ALTER TABLE games ADD COLUMN rumor_channel_id INTEGER;
+    ALTER TABLE players ADD COLUMN rumors_sent INTEGER NOT NULL DEFAULT 0
+        CHECK (rumors_sent BETWEEN 0 AND 3);
     """,
 )
 

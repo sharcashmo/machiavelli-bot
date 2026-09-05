@@ -81,9 +81,23 @@ class GameRepository:
                             f"'{game.channel_id}' ya están en uso."
                         ) from error
                 else:
+                    # La cuota no forma parte del agregado y solo cambia al avanzar.
+                    cursor.execute(
+                        "UPDATE players SET rumors_sent = 0 WHERE game_id = ? "
+                        "AND EXISTS (SELECT 1 FROM games WHERE id = ? "
+                        "AND turn_number < ?)",
+                        (game.database_id, game.database_id, game.turn_number),
+                    )
                     set_clause = ", ".join([f"{column} = ?" for column in columns])
-                    query = f"UPDATE games SET {set_clause} WHERE id = ?"
-                    cursor.execute(query, tuple(values) + (game.database_id,))
+                    query = (
+                        f"UPDATE games SET {set_clause} WHERE id = ? "
+                        "AND turn_number <= ?"
+                    )
+                    cursor.execute(
+                        query, tuple(values) + (game.database_id, game.turn_number)
+                    )
+                    if cursor.rowcount != 1:
+                        raise ValueError("La partida ha cambiado; vuelve a intentarlo.")
 
                 # Por último, guardamos las listas de objetos complejos: jugadores,
                 # eventos e intercambios pendientes
@@ -95,6 +109,60 @@ class GameRepository:
                 logger.debug("Previous id is %s", previous_id)
                 game.database_id = previous_id
                 raise
+
+    def reserve_rumor(
+        self,
+        game_id: int,
+        turn_number: int,
+        discord_id: int,
+        recipient_id: int | None,
+        rumor_channel_id: int | None,
+    ) -> int:
+        """Reserva cuota sin persistir el destino y sin guardar el agregado."""
+        with self.conn:
+            row = self.conn.execute(
+                """
+                UPDATE players SET rumors_sent = rumors_sent + 1
+                WHERE game_id = ? AND discord_id = ? AND rumors_sent < 3
+                    AND EXISTS (
+                        SELECT 1 FROM games WHERE id = ? AND turn_number = ?
+                        AND (? IS NOT NULL OR rumor_channel_id = ?)
+                    )
+                    AND (? IS NULL OR (? != discord_id AND EXISTS (
+                        SELECT 1 FROM players AS recipient
+                        WHERE recipient.game_id = players.game_id
+                            AND recipient.discord_id = ?
+                    )))
+                RETURNING rumors_sent
+                """,
+                (
+                    game_id,
+                    discord_id,
+                    game_id,
+                    turn_number,
+                    recipient_id,
+                    rumor_channel_id,
+                    recipient_id,
+                    recipient_id,
+                    recipient_id,
+                ),
+            ).fetchone()
+            if row is None:
+                raise ValueError(
+                    "No se pudo reservar el rumor: límite de tres alcanzado "
+                    "o la partida ha cambiado."
+                )
+            return 3 - int(row[0])
+
+    def refund_rumor(self, game_id: int, turn_number: int, discord_id: int) -> None:
+        """Devuelve una reserva rechazada solo si sigue siendo el mismo turno."""
+        with self.conn:
+            self.conn.execute(
+                "UPDATE players SET rumors_sent = rumors_sent - 1 "
+                "WHERE game_id = ? AND discord_id = ? AND rumors_sent > 0 "
+                "AND EXISTS (SELECT 1 FROM games WHERE id = ? AND turn_number = ?)",
+                (game_id, discord_id, game_id, turn_number),
+            )
 
     def delete(self, game: Game) -> None:
         """Elimina una partida de la base de datos."""

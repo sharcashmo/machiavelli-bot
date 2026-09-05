@@ -99,6 +99,34 @@ Añade una orden nueva al turno actual.
 
 Añade un gasto nuevo al turno actual.
 
+#### `/mach rumor texto [destinatario]`
+
+> Versión 0.10.0
+
+Desde el canal de la partida, envía inmediatamente un rumor anónimo. Selecciona otro
+participante como destinatario para enviarlo por DM, u omítelo para publicarlo en el
+tablón configurado. Solo admite texto no vacío de hasta 1900 caracteres, sin formularios
+ni adjuntos. No se añaden restricciones de menciones.
+
+Cada jugador dispone de **tres rumores en total por turno**, compartidos entre DMs y
+tablón. La cuota se conserva al reiniciar el bot y se renueva con cada avance de turno,
+incluido mantenimiento; también está disponible en el turno inicial. Solo pueden enviar
+y recibir participantes inscritos que pertenezcan al servidor, incluidos los eliminados
+mientras sigan inscritos. No se permiten autoenvíos.
+
+El destinatario recibe un mensaje independiente del bot, con el nombre de la partida y
+sin datos del remitente. La confirmación y los errores solo los ve quien ejecuta el
+comando. Si Discord rechaza claramente la entrega, se devuelve la cuota. Ante un timeout
+o resultado incierto se conserva la reserva y no se reenvía automáticamente desde la
+aplicación. Un fallo en la confirmación no vuelve a enviar el rumor.
+
+El bot no guarda contenido, destinatarios, fechas ni historial de rumores: únicamente
+el contador en la fila del jugador y el canal del tablón. Tampoco incorpora rumores o
+contadores a los informes. Se desactivan los logs HTTP/Gateway/webhook de `discord.py` porque
+pueden contener datos de interacciones y mensajes, incluso con DEBUG activado. Discord
+procesa las interacciones y conserva los mensajes entregados; el contenido del propio
+rumor puede permitir deducir su autoría.
+
 #### `/mach exchange`
 
 > Versión 0.7.0
@@ -123,7 +151,7 @@ Da a una unidad sus provincias prioritarias de retirada.
 > Versión 0.2.0
 
 Conjunto de comandos para su uso por el administrador. Todos estos comandos son
-públicos.
+públicos, excepto la configuración del tablón de rumores, cuya respuesta es efímera.
 
 #### `/shar create`
 
@@ -142,6 +170,24 @@ Elimina la partida activa en el canal que se ejecuta.
 > Versión 0.2.0
 
 Selecciona un escenario para la partida.
+
+#### `/shar set_rumor_channel canal`
+
+> Versión 0.10.0
+
+Configura o sustituye el tablón fijo de la partida del canal donde se ejecuta. Requiere
+permisos de administrador y un canal de texto del mismo servidor que el bot pueda ver
+y en el que pueda enviar mensajes. El administrador debe restringir la lectura a los
+participantes y administradores y mantener esos accesos al cambiar los jugadores; el bot
+no modifica los permisos del canal. Los rumores por DM no necesitan tablón configurado.
+
+Para activar los comandos tras instalar esta versión, arranca el bot normalmente (se
+aplica la migración interna de SQLite del esquema 5 al 6) y ejecuta `!sync`. La versión
+del paquete continúa siendo `0.10.0`.
+
+Las pruebas de rumores usan SQLite temporal y Discord simulado, con llamadas de red de
+Discord bloqueadas. Comprueban cuotas, concurrencia, privacidad y errores sin token ni
+servidor; no certifican la entrega real, los permisos reales ni la interfaz de Discord.
 
 #### `/shar set_deadlines`
 
