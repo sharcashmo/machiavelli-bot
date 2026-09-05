@@ -162,7 +162,8 @@ class GameService:
         elif game.rumor_channel_id is None:
             raise ValueError("El administrador todavía no ha configurado el tablón.")
         season = GameTables.seasons[(game.turn_number - 1) % 4]
-        return (game.rumor_channel_id, season, remaining)
+        year = (game.turn_number - 1) // 4 + game.require_scenario().year
+        return (game.rumor_channel_id, f"{season} de {year}", remaining)
 
     def send_rumor(
         self,

@@ -178,19 +178,22 @@ def test_add_remove_and_resolve_player_persist_the_authoritative_collection() ->
 def test_send_rumor_updates_and_persists_the_player_quota() -> None:
     with closing(sqlite3.connect(":memory:")) as conn:
         service = make_service(conn)
-        service.create_game("Rumores", 70025)
+        service.create_game("Rumores", 70025, "Be")
         service.add_player(70025, 101, "P1")
         service.add_player(70025, 202, "P2")
+        game = service.get_game(70025)
+        game.turn_number = 7
+        service.repo.save(game)
 
         assert service.prepare_rumor(70025, 101, 202) == (
             None,
-            "Otoño",
+            "Verano de 1455",
             3,
         )
         assert service.send_rumor(70025, 101) == 2
         assert service.prepare_rumor(70025, 101, 202) == (
             None,
-            "Otoño",
+            "Verano de 1455",
             2,
         )
         assert service.send_rumor(70025, 101) == 1
