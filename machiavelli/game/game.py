@@ -123,6 +123,7 @@ class Game:
             )
         for player in self.players:
             player.commands.clear()
+            player.rumors_sent = 0
         self.pending_exchanges.clear()
 
     def add_event(self, turn_event: TurnEvent) -> None:

@@ -40,6 +40,7 @@ class Player:
     home_countries: list[str] = field(default_factory=list)
     power: str | None = None
     commands: list[Command] = field(default_factory=list)
+    rumors_sent: int = 0
 
     @property
     def game_id(self) -> int | None:

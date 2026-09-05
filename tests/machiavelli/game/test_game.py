@@ -163,6 +163,8 @@ class TestAdvanceTurn(unittest.TestCase):
         self.assertEqual(game.next_deadline, "2020-10-17 22:00")
         self.assertEqual(player1.commands, [])
         self.assertEqual(player2.commands, [])
+        self.assertEqual(player1.rumors_sent, 0)
+        self.assertEqual(player2.rumors_sent, 0)
 
 
 class TestAddEvent(unittest.TestCase):

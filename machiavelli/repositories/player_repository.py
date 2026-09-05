@@ -48,9 +48,10 @@ class PlayerRepository:
             INSERT INTO players (
                 game_id, player_id, discord_id, controlled_locations,
                 armies, fleets, garrisons, ass_counters, ducats,
-                rebelled_provinces, rebelled_cities, home_countries, power
+                rebelled_provinces, rebelled_cities, home_countries, power,
+                rumors_sent
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(game_id, player_id) DO UPDATE SET
                 discord_id = excluded.discord_id,
                 controlled_locations = excluded.controlled_locations,
@@ -62,7 +63,8 @@ class PlayerRepository:
                 rebelled_provinces = excluded.rebelled_provinces,
                 rebelled_cities = excluded.rebelled_cities,
                 home_countries = excluded.home_countries,
-                power = excluded.power
+                power = excluded.power,
+                rumors_sent = excluded.rumors_sent
             """,
             (
                 game_id,
@@ -78,6 +80,7 @@ class PlayerRepository:
                 json.dumps(player.rebelled_cities),
                 json.dumps(player.home_countries),
                 player.power,
+                player.rumors_sent,
             ),
         )
 
@@ -173,7 +176,7 @@ class PlayerRepository:
             """
             SELECT player_id, discord_id, controlled_locations, armies, fleets,
                 garrisons, ass_counters, ducats, rebelled_provinces,
-                rebelled_cities, home_countries, power
+                rebelled_cities, home_countries, power, rumors_sent
             FROM players
             WHERE game_id = ?
             ORDER BY rowid ASC
@@ -197,6 +200,7 @@ class PlayerRepository:
                 rebelled_cities=self._decode_list(row[9]),
                 home_countries=self._decode_list(row[10]),
                 power=row[11],
+                rumors_sent=row[12],
             )
             player.commands = self.command_repo.get_by_player(player)
             players.append(player)

@@ -45,6 +45,7 @@ type ActorOption = tuple[str, str]
 logger = logging.getLogger(__name__)
 
 _trade_mutation_lock = Lock()
+MAX_RUMORS_PER_TURN = 3
 # ponytail: lock global por instancia; locks por partida si la contención lo exige
 type GameStatusDict = dict[str, Any]
 
@@ -147,36 +148,34 @@ class GameService:
 
     def prepare_rumor(
         self, channel_id: int, discord_id: int, recipient_id: int | None
-    ) -> tuple[int, int, str, int | None]:
+    ) -> tuple[int | None, int]:
         """Valida los participantes sin recibir ni almacenar el texto del rumor."""
         game = self.get_game(channel_id)
-        self.resolve_player(game, discord_id)
+        actor = self.resolve_player(game, discord_id)
+        remaining = MAX_RUMORS_PER_TURN - actor.rumors_sent
+        if remaining <= 0:
+            raise ValueError("Ya has enviado los tres rumores de este turno.")
         if recipient_id is not None:
             if recipient_id == discord_id:
                 raise ValueError("El destinatario debe ser otro jugador.")
             self.resolve_player(game, recipient_id)
         elif game.rumor_channel_id is None:
             raise ValueError("El administrador todavía no ha configurado el tablón.")
-        if game.database_id is None:
-            raise RuntimeError("La partida no está guardada.")
-        return (game.database_id, game.turn_number, game.name, game.rumor_channel_id)
+        return (game.rumor_channel_id, remaining)
 
-    def reserve_rumor(
+    def send_rumor(
         self,
-        game_id: int,
-        turn_number: int,
+        channel_id: int,
         discord_id: int,
-        recipient_id: int | None,
-        rumor_channel_id: int | None,
     ) -> int:
-        """Revalida el estado y consume una de las tres plazas del turno."""
-        return self.repo.reserve_rumor(
-            game_id, turn_number, discord_id, recipient_id, rumor_channel_id
-        )
-
-    def refund_rumor(self, game_id: int, turn_number: int, discord_id: int) -> None:
-        """Devuelve la cuota de una entrega rechazada inequívocamente."""
-        self.repo.refund_rumor(game_id, turn_number, discord_id)
+        """Registra un rumor ya entregado y devuelve los envíos disponibles."""
+        game = self.get_game(channel_id)
+        actor = self.resolve_player(game, discord_id)
+        if actor.rumors_sent >= MAX_RUMORS_PER_TURN:
+            raise ValueError("Ya has enviado los tres rumores de este turno.")
+        actor.rumors_sent += 1
+        self.repo.save(game)
+        return MAX_RUMORS_PER_TURN - actor.rumors_sent
 
     def get_game_status(self, channel_id: int) -> GameStatusDict:
         """Devuelve un resumen estructurado utilizando los atributos canónicos de la

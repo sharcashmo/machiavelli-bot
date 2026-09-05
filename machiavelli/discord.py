@@ -31,11 +31,6 @@ from machiavelli.services import game_service_session
 
 logger = logging.getLogger(__name__)
 
-# HTTP/Gateway pueden registrar texto, usuarios y destinos, incluso al reintentar.
-# Los rumores no deben dejar esas trazas ni al activar DEBUG en la aplicación.
-for _transport_logger in ("discord.http", "discord.gateway", "discord.webhook.async_"):
-    logging.getLogger(_transport_logger).disabled = True
-
 _INVALID_TURN_EVENT_MESSAGE = (
     "No se pudo generar el informe porque el historial del turno no es válido.\n"
     "Comunícaselo al administrador para que revise los eventos guardados."
@@ -888,30 +883,18 @@ def _set_rumor_channel_record(
 
 def _prepare_rumor_record(
     db_path: str, channel_id: int, discord_id: int, recipient_id: int | None
-) -> tuple[int, int, str, int | None]:
+) -> tuple[int | None, int]:
     with game_service_session(db_path) as service:
         return service.prepare_rumor(channel_id, discord_id, recipient_id)
 
 
-def _reserve_rumor_record(
+def _send_rumor_record(
     db_path: str,
-    game_id: int,
-    turn_number: int,
+    channel_id: int,
     discord_id: int,
-    recipient_id: int | None,
-    rumor_channel_id: int | None,
 ) -> int:
     with game_service_session(db_path) as service:
-        return service.reserve_rumor(
-            game_id, turn_number, discord_id, recipient_id, rumor_channel_id
-        )
-
-
-def _refund_rumor_record(
-    db_path: str, game_id: int, turn_number: int, discord_id: int
-) -> None:
-    with game_service_session(db_path) as service:
-        service.refund_rumor(game_id, turn_number, discord_id)
+        return service.send_rumor(channel_id, discord_id)
 
 
 def _check_rumor_channel(channel: discord.TextChannel, guild: discord.Guild) -> None:
@@ -986,6 +969,7 @@ async def rumor(
     destinatario: discord.Member | None = None,
 ) -> None:
     remaining: int | None = None
+    delivered = False
     try:
         await interaction.response.defer(ephemeral=True)
         guild = interaction.guild
@@ -996,14 +980,14 @@ async def rumor(
                 "El rumor debe contener texto y no superar 1900 caracteres."
             )
         recipient_id = destinatario.id if destinatario is not None else None
-        game_id, turn_number, name, board_id = await asyncio.to_thread(
+        board_id, _remaining = await asyncio.to_thread(
             _prepare_rumor_record,
             game_group.db_path,
             _require_channel_id(interaction),
             interaction.user.id,
             recipient_id,
         )
-        # Consultar miembros actuales evita depender de una caché incompleta o antigua.
+
         await guild.fetch_member(interaction.user.id)
         destination: discord.Member | discord.TextChannel
         if recipient_id is not None:
@@ -1018,32 +1002,15 @@ async def rumor(
                 raise ValueError("El tablón debe ser un canal de texto.")
             _check_rumor_channel(board, guild)
             destination = board
+        await destination.send(f"RUMOR - *{texto}*")
+        delivered = True
         remaining = await asyncio.to_thread(
-            _reserve_rumor_record,
+            _send_rumor_record,
             game_group.db_path,
-            game_id,
-            turn_number,
+            _require_channel_id(interaction),
             interaction.user.id,
-            recipient_id,
-            board_id,
         )
-        try:
-            header = " ".join(name.split())[:60]
-            await destination.send(f"Rumor anónimo · {header}\n\n{texto}")
-        except discord.HTTPException as error:
-            if 400 <= error.status < 500 and error.status != 429:
-                await asyncio.to_thread(
-                    _refund_rumor_record,
-                    game_group.db_path,
-                    game_id,
-                    turn_number,
-                    interaction.user.id,
-                )
-                await _reply_rumor(
-                    interaction, "Discord rechazó la entrega. No se consume cuota."
-                )
-                return
-            raise
+
         message = f"Rumor enviado. Restantes: {remaining} de 3."
     except GameNotFoundException:
         message = "No hay ninguna partida en este canal."
@@ -1051,13 +1018,15 @@ async def rumor(
         message = "Emisor y destinatario deben estar inscritos en esta partida."
     except ValueError as error:
         message = (
-            str(error) if remaining is None else "No se pudo confirmar la entrega."
+            str(error)
+            if not delivered
+            else "El rumor se entregó, pero no se pudo actualizar su cuota."
         )
     except Exception:
         message = (
             "No se pudo preparar el rumor. Comprueba el destinatario o el tablón."
-            if remaining is None
-            else "No se pudo confirmar la entrega. La cuota reservada se conserva."
+            if not delivered
+            else "El rumor se entregó, pero no se pudo actualizar su cuota."
         )
     await _reply_rumor(interaction, message)
 
