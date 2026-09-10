@@ -1,7 +1,6 @@
 """Generador de reporte de estado"""
 
 from machiavelli.game.game import Game
-from machiavelli.game.tables import GameTables
 
 
 class StatusReporter:
@@ -46,11 +45,14 @@ class StatusReporter:
             )[(game.turn_number - 1) % 4]
             report.append(f"### __**Estado:** {season} de {year}__")
             report.append("### :crossed_swords: **Han enviado sus órdenes:**")
+            active_players = [
+                player for player in game.players if player.home_countries
+            ]
             ordered_players = [player for player in game.players if player.commands]
             if ordered_players:
-                report.extend(
-                    f"- {GameTables.powers[player.power]} (<@{player.discord_id}>)"
-                    for player in ordered_players
+                report.append(
+                    f"- {len(ordered_players)} jugadores de "
+                    f"{len(active_players)} jugadores activos"
                 )
             else:
                 report.append("- Nadie :wink:.")
