@@ -348,6 +348,12 @@ class GameService:
         game = self.get_game(channel_id)
         player = self.resolve_player(game, discord_id, selected_power)
 
+        turn_type = (
+            TurnType.MAINTENANCE if game.turn_number % 4 == 1 else TurnType.CAMPAIGN
+        )
+        if turn_type == TurnType.MAINTENANCE:
+            raise ValueError("No se permiten gastos en turno de mantenimiento.")
+
         valid_expenses = {code for code, _label in player.exp_available_expenses()}
         if expense not in valid_expenses:
             raise ValueError(f"`{expense}` no es un gasto válido.")

@@ -99,33 +99,15 @@ Añade una orden nueva al turno actual.
 
 Añade un gasto nuevo al turno actual.
 
-#### `/mach rumor texto [destinatario]`
+#### `/mach rumour`
 
-> Versión 0.10.0
+> Versión 0.11.0
 
-Desde el canal de la partida, envía inmediatamente un rumor anónimo. Selecciona otro
-participante como destinatario para enviarlo por DM, u omítelo para publicarlo en el
-tablón configurado. Solo admite texto no vacío de hasta 1900 caracteres, sin formularios
-ni adjuntos. No se añaden restricciones de menciones.
+Envía un rumor anónimo, bien sea al tablón de rumores o a un destinatario por DM, si
+se indica.
 
-Cada jugador dispone de **tres rumores en total por turno**, compartidos entre DMs y
-tablón. La cuota se conserva al reiniciar el bot y se renueva con cada avance de turno,
-incluido mantenimiento; también está disponible en el turno inicial. Solo pueden enviar
-y recibir participantes inscritos que pertenezcan al servidor, incluidos los eliminados
-mientras sigan inscritos. No se permiten autoenvíos.
-
-El destinatario recibe un mensaje independiente del bot, con el nombre de la partida y
-sin datos del remitente. La confirmación y los errores solo los ve quien ejecuta el
-comando. Si Discord rechaza claramente la entrega, se devuelve la cuota. Ante un timeout
-o resultado incierto se conserva la reserva y no se reenvía automáticamente desde la
-aplicación. Un fallo en la confirmación no vuelve a enviar el rumor.
-
-El bot no guarda contenido, destinatarios, fechas ni historial de rumores: únicamente
-el contador en la fila del jugador y el canal del tablón. Tampoco incorpora rumores o
-contadores a los informes. Se desactivan los logs HTTP/Gateway/webhook de `discord.py` porque
-pueden contener datos de interacciones y mensajes, incluso con DEBUG activado. Discord
-procesa las interacciones y conserva los mensajes entregados; el contenido del propio
-rumor puede permitir deducir su autoría.
+Cada jugador, incluidos los ya eliminados, disponen de **tres rumores por turno**,
+compartidos entre DMs y tablón.
 
 #### `/mach exchange`
 
@@ -175,19 +157,7 @@ Selecciona un escenario para la partida.
 
 > Versión 0.10.0
 
-Configura o sustituye el tablón fijo de la partida del canal donde se ejecuta. Requiere
-permisos de administrador y un canal de texto del mismo servidor que el bot pueda ver
-y en el que pueda enviar mensajes. El administrador debe restringir la lectura a los
-participantes y administradores y mantener esos accesos al cambiar los jugadores; el bot
-no modifica los permisos del canal. Los rumores por DM no necesitan tablón configurado.
-
-Para activar los comandos tras instalar esta versión, arranca el bot normalmente (se
-aplica la migración interna de SQLite del esquema 5 al 6) y ejecuta `!sync`. La versión
-del paquete continúa siendo `0.10.0`.
-
-Las pruebas de rumores usan SQLite temporal y Discord simulado, con llamadas de red de
-Discord bloqueadas. Comprueban cuotas, concurrencia, privacidad y errores sin token ni
-servidor; no certifican la entrega real, los permisos reales ni la interfaz de Discord.
+Configura o sustituye el tablón fijo de la partida del canal donde se ejecuta.
 
 #### `/shar set_deadlines`
 
@@ -235,19 +205,15 @@ partida, ni devuelve las órdenes enviadas.
 
 Se prevén las siguientes versiones
 
-### Versión 0.10.0
+### Versión 1.0.0
 
 - [ ] Añadir un chequeo de órdenes incorrectas, ilegales o inconsistentes.
   - [ ] Fase de mantenimiento.
   - [ ] Fase de campaña.
 - [ ] Añadir más escenarios.
 - [ ] Refactorización.
-  - [X] Modificar `machiavelli.game.map.Map` para que los `fortress` se eliminen en el
-    momento de la carga
-  - [X] Eliminar la funcion `is_defensible_city`, ya que `Map` ya elimina los `fortress`
-    al cargarse si están deshabilitados
 - [X] Bugs solucionados
-  - [X] Una guarnición bajo asedio no de generar ingresos
+  - [X] No permitir el envío de gastos (expenses) en el turno de mantenimiento.
 
 ### Desarrollos futuros
 
@@ -256,7 +222,6 @@ versiones conforme se completen.
 
 - [ ] Ejecutar todas las acciones del turno. Todavía faltan:
   - [ ] Tratamiento del fin de partida.
-  - [X] Tratamiento de eliminación de jugadores.
 - [ ] Incluir algún tipo de chequeo del turno para advertir de órdenes incorrectas,
   ilegales o inconsistentes.
 - [ ] Hacer que el reporte incluya un mapa gráfico con la posición de las unidades.
@@ -374,3 +339,4 @@ versiones conforme se completen.
   comandos registrados en discord a nivel local y global.
 - Versión 0.10.0: más refactorizaciones. Corregido un bug: las ciudades bajo asedio no
   proporcionan ingresos.
+- Versión 1.0.0: no se permite el envío de gastos en un turno de mantenimiento.
