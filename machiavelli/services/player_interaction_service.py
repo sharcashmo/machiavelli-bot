@@ -599,13 +599,13 @@ class PlayerInteractionService:
             for c in range(cost, cost * 3 + 1, cost):
                 choices.append((str(c), f"{c} ducados"))
         elif key == "F":
-            for c in range(cost, self.player.ducats + 1, 3):
+            for c in range(cost, self.player.ducats + 31, 3):
                 choices.append((str(c), f"{c} ducados"))
         elif key in ("G", "H", "I", "J", "K"):
             target_type, target_id = target.split()
             if target_type == "G" and map.provinces[target_id].major_city > 1:
                 cost *= 2
-            for c in range(cost, self.player.ducats + 1, 3):
+            for c in range(cost, self.player.ducats + 31, 3):
                 choices.append((str(c), f"{c} ducados"))
 
         return choices
