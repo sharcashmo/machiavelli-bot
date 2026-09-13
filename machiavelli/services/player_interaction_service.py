@@ -339,8 +339,7 @@ class PlayerInteractionService:
         expenses = {
             k: e
             for k, e in GameTables.expenses.items()
-            if e["cost"] <= self.player.ducats
-            and (k != "A" or rules.famine_active)
+            if (k != "A" or rules.famine_active)
             and (k != "E" or rules.assassinations_active)
         }
 
@@ -381,8 +380,9 @@ class PlayerInteractionService:
         ]
 
         for key, expense in expenses.items():
+            broken = " (sin fondos)" if expense["cost"] > self.player.ducats else ""
             if key == "A" and self.game.famine:
-                choices.append((f"E {key}", f"{expense['text']}"))
+                choices.append((f"E {key}", f"{expense['text']}{broken}"))
             elif key == "B":
                 rebellions = [
                     r for p in self.game.players for r in p.rebelled_provinces
@@ -393,7 +393,7 @@ class PlayerInteractionService:
                     if self._is_defensible_location(r)
                 ]
                 if rebellions:
-                    choices.append((f"E {key}", f"{expense['text']}"))
+                    choices.append((f"E {key}", f"{expense['text']}{broken}"))
             elif key == "C":
                 no_hc = [
                     pr
@@ -404,7 +404,7 @@ class PlayerInteractionService:
                     if pr not in p.rebelled_cities
                 ]
                 if no_hc:
-                    choices.append((f"E {key}", f"{expense['text']}"))
+                    choices.append((f"E {key}", f"{expense['text']}{broken}"))
             elif key == "D":
                 hc = [
                     pr
@@ -415,7 +415,7 @@ class PlayerInteractionService:
                     if pr not in p.rebelled_cities
                 ]
                 if hc:
-                    choices.append((f"E {key}", f"{expense['text']}"))
+                    choices.append((f"E {key}", f"{expense['text']}{broken}"))
             elif key == "E":
                 ass = [
                     p.power
@@ -424,9 +424,9 @@ class PlayerInteractionService:
                     if p.power in self.player.ass_counters
                 ]
                 if ass:
-                    choices.append((f"E {key}", f"{expense['text']}"))
+                    choices.append((f"E {key}", f"{expense['text']}{broken}"))
             elif key == "F":
-                choices.append((f"E {key}", f"{expense['text']}"))
+                choices.append((f"E {key}", f"{expense['text']}{broken}"))
             elif key in ("G", "H"):
                 garrisons = [
                     g
@@ -434,16 +434,16 @@ class PlayerInteractionService:
                     if g in adjacent and self._is_defensible_location(g)
                 ]
                 if garrisons:
-                    choices.append((f"E {key}", f"{expense['text']}"))
+                    choices.append((f"E {key}", f"{expense['text']}{broken}"))
             elif key == "I":
                 if bribe_garrisons:
-                    choices.append((f"E {key}", f"{expense['text']}"))
+                    choices.append((f"E {key}", f"{expense['text']}{broken}"))
             elif key == "J":
                 if bribe_armies or bribe_fleets or bribe_garrisons:
-                    choices.append((f"E {key}", f"{expense['text']}"))
+                    choices.append((f"E {key}", f"{expense['text']}{broken}"))
             elif key == "K":
                 if bribe_armies or bribe_fleets:
-                    choices.append((f"E {key}", f"{expense['text']}"))
+                    choices.append((f"E {key}", f"{expense['text']}{broken}"))
 
         return choices
 
