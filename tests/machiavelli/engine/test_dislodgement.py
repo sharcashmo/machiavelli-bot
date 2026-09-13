@@ -222,6 +222,7 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
 
         mock_province = Mock()
         mock_province.city = "fortified"
+        mock_province.is_venice = False
         self.mock_map.provinces = {"rome": mock_province}
 
         outcome = Mock()
@@ -326,6 +327,38 @@ class TestRetreatHandlerPreferredRetreat(unittest.TestCase):
         invalid_destinations = {
             "G naple",
         }
+        for step in RetreatStep:
+            result = self.handler._preferred_retreat(
+                step, outcome, invalid_destinations
+            )
+            if result:
+                break
+
+        self.assertEqual(result, DislodgementDecision("disband", None))
+
+    @patch("machiavelli.engine.dislodgement.conflict_location")
+    def test_no_retreat_places_no_garrison_city_is_venice(self, mock_conflict_location):
+        """No hay rutas de huída y la ciudad es Venecia."""
+        mock_conflict_location.side_effect = lambda loc, utype: (
+            f"G {loc}" if utype == "G" else loc.split()[0]
+        )
+
+        self.mock_map.adjacent_locations.return_value = []
+
+        mock_province = Mock()
+        mock_province.city = "fortified"
+        mock_province.has_port = False
+        mock_province.is_venice = True
+        self.mock_map.provinces = {"naple": mock_province}
+
+        outcome = Mock()
+        outcome.unit.player_id = 1
+        outcome.unit.unit_type = "A"
+        outcome.unit.origin = "naple"
+        outcome.final_unit_type = "A"
+
+        invalid_destinations = {}
+
         for step in RetreatStep:
             result = self.handler._preferred_retreat(
                 step, outcome, invalid_destinations
