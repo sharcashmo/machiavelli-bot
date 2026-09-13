@@ -66,6 +66,9 @@ class RetreatHandler:
                 and
                 # Tiene una ciudad fortificada o un fuerte
                 province.city in ("fortified", "fortress")
+                and
+                # Y no es Venecia
+                not province.is_venice
             ):
                 if unit.unit_type == "A" or unit.unit_type == "F" and province.has_port:
                     # Nos retiramos al fuerte
