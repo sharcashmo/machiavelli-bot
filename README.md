@@ -52,7 +52,7 @@ distribución wheel generada mediante `python -m build`.
 
 ## Versión
 
-Versión de desarrollo actual: 0.10.0. Última versión estable publicada: 0.9.0.
+Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.0.0.
 
 ## Comandos disponibles
 
@@ -99,7 +99,7 @@ Añade una orden nueva al turno actual.
 
 Añade un gasto nuevo al turno actual.
 
-#### `/mach rumour`
+#### `/mach rumor`
 
 > Versión 0.11.0
 
@@ -155,7 +155,7 @@ Selecciona un escenario para la partida.
 
 #### `/shar set_rumor_channel canal`
 
-> Versión 0.10.0
+> Versión 1.0.0
 
 Configura o sustituye el tablón fijo de la partida del canal donde se ejecuta.
 
@@ -337,6 +337,9 @@ versiones conforme se completen.
   
   Se ha modificado `!sync` para evitar comandos duplicados y hacer limpieza de los
   comandos registrados en discord a nivel local y global.
-- Versión 0.10.0: más refactorizaciones. Corregido un bug: las ciudades bajo asedio no
+- Versión 1.0.0: más refactorizaciones. Corregido un bug: las ciudades bajo asedio no
   proporcionan ingresos.
-- Versión 1.0.0: no se permite el envío de gastos en un turno de mantenimiento.
+- Versión 1.0.0: no se permite el envío de gastos en un turno de mantenimiento. No se
+  permite la retirada a guarnición en ciudades con el `is_venice` flag activo (en esas
+  provincias pueden haber unidades en la ciudad o en la provincia, pero no en las dos
+  a la vez).
