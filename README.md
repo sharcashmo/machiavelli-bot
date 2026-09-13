@@ -155,7 +155,7 @@ Selecciona un escenario para la partida.
 
 #### `/shar set_rumor_channel canal`
 
-> Versión 1.0.0
+> Versión 0.11.0
 
 Configura o sustituye el tablón fijo de la partida del canal donde se ejecuta.
 
@@ -207,13 +207,9 @@ Se prevén las siguientes versiones
 
 ### Versión 1.0.0
 
-- [ ] Añadir un chequeo de órdenes incorrectas, ilegales o inconsistentes.
-  - [ ] Fase de mantenimiento.
-  - [ ] Fase de campaña.
-- [ ] Añadir más escenarios.
-- [ ] Refactorización.
 - [X] Bugs solucionados
   - [X] No permitir el envío de gastos (expenses) en el turno de mantenimiento.
+  - [X] No se permite la retirada a guarnición en la ciudad de Venecia.
 
 ### Desarrollos futuros
 
@@ -337,8 +333,9 @@ versiones conforme se completen.
   
   Se ha modificado `!sync` para evitar comandos duplicados y hacer limpieza de los
   comandos registrados en discord a nivel local y global.
-- Versión 1.0.0: más refactorizaciones. Corregido un bug: las ciudades bajo asedio no
+- Versión 0.10.0: más refactorizaciones. Corregido un bug: las ciudades bajo asedio no
   proporcionan ingresos.
+- Versión 0.11.0: se añade la funcionalidad de rumores.
 - Versión 1.0.0: no se permite el envío de gastos en un turno de mantenimiento. No se
   permite la retirada a guarnición en ciudades con el `is_venice` flag activo (en esas
   provincias pueden haber unidades en la ciudad o en la provincia, pero no en las dos
