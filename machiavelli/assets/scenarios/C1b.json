@@ -2,6 +2,7 @@
   "scenario_id": "C1b",
   "name": "The struggle for dominance, part one (four players)",
   "year": 1499,
+  "map_id": "machiavelli",
   "victory_conditions": {
     "cities": 23,
     "home_countries": 3
@@ -11,11 +12,7 @@
     "fortress_active": false
   },
   "home_countries": {
-    "F": [
-      "avign",
-      "marse",
-      "prove"
-    ],
+    "F": ["avign", "marse", "prove"],
     "A": [
       "tyrol",
       "austr",
@@ -37,12 +34,7 @@
       "urbin",
       "romag"
     ],
-    "L": [
-      "arezz",
-      "flore",
-      "pisa",
-      "pisto"
-    ],
+    "L": ["arezz", "flore", "pisa", "pisto"],
     "V": [
       "trevi",
       "padua",
@@ -65,88 +57,30 @@
       "aquil",
       "capua"
     ],
-    "T": [
-      "tunis",
-      "alban",
-      "duraz",
-      "herze",
-      "bosni"
-    ]
+    "T": ["tunis", "alban", "duraz", "herze", "bosni"]
   },
   "powers": {
     "F": {
-      "home_countries": [
-        "F"
-      ],
-      "armies": [
-        "avign",
-        "milan",
-        "naple",
-        "bari",
-        "saluz"
-      ],
-      "fleets": [
-        "marse",
-        "genoa"
-      ],
-      "extra_provinces": [
-        "milan",
-        "genoa",
-        "naple",
-        "bari",
-        "saluz"
-      ]
+      "home_countries": ["F"],
+      "armies": ["avign", "milan", "naple", "bari", "saluz"],
+      "fleets": ["marse", "genoa"],
+      "extra_provinces": ["milan", "genoa", "naple", "bari", "saluz"]
     },
     "A": {
-      "home_countries": [
-        "A"
-      ],
-      "armies": [
-        "tyrol",
-        "austr",
-        "swiss",
-        "messi"
-      ],
-      "fleets": [
-        "sardi",
-        "paler"
-      ]
+      "home_countries": ["A"],
+      "armies": ["tyrol", "austr", "swiss", "messi"],
+      "fleets": ["sardi", "paler"]
     },
     "P": {
-      "home_countries": [
-        "P",
-        "L"
-      ],
-      "armies": [
-        "bolog",
-        "perug",
-        "rome",
-        "arezz",
-        "flore"
-      ],
-      "fleets": [
-        "ancon",
-        "pisa"
-      ]
+      "home_countries": ["P", "L"],
+      "armies": ["bolog", "perug", "rome", "arezz", "flore"],
+      "fleets": ["ancon", "pisa"]
     },
     "V": {
-      "home_countries": [
-        "V",
-        "T"
-      ],
-      "armies": [
-        "trevi",
-        "padua",
-        "alban"
-      ],
-      "fleets": [
-        "dalma",
-        "tunis",
-        "duraz"
-      ],
-      "garrisons": [
-        "venic"
-      ]
+      "home_countries": ["V", "T"],
+      "armies": ["trevi", "padua", "alban"],
+      "fleets": ["dalma", "tunis", "duraz"],
+      "garrisons": ["venic"]
     }
   },
   "excluded_locations": [],
@@ -161,8 +95,5 @@
     "V",
     "V"
   ],
-  "variable_income_provinces": [
-    "genoa",
-    "flore"
-  ]
+  "variable_income_provinces": ["genoa", "flore"]
 }

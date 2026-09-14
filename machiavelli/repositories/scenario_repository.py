@@ -124,6 +124,7 @@ class ScenarioRepository:
         return Scenario(
             name=scenario_data["name"],
             year=scenario_data["year"],
+            map_id=scenario_data["map_id"],
             victory_conditions=victory_conditions,
             rules=rules,
             home_countries=home_countries,

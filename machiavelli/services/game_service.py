@@ -124,6 +124,7 @@ class GameService:
                 scenario_id=scenario_id,
                 scenario=scenario,
                 map=MapRepository().load_map(
+                    map_id=scenario.map_id,
                     exclude_ids=scenario.excluded_locations,
                     fortress_active=scenario.rules.fortress_active,
                 ),
@@ -228,6 +229,7 @@ class GameService:
         game.scenario_id = scenario_id
         game.scenario = scenario
         game.map = MapRepository().load_map(
+            map_id=scenario.map_id,
             exclude_ids=scenario.excluded_locations,
             fortress_active=scenario.rules.fortress_active,
         )

@@ -23,7 +23,10 @@ def make_report_game() -> Game:
         channel_id=123,
         scenario_id="Be",
         scenario=scenario,
-        map=MapRepository().load_map(exclude_ids=scenario.excluded_locations),
+        map=MapRepository().load_map(
+            map_id=scenario.map_id,
+            exclude_ids=scenario.excluded_locations,
+        ),
         turn_number=2,
     )
     first = game.add_player("player-1", 123)

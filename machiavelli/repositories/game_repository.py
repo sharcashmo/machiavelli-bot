@@ -189,11 +189,13 @@ class GameRepository:
                 ) from error
             excluded_locations = game.scenario.excluded_locations
             fortress_active = game.scenario.rules.fortress_active
+            map_id = game.scenario.map_id
         else:
             game.scenario = None
-            excluded_locations = None
-            fortress_active = True
+            game.map = None
+            return game
         game.map = MapRepository().load_map(
+            map_id=map_id,
             exclude_ids=excluded_locations,
             fortress_active=fortress_active,
         )

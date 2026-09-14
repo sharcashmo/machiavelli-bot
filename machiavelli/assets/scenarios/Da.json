@@ -2,6 +2,7 @@
   "scenario_id": "Da",
   "name": "The spanish preponderance (two players)",
   "year": 1521,
+  "map_id": "machiavelli",
   "victory_conditions": {
     "cities": 0,
     "home_countries": 5
@@ -11,13 +12,7 @@
     "fortress_active": false
   },
   "home_countries": {
-    "F": [
-      "swiss",
-      "avign",
-      "marse",
-      "saluz",
-      "prove"
-    ],
+    "F": ["swiss", "avign", "marse", "saluz", "prove"],
     "A": [
       "tyrol",
       "austr",
@@ -57,44 +52,16 @@
       "friul",
       "istri"
     ],
-    "T": [
-      "alban",
-      "duraz",
-      "tunis",
-      "herze",
-      "bosni",
-      "hunga"
-    ]
+    "T": ["alban", "duraz", "tunis", "herze", "bosni", "hunga"]
   },
   "powers": {
     "F": {
-      "home_countries": [
-        "F",
-        "T",
-        "V"
-      ],
-      "armies": [
-        "swiss",
-        "avign",
-        "saluz",
-        "padua",
-        "trevi",
-        "alban",
-        "hunga"
-      ],
-      "fleets": [
-        "marse",
-        "venic",
-        "dalma",
-        "duraz",
-        "tunis"
-      ]
+      "home_countries": ["F", "T", "V"],
+      "armies": ["swiss", "avign", "saluz", "padua", "trevi", "alban", "hunga"],
+      "fleets": ["marse", "venic", "dalma", "duraz", "tunis"]
     },
     "A": {
-      "home_countries": [
-        "A",
-        "P"
-      ],
+      "home_countries": ["A", "P"],
       "armies": [
         "tyrol",
         "austr",
@@ -106,23 +73,10 @@
         "perug",
         "rome"
       ],
-      "fleets": [
-        "paler",
-        "sardi",
-        "ancon"
-      ]
+      "fleets": ["paler", "sardi", "ancon"]
     }
   },
   "excluded_locations": [],
-  "variable_income_home_countries": [
-    "F",
-    "T",
-    "P",
-    "V",
-    "A",
-    "A"
-  ],
-  "variable_income_provinces": [
-    "genoa"
-  ]
+  "variable_income_home_countries": ["F", "T", "P", "V", "A", "A"],
+  "variable_income_provinces": ["genoa"]
 }

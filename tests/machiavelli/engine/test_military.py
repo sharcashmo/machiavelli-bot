@@ -105,6 +105,7 @@ def fortress_scenario(*, active: bool) -> Scenario:
     return Scenario(
         name="fortress-test",
         year=1454,
+        map_id="machiavelli",
         victory_conditions=VictoryConditions(cities=1, home_countries=1),
         rules=Rules(fortress_active=active),
     )

@@ -2,6 +2,7 @@
   "scenario_id": "Bc",
   "name": "The balance of power (four players)",
   "year": 1454,
+  "map_id": "machiavelli",
   "victory_conditions": {
     "cities": 0,
     "home_countries": 4
@@ -11,15 +12,7 @@
     "fortress_active": false
   },
   "home_countries": {
-    "M": [
-      "pavia",
-      "cremo",
-      "como",
-      "forno",
-      "pianc",
-      "parma",
-      "milan"
-    ],
+    "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
     "V": [
       "padua",
       "veron",
@@ -32,12 +25,7 @@
       "friul",
       "istri"
     ],
-    "L": [
-      "arezz",
-      "flore",
-      "pisa",
-      "pisto"
-    ],
+    "L": ["arezz", "flore", "pisa", "pisto"],
     "P": [
       "bolog",
       "ancon",
@@ -59,93 +47,30 @@
       "aquil",
       "capua"
     ],
-    "T": [
-      "alban",
-      "duraz",
-      "tunis",
-      "herze",
-      "bosni"
-    ],
-    "A": [
-      "hunga",
-      "austr",
-      "tyrol",
-      "carin"
-    ],
-    "F": [
-      "swiss",
-      "avign",
-      "marse",
-      "prove"
-    ]
+    "T": ["alban", "duraz", "tunis", "herze", "bosni"],
+    "A": ["hunga", "austr", "tyrol", "carin"],
+    "F": ["swiss", "avign", "marse", "prove"]
   },
   "powers": {
     "M": {
-      "home_countries": [
-        "M",
-        "A"
-      ],
-      "armies": [
-        "pavia",
-        "cremo",
-        "milan",
-        "hunga",
-        "austr",
-        "tyrol"
-      ]
+      "home_countries": ["M", "A"],
+      "armies": ["pavia", "cremo", "milan", "hunga", "austr", "tyrol"]
     },
     "V": {
-      "home_countries": [
-        "V",
-        "F"
-      ],
-      "armies": [
-        "padua",
-        "veron",
-        "swiss",
-        "avign"
-      ],
-      "fleets": [
-        "dalma",
-        "marse"
-      ],
-      "garrisons": [
-        "venic"
-      ]
+      "home_countries": ["V", "F"],
+      "armies": ["padua", "veron", "swiss", "avign"],
+      "fleets": ["dalma", "marse"],
+      "garrisons": ["venic"]
     },
     "L": {
-      "home_countries": [
-        "L",
-        "T"
-      ],
-      "armies": [
-        "arezz",
-        "flore",
-        "alban"
-      ],
-      "fleets": [
-        "pisa",
-        "duraz",
-        "tunis"
-      ]
+      "home_countries": ["L", "T"],
+      "armies": ["arezz", "flore", "alban"],
+      "fleets": ["pisa", "duraz", "tunis"]
     },
     "P": {
-      "home_countries": [
-        "P",
-        "N"
-      ],
-      "armies": [
-        "bolog",
-        "perug",
-        "rome",
-        "bari",
-        "messi"
-      ],
-      "fleets": [
-        "ancon",
-        "naple",
-        "paler"
-      ]
+      "home_countries": ["P", "N"],
+      "armies": ["bolog", "perug", "rome", "bari", "messi"],
+      "fleets": ["ancon", "naple", "paler"]
     }
   },
   "excluded_locations": [],
@@ -161,9 +86,5 @@
     "V",
     "V"
   ],
-  "variable_income_provinces": [
-    "genoa",
-    "naple",
-    "milan"
-  ]
+  "variable_income_provinces": ["genoa", "naple", "milan"]
 }

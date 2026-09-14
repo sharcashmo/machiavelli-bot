@@ -731,6 +731,7 @@ def test_active_rules_versioned_snapshots_v1() -> None:
     scenario = Scenario(
         name="active-rules-v1",
         year=1454,
+        map_id="machiavelli",
         victory_conditions=VictoryConditions(cities=99, home_countries=99),
         rules=Rules(),
         home_countries={
@@ -818,7 +819,7 @@ def test_real_turns_emit_only_ordered_reconstructible_events(
         name=f"integrated-events-{runs}",
         scenario_id="Be",
         scenario=scenario,
-        map=MapRepository().load_map(),
+        map=MapRepository().load_map(map_id="machiavelli"),
     )
     for index in range(len(scenario.powers)):
         game.add_player(f"P{index}", discord_id=1000 + index)
@@ -867,6 +868,7 @@ def _rule_campaign_game(
     scenario = Scenario(
         name="rule-integration",
         year=1454,
+        map_id="machiavelli",
         victory_conditions=VictoryConditions(cities=99, home_countries=99),
         rules=rules,
         home_countries={
@@ -891,6 +893,7 @@ def test_first_turn_famine_inactive_integrated_snapshot() -> None:
         scenario = Scenario(
             name="startup-rule-integration",
             year=1454,
+            map_id="machiavelli",
             victory_conditions=VictoryConditions(cities=99, home_countries=99),
             rules=Rules(first_turn_famine=first_turn_famine),
             home_countries={"M": HomeCountry(provinces=["fort"])},

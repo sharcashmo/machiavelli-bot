@@ -17,12 +17,13 @@ class MapRepository:
 
     def load_map(
         self,
+        map_id: str,
         exclude_ids: list[str] | None = None,
         fortress_active: bool = True,
     ) -> Map:
         """Carga el mapa, aplica exclusiones y configura sus fortalezas."""
         exclude_set = set(exclude_ids) if exclude_ids else set()
-        raw_data = self._read_data()
+        raw_data = self._read_data(map_id)
 
         if not isinstance(raw_data, dict):
             raise TypeError("El recurso del mapa debe contener un objeto JSON")
@@ -31,9 +32,9 @@ class MapRepository:
         seas = self._load_seas(raw_data, exclude_set)
         return Map(provinces=provinces, seas=seas)
 
-    def _read_data(self) -> object:
+    def _read_data(self, map_id: str) -> object:
         if self.json_path is None:
-            return read_package_json("map_data.json")
+            return read_package_json(f"assets/maps/{map_id}.json")
         with self.json_path.open(encoding="utf-8") as stream:
             return json.load(stream)
 

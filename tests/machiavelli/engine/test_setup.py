@@ -163,6 +163,7 @@ def _scenario_with_rules(
     return Scenario(
         name="rules-test",
         year=1454,
+        map_id="machiavelli",
         victory_conditions=VictoryConditions(cities=1, home_countries=1),
         rules=rules,
         powers={"M": Power(garrisons=garrisons or [])},

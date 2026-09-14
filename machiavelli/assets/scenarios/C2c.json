@@ -2,6 +2,7 @@
   "scenario_id": "C2c",
   "name": "The struggle for dominance, part two (six players)",
   "year": 1513,
+  "map_id": "machiavelli",
   "victory_conditions": {
     "cities": 15,
     "home_countries": 2
@@ -11,27 +12,9 @@
     "fortress_active": false
   },
   "home_countries": {
-    "F": [
-      "avign",
-      "marse",
-      "prove",
-      "saluz"
-    ],
-    "T": [
-      "duraz",
-      "alban",
-      "tunis",
-      "herze",
-      "bosni",
-      "hunga"
-    ],
-    "M": [
-      "pavia",
-      "cremo",
-      "swiss",
-      "moden",
-      "ferra"
-    ],
+    "F": ["avign", "marse", "prove", "saluz"],
+    "T": ["duraz", "alban", "tunis", "herze", "bosni", "hunga"],
+    "M": ["pavia", "cremo", "swiss", "moden", "ferra"],
     "A": [
       "tyrol",
       "austr",
@@ -72,104 +55,38 @@
   },
   "powers": {
     "F": {
-      "home_countries": [
-        "F"
-      ],
-      "armies": [
-        "avign",
-        "saluz"
-      ],
-      "fleets": [
-        "marse"
-      ],
-      "garrisons": [
-        "milan"
-      ]
+      "home_countries": ["F"],
+      "armies": ["avign", "saluz"],
+      "fleets": ["marse"],
+      "garrisons": ["milan"]
     },
     "T": {
-      "home_countries": [
-        "T"
-      ],
-      "armies": [
-        "duraz",
-        "hunga"
-      ],
-      "fleets": [
-        "alban",
-        "tunis"
-      ]
+      "home_countries": ["T"],
+      "armies": ["duraz", "hunga"],
+      "fleets": ["alban", "tunis"]
     },
     "M": {
-      "home_countries": [
-        "M"
-      ],
-      "armies": [
-        "pavia",
-        "cremo",
-        "swiss",
-        "moden",
-        "ferra"
-      ]
+      "home_countries": ["M"],
+      "armies": ["pavia", "cremo", "swiss", "moden", "ferra"]
     },
     "A": {
-      "home_countries": [
-        "A"
-      ],
-      "armies": [
-        "tyrol",
-        "austr",
-        "messi",
-        "bari",
-        "milan"
-      ],
-      "fleets": [
-        "paler",
-        "naple",
-        "sardi"
-      ]
+      "home_countries": ["A"],
+      "armies": ["tyrol", "austr", "messi", "bari", "milan"],
+      "fleets": ["paler", "naple", "sardi"]
     },
     "P": {
-      "home_countries": [
-        "P"
-      ],
-      "armies": [
-        "perug",
-        "rome",
-        "bolog"
-      ],
-      "fleets": [
-        "ancon"
-      ]
+      "home_countries": ["P"],
+      "armies": ["perug", "rome", "bolog"],
+      "fleets": ["ancon"]
     },
     "V": {
-      "home_countries": [
-        "V"
-      ],
-      "armies": [
-        "padua",
-        "trevi"
-      ],
-      "fleets": [
-        "dalma"
-      ],
-      "garrisons": [
-        "venic"
-      ]
+      "home_countries": ["V"],
+      "armies": ["padua", "trevi"],
+      "fleets": ["dalma"],
+      "garrisons": ["venic"]
     }
   },
   "excluded_locations": [],
-  "variable_income_home_countries": [
-    "F",
-    "T",
-    "M",
-    "P",
-    "A",
-    "A",
-    "V",
-    "V"
-  ],
-  "variable_income_provinces": [
-    "genoa",
-    "flore"
-  ]
+  "variable_income_home_countries": ["F", "T", "M", "P", "A", "A", "V", "V"],
+  "variable_income_provinces": ["genoa", "flore"]
 }

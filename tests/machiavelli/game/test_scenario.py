@@ -54,6 +54,7 @@ class TestScenario(unittest.TestCase):
         scenario = Scenario(
             name="Test Scenario",
             year=1454,
+            map_id="machiavelli",
             victory_conditions=self.vc,
             rules=self.rules,
             home_countries=self.home_countries,
@@ -78,6 +79,7 @@ class TestScenario(unittest.TestCase):
         scenario = Scenario(
             name="Fallback Scenario",
             year=1500,
+            map_id="machiavelli",
             victory_conditions=self.vc,
             powers=powers,
         )
@@ -88,6 +90,7 @@ class TestScenario(unittest.TestCase):
         scenario = Scenario(
             name="Test Scenario",
             year=1454,
+            map_id="machiavelli",
             victory_conditions=self.vc,
             home_countries=self.home_countries,
             powers={},
@@ -113,6 +116,7 @@ class TestScenario(unittest.TestCase):
             "scenario_id": "Be",
             "name": "The balance of power",
             "year": 1454,
+            "map_id": "machiavelli",
             "victory_conditions": {"cities": 15, "home_countries": 2},
             "rules": {"fortress_active": False},
             "home_countries": {
@@ -168,6 +172,7 @@ class TestScenario(unittest.TestCase):
         scenario = Scenario(
             name="Test Scenario",
             year=1454,
+            map_id="machiavelli",
             victory_conditions=self.vc,
             rules=self.rules,
             home_countries=self.home_countries,

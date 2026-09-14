@@ -131,7 +131,7 @@ def test_map_loading_separates_land_and_sea(mock_json_data):
             return_value=mock_json_data,
         ),
     ):
-        game_map = MapRepository().load_map()
+        game_map = MapRepository().load_map(map_id="machiavelli")
 
     # Comprobamos la carga de Provinces en el diccionario
     assert "rome" in game_map.provinces
@@ -154,7 +154,9 @@ def test_map_loading_applies_exclusions(mock_json_data):
             return_value=mock_json_data,
         ),
     ):
-        game_map = MapRepository().load_map(exclude_ids=["tivol", "IS"])
+        game_map = MapRepository().load_map(
+            map_id="machiavelli", exclude_ids=["tivol", "IS"]
+        )
 
     # Verificamos que hayan sido eliminados
     assert "tivol" not in game_map.provinces
@@ -175,7 +177,7 @@ def test_map_loading_without_fortress(mock_json_data):
             return_value=mock_json_data,
         ),
     ):
-        game_map = MapRepository().load_map(fortress_active=False)
+        game_map = MapRepository().load_map(map_id="machiavelli", fortress_active=False)
 
     # Verificamos que el fortress de "tivol" no existe
     assert game_map.provinces["tivol"].city is None
@@ -232,7 +234,7 @@ def test_map_loading_excludes_routes_to_excluded_locations(mock_json_data):
             return_value=mock_json_data,
         ),
     ):
-        game_map = MapRepository().load_map(exclude_ids=["tivol"])
+        game_map = MapRepository().load_map(map_id="machiavelli", exclude_ids=["tivol"])
 
     # Certificamos que Tivoli efectivamente no se ha procesado
     assert "tivol" not in game_map.provinces
@@ -257,7 +259,7 @@ def test_map_loading_excludes_double_coasts_by_base_id(mock_json_data):
         ),
     ):
         # Excluimos la provincia 'prove'
-        game_map = MapRepository().load_map(exclude_ids=["prove"])
+        game_map = MapRepository().load_map(map_id="machiavelli", exclude_ids=["prove"])
 
     # 'prove S' ha sido eliminado de provinces
     assert "prove S" not in game_map.provinces
@@ -278,7 +280,7 @@ def test_adjacent_locations_default_both_modes(mock_json_data):
             return_value=mock_json_data,
         ),
     ):
-        game_map = MapRepository().load_map()
+        game_map = MapRepository().load_map(map_id="machiavelli")
 
     adjacent = game_map.adjacent_locations("rome")
 
@@ -294,7 +296,7 @@ def test_adjacent_locations_land_mode_only(mock_json_data):
             return_value=mock_json_data,
         ),
     ):
-        game_map = MapRepository().load_map()
+        game_map = MapRepository().load_map(map_id="machiavelli")
 
     adjacent = game_map.adjacent_locations("rome", mode=MovementMode.LAND)
 
@@ -310,7 +312,7 @@ def test_adjacent_locations_sea_mode_only(mock_json_data):
             return_value=mock_json_data,
         ),
     ):
-        game_map = MapRepository().load_map()
+        game_map = MapRepository().load_map(map_id="machiavelli")
 
     adjacent = game_map.adjacent_locations("rome", mode=MovementMode.SEA)
 
@@ -326,7 +328,7 @@ def test_adjacent_locations_double_coast_base_in_both_mode(mock_json_data):
             return_value=mock_json_data,
         ),
     ):
-        game_map = MapRepository().load_map()
+        game_map = MapRepository().load_map(map_id="machiavelli")
 
     adjacent = game_map.adjacent_locations("prove", mode=MovementMode.BOTH)
 
@@ -343,7 +345,7 @@ def test_adjacent_locations_double_coast_destination_normalizes_to_base(mock_jso
             return_value=mock_json_data,
         ),
     ):
-        game_map = MapRepository().load_map()
+        game_map = MapRepository().load_map(map_id="machiavelli")
 
     # WGOL tiene ruta hacia 'prove S'
     adjacent = game_map.adjacent_locations("WGOL", mode=MovementMode.BOTH)
@@ -360,7 +362,7 @@ def test_adjacent_locations_invalid_origin_raises_keyerror(mock_json_data):
             return_value=mock_json_data,
         ),
     ):
-        game_map = MapRepository().load_map()
+        game_map = MapRepository().load_map(map_id="machiavelli")
 
     with pytest.raises(KeyError):
         game_map.adjacent_locations("invalid_id")

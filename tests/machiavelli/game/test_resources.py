@@ -15,7 +15,7 @@ from machiavelli.repositories.scenario_repository import ScenarioRepository
 
 
 def test_default_map_loads_from_package_resource() -> None:
-    game_map = MapRepository().load_map()
+    game_map = MapRepository().load_map(map_id="machiavelli")
 
     assert game_map.provinces
     assert game_map.seas
@@ -40,7 +40,7 @@ def test_map_loads_from_explicit_path(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    game_map = MapRepository(map_path).load_map()
+    game_map = MapRepository(map_path).load_map(map_id="machiavelli")
 
     assert list(game_map.provinces) == ["rome"]
     assert list(game_map.seas) == ["IS"]
@@ -55,6 +55,7 @@ def test_scenarios_load_from_explicit_path(tmp_path: Path) -> None:
                 "scenario_id": "test",
                 "name": "Test scenario",
                 "year": 1454,
+                "map_id": "machiavelli",
                 "victory_conditions": {"cities": 12, "home_countries": 2},
             }
         ),
@@ -121,7 +122,7 @@ def test_resources_load_after_installing_wheel(tmp_path: Path) -> None:
                 "ScenarioRepository; "
                 "assert 'site-packages' in Path(machiavelli.__file__).parts; "
                 "assert GameEngine and Game and Player and Command; "
-                "assert MapRepository().load_map().provinces; "
+                "assert MapRepository().load_map(map_id='machiavelli').provinces; "
                 "assert ScenarioRepository().load_scenarios()"
             ),
         ],

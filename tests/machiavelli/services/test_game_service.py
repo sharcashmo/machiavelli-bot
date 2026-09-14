@@ -1513,6 +1513,7 @@ def test_trade_operations_budget(monkeypatch: pytest.MonkeyPatch) -> None:
     perf_scenario = Scenario(
         name="Performance 7",
         year=1454,
+        map_id="machiavelli",
         victory_conditions=VictoryConditions(cities=15, home_countries=2),
         rules=Rules(assassinations_active=True),
         powers={code: Power() for code in perf_power_codes},

@@ -2,6 +2,7 @@
   "scenario_id": "Db",
   "name": "The spanish preponderance (three players)",
   "year": 1521,
+  "map_id": "machiavelli",
   "victory_conditions": {
     "cities": 0,
     "home_countries": 6
@@ -11,13 +12,7 @@
     "fortress_active": false
   },
   "home_countries": {
-    "F": [
-      "swiss",
-      "avign",
-      "marse",
-      "saluz",
-      "prove"
-    ],
+    "F": ["swiss", "avign", "marse", "saluz", "prove"],
     "A": [
       "tyrol",
       "austr",
@@ -45,12 +40,7 @@
       "tivol",
       "patri"
     ],
-    "L": [
-      "arezz",
-      "flore",
-      "pisa",
-      "pisto"
-    ],
+    "L": ["arezz", "flore", "pisa", "pisto"],
     "V": [
       "padua",
       "trevi",
@@ -63,85 +53,26 @@
       "friul",
       "istri"
     ],
-    "T": [
-      "alban",
-      "duraz",
-      "tunis",
-      "herze",
-      "bosni",
-      "hunga"
-    ]
+    "T": ["alban", "duraz", "tunis", "herze", "bosni", "hunga"]
   },
   "powers": {
     "F": {
-      "home_countries": [
-        "F",
-        "T",
-        "L"
-      ],
-      "armies": [
-        "swiss",
-        "avign",
-        "saluz",
-        "alban",
-        "hunga",
-        "arezz",
-        "flore"
-      ],
-      "fleets": [
-        "marse",
-        "duraz",
-        "tunis",
-        "pisa"
-      ]
+      "home_countries": ["F", "T", "L"],
+      "armies": ["swiss", "avign", "saluz", "alban", "hunga", "arezz", "flore"],
+      "fleets": ["marse", "duraz", "tunis", "pisa"]
     },
     "A": {
-      "home_countries": [
-        "A"
-      ],
-      "armies": [
-        "tyrol",
-        "austr",
-        "milan",
-        "bari",
-        "messi",
-        "naple"
-      ],
-      "fleets": [
-        "paler",
-        "sardi"
-      ]
+      "home_countries": ["A"],
+      "armies": ["tyrol", "austr", "milan", "bari", "messi", "naple"],
+      "fleets": ["paler", "sardi"]
     },
     "P": {
-      "home_countries": [
-        "P",
-        "V"
-      ],
-      "armies": [
-        "bolog",
-        "perug",
-        "rome",
-        "padua",
-        "trevi"
-      ],
-      "fleets": [
-        "ancon",
-        "venic",
-        "dalma"
-      ]
+      "home_countries": ["P", "V"],
+      "armies": ["bolog", "perug", "rome", "padua", "trevi"],
+      "fleets": ["ancon", "venic", "dalma"]
     }
   },
   "excluded_locations": [],
-  "variable_income_home_countries": [
-    "F",
-    "T",
-    "L",
-    "P",
-    "V",
-    "A",
-    "A"
-  ],
-  "variable_income_provinces": [
-    "genoa"
-  ]
+  "variable_income_home_countries": ["F", "T", "L", "P", "V", "A", "A"],
+  "variable_income_provinces": ["genoa"]
 }

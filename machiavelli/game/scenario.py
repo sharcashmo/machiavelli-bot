@@ -59,6 +59,7 @@ class Scenario:
 
     name: str
     year: int
+    map_id: str
     victory_conditions: VictoryConditions
     rules: Rules = field(default_factory=Rules)
     home_countries: dict[str, HomeCountry] = field(default_factory=dict)

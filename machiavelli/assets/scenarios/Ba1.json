@@ -2,6 +2,7 @@
   "scenario_id": "Ba1",
   "name": "The balance of power (two players, four powers each)",
   "year": 1454,
+  "map_id": "machiavelli",
   "victory_conditions": {
     "cities": 0,
     "home_countries": 8
@@ -11,15 +12,7 @@
     "fortress_active": false
   },
   "home_countries": {
-    "M": [
-      "pavia",
-      "cremo",
-      "como",
-      "forno",
-      "pianc",
-      "parma",
-      "milan"
-    ],
+    "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
     "V": [
       "padua",
       "veron",
@@ -32,12 +25,7 @@
       "friul",
       "istri"
     ],
-    "L": [
-      "arezz",
-      "flore",
-      "pisa",
-      "pisto"
-    ],
+    "L": ["arezz", "flore", "pisa", "pisto"],
     "P": [
       "bolog",
       "ancon",
@@ -59,34 +47,13 @@
       "aquil",
       "capua"
     ],
-    "T": [
-      "alban",
-      "duraz",
-      "tunis",
-      "herze",
-      "bosni"
-    ],
-    "A": [
-      "hunga",
-      "austr",
-      "tyrol",
-      "carin"
-    ],
-    "F": [
-      "swiss",
-      "avign",
-      "marse",
-      "prove"
-    ]
+    "T": ["alban", "duraz", "tunis", "herze", "bosni"],
+    "A": ["hunga", "austr", "tyrol", "carin"],
+    "F": ["swiss", "avign", "marse", "prove"]
   },
   "powers": {
     "M": {
-      "home_countries": [
-        "M",
-        "A",
-        "P",
-        "N"
-      ],
+      "home_countries": ["M", "A", "P", "N"],
       "armies": [
         "pavia",
         "cremo",
@@ -100,38 +67,13 @@
         "bari",
         "messi"
       ],
-      "fleets": [
-        "ancon",
-        "naple",
-        "paler"
-      ]
+      "fleets": ["ancon", "naple", "paler"]
     },
     "V": {
-      "home_countries": [
-        "V",
-        "F",
-        "L",
-        "T"
-      ],
-      "armies": [
-        "padua",
-        "veron",
-        "swiss",
-        "avign",
-        "arezz",
-        "flore",
-        "alban"
-      ],
-      "fleets": [
-        "dalma",
-        "marse",
-        "pisa",
-        "duraz",
-        "tunis"
-      ],
-      "garrisons": [
-        "venic"
-      ]
+      "home_countries": ["V", "F", "L", "T"],
+      "armies": ["padua", "veron", "swiss", "avign", "arezz", "flore", "alban"],
+      "fleets": ["dalma", "marse", "pisa", "duraz", "tunis"],
+      "garrisons": ["venic"]
     }
   },
   "excluded_locations": [],
@@ -147,9 +89,5 @@
     "V",
     "V"
   ],
-  "variable_income_provinces": [
-    "genoa",
-    "naple",
-    "milan"
-  ]
+  "variable_income_provinces": ["genoa", "naple", "milan"]
 }

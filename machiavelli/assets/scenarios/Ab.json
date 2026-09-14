@@ -2,6 +2,7 @@
   "scenario_id": "Ab",
   "name": "The expansion of states (three players)",
   "year": 1385,
+  "map_id": "machiavelli",
   "victory_conditions": {
     "cities": 0,
     "home_countries": 4
@@ -11,78 +12,27 @@
     "fortress_active": true
   },
   "home_countries": {
-    "M": [
-      "pavia",
-      "milan",
-      "cremo",
-      "como",
-      "bolog",
-      "genoa"
-    ],
-    "V": [
-      "dalma",
-      "venic",
-      "ragus"
-    ],
-    "N": [
-      "bari",
-      "aquil",
-      "naple",
-      "saler",
-      "otran",
-      "capua"
-    ],
-    "L": [
-      "pisto",
-      "flore",
-      "pisa"
-    ]
+    "M": ["pavia", "milan", "cremo", "como", "bolog", "genoa"],
+    "V": ["dalma", "venic", "ragus"],
+    "N": ["bari", "aquil", "naple", "saler", "otran", "capua"],
+    "L": ["pisto", "flore", "pisa"]
   },
   "powers": {
     "M": {
-      "home_countries": [
-        "M"
-      ],
-      "armies": [
-        "pavia",
-        "milan",
-        "cremo",
-        "bolog"
-      ],
-      "fleets": [
-        "genoa"
-      ]
+      "home_countries": ["M"],
+      "armies": ["pavia", "milan", "cremo", "bolog"],
+      "fleets": ["genoa"]
     },
     "V": {
-      "home_countries": [
-        "V",
-        "L"
-      ],
-      "armies": [
-        "pisto",
-        "flore"
-      ],
-      "fleets": [
-        "dalma",
-        "ragus",
-        "pisa"
-      ],
-      "garrisons": [
-        "venic"
-      ]
+      "home_countries": ["V", "L"],
+      "armies": ["pisto", "flore"],
+      "fleets": ["dalma", "ragus", "pisa"],
+      "garrisons": ["venic"]
     },
     "N": {
-      "home_countries": [
-        "N"
-      ],
-      "armies": [
-        "bari",
-        "aquil"
-      ],
-      "fleets": [
-        "naple",
-        "saler"
-      ]
+      "home_countries": ["N"],
+      "armies": ["bari", "aquil"],
+      "fleets": ["naple", "saler"]
     }
   },
   "excluded_locations": [
@@ -95,13 +45,6 @@
     "carin",
     "hunga"
   ],
-  "variable_income_home_countries": [
-    "M",
-    "L",
-    "V",
-    "N"
-  ],
-  "variable_income_provinces": [
-    "rome"
-  ]
+  "variable_income_home_countries": ["M", "L", "V", "N"],
+  "variable_income_provinces": ["rome"]
 }
