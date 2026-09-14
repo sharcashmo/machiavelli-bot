@@ -34,6 +34,7 @@ from machiavelli.repositories.game_repository import (
     GameNotFoundException,
     GameRepository,
 )
+from machiavelli.repositories.scenario_repository import ScenarioRepository
 from machiavelli.services.status_reporter import StatusReporter
 
 from .command_reporter import CommandReporter
@@ -68,7 +69,7 @@ class GameService:
 
     @staticmethod
     def _resolve_scenario(scenario_name: str) -> tuple[str, Scenario]:
-        scenarios = Scenario.load_scenarios()
+        scenarios = ScenarioRepository().load_scenarios()
         if scenario_name in scenarios:
             return scenario_name, scenarios[scenario_name]
 

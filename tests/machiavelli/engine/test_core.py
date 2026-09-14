@@ -20,6 +20,7 @@ from machiavelli.game.scenario import (
     VictoryConditions,
 )
 from machiavelli.game.tables import GameTables
+from machiavelli.repositories.scenario_repository import ScenarioRepository
 from tests.machiavelli.engine.helpers import create_military_game, military_snapshot
 
 logger = logging.getLogger(__name__)
@@ -809,7 +810,7 @@ def test_real_turns_emit_only_ordered_reconstructible_events(
     """El inicio, el mantenimiento y la campaña reales conservan únicamente hechos de
     dominio tipados.
     """
-    scenario = Scenario.load_scenarios()["Be"]
+    scenario = ScenarioRepository().load_scenarios()["Be"]
     scenario.rules = Rules()
     assert scenario.rules == Rules()
     game = Game(

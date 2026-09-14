@@ -10,14 +10,14 @@ import pytest
 from machiavelli.game.events import EventType, JSONValue, TurnEvent
 from machiavelli.game.game import Game
 from machiavelli.game.map import Map
-from machiavelli.game.scenario import Scenario
 from machiavelli.game.trading import ExchangeProposal, TradeResource
+from machiavelli.repositories.scenario_repository import ScenarioRepository
 from machiavelli.services.turn_reporter import TurnReporter
 
 
 def make_report_game() -> Game:
     """Construye una partida cargada con identificadores públicos conocidos."""
-    scenario = Scenario.load_scenarios()["Be"]
+    scenario = ScenarioRepository().load_scenarios()["Be"]
     game = Game(
         name="Partida de prueba",
         channel_id=123,

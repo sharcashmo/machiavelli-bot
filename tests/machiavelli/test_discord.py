@@ -62,7 +62,7 @@ from machiavelli.game import (
 )
 from machiavelli.game.events import InvalidTurnEventError
 from machiavelli.game.exceptions import GameNotFoundException
-from machiavelli.game.scenario import Scenario
+from machiavelli.repositories.scenario_repository import ScenarioRepository
 from machiavelli.services import game_service_session
 
 
@@ -881,11 +881,11 @@ class TestGiveCommand(unittest.IsolatedAsyncioTestCase):
             self.assertEqual({choice.value for choice in targets}, expected_targets)
             self.assertNotIn("0", {choice.value for choice in targets})
 
-            disabled_scenario = Scenario.load_scenarios()["Be"]
+            disabled_scenario = ScenarioRepository().load_scenarios()["Be"]
             disabled_scenario.rules.assassinations_active = False
             with (
                 patch(
-                    "machiavelli.services.game_service.Scenario.load_scenarios",
+                    "machiavelli.services.game_service.ScenarioRepository.load_scenarios",
                     return_value={"Be": disabled_scenario},
                 ),
                 patch.object(game_group, "db_path", db_path),

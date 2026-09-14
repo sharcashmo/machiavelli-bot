@@ -16,10 +16,11 @@ from machiavelli.game.trading import (
     player_has_trade_resource,
     transfer_trade_resource,
 )
+from machiavelli.repositories.scenario_repository import ScenarioRepository
 
 
 def make_scenario() -> Scenario:
-    return Scenario.load_scenarios()["Be"]
+    return ScenarioRepository().load_scenarios()["Be"]
 
 
 def make_players() -> tuple[Player, Player]:

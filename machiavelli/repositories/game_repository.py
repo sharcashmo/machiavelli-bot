@@ -11,10 +11,10 @@ from ..game.events import TurnEvent
 from ..game.exceptions import DuplicatedGameException, GameNotFoundException
 from ..game.game import Game
 from ..game.map import Map
-from ..game.scenario import Scenario
 from .events_repository import TurnEventsRepository
 from .exchange_repository import ExchangeRepository
 from .player_repository import PlayerRepository
+from .scenario_repository import ScenarioRepository
 
 logger = logging.getLogger(__name__)
 
@@ -180,7 +180,7 @@ class GameRepository:
         ]
 
         if game.scenario_id:
-            scenarios = Scenario.load_scenarios()
+            scenarios = ScenarioRepository().load_scenarios()
             try:
                 game.scenario = scenarios[game.scenario_id]
             except KeyError as error:

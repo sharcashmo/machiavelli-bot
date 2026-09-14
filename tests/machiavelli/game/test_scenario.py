@@ -11,6 +11,7 @@ from machiavelli.game.scenario import (
     Scenario,
     VictoryConditions,
 )
+from machiavelli.repositories.scenario_repository import ScenarioRepository
 
 
 class TestScenario(unittest.TestCase):
@@ -141,7 +142,7 @@ class TestScenario(unittest.TestCase):
             json_path = Path(tmp_dir) / "test_scenarios.json"
             json_path.write_text(json.dumps(sample_json_data), encoding="utf-8")
 
-            scenarios = Scenario.load_scenarios(json_path=json_path)
+            scenarios = ScenarioRepository(json_path).load_scenarios()
 
         self.assertIn("Be", scenarios)
         sc = scenarios["Be"]

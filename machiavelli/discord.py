@@ -25,8 +25,8 @@ from machiavelli.game.exceptions import (
     DuplicatedGameException,
     GameNotFoundException,
 )
-from machiavelli.game.scenario import Scenario
 from machiavelli.game.tables import GameTables
+from machiavelli.repositories.scenario_repository import ScenarioRepository
 from machiavelli.services import game_service_session
 
 logger = logging.getLogger(__name__)
@@ -669,7 +669,7 @@ async def set_scenario_autocomplete(
     """Genera sugerencias mientras el usuario escribe."""
 
     # Cargamos tu diccionario {str: Scenario}
-    escenarios_disponibles = Scenario.load_scenarios()
+    escenarios_disponibles = ScenarioRepository().load_scenarios()
 
     choices = []
     for s_id, scenario in escenarios_disponibles.items():

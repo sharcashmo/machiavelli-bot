@@ -608,7 +608,7 @@ def test_give_resource_rejects_disabled_assassinations_without_save() -> None:
 
         with (
             patch(
-                "machiavelli.services.game_service.Scenario.load_scenarios",
+                "machiavelli.services.game_service.ScenarioRepository.load_scenarios",
                 return_value={"Be": scenario},
             ),
             patch.object(service.repo, "save") as save,
@@ -1263,7 +1263,7 @@ def test_exchange_cancellation_ignores_disabled_assassin_value() -> None:
         scenario.rules.assassinations_active = False
 
         with patch(
-            "machiavelli.services.game_service.Scenario.load_scenarios",
+            "machiavelli.services.game_service.ScenarioRepository.load_scenarios",
             return_value={"Be": scenario},
         ):
             result = service.exchange_resources(

@@ -1,12 +1,7 @@
 # machiavelli/game/scenario.py
-import json
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Self
 
 from machiavelli.game.tables import GameTables
-
-from .resources import read_package_json
 
 
 @dataclass
@@ -89,57 +84,6 @@ class Scenario:
 
             # Elimina duplicados manteniendo el orden
             power.controlled_provinces = list(dict.fromkeys(provinces))
-
-    @classmethod
-    def load_scenarios(cls, json_path: Path | str | None = None) -> dict[str, Self]:
-        """Lee el JSON de escenarios y los devuelve en un diccionario."""
-        if json_path is None:
-            data = read_package_json("scenarios.json")
-        else:
-            with Path(json_path).open(encoding="utf-8") as stream:
-                data = json.load(stream)
-
-        if not isinstance(data, dict):
-            raise TypeError("El recurso de escenarios debe contener un objeto JSON")
-
-        sc_dict = {}
-
-        for sc_id, sc_data in data.items():
-            vc = VictoryConditions(**sc_data["victory_conditions"])
-            rules = Rules(**sc_data.get("rules", {}))
-
-            # Parsear home_countries como dict[str, HomeCountry]
-            hcs = {
-                hc_id: HomeCountry(provinces=provinces)
-                for hc_id, provinces in sc_data.get("home_countries", {}).items()
-            }
-
-            # Parsear powers como dict[str, Power]
-            powers = {}
-            for p_id, p_data in sc_data.get("powers", {}).items():
-                powers[p_id] = Power(
-                    home_countries=p_data.get("home_countries", []),
-                    armies=p_data.get("armies", []),
-                    fleets=p_data.get("fleets", []),
-                    garrisons=p_data.get("garrisons", []),
-                    extra_provinces=p_data.get("extra_provinces", []),
-                )
-
-            sc_dict[sc_id] = cls(
-                name=sc_data["name"],
-                year=sc_data["year"],
-                victory_conditions=vc,
-                rules=rules,
-                home_countries=hcs,
-                powers=powers,
-                excluded_locations=sc_data.get("excluded_locations", []),
-                variable_income_home_countries=sc_data.get(
-                    "variable_income_home_countries", []
-                ),
-                variable_income_provinces=sc_data.get("variable_income_provinces", []),
-            )
-
-        return sc_dict
 
     def province_home_country(self, province: str) -> str | None:
         """Devuelve el ID del país natal al que pertenece una provincia.

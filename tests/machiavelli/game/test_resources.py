@@ -11,7 +11,7 @@ import pytest
 
 from machiavelli.game.map import Map
 from machiavelli.game.resources import PackageResourceError, read_package_json
-from machiavelli.game.scenario import Scenario
+from machiavelli.repositories.scenario_repository import ScenarioRepository
 
 
 def test_default_map_loads_from_package_resource() -> None:
@@ -22,7 +22,7 @@ def test_default_map_loads_from_package_resource() -> None:
 
 
 def test_default_scenarios_load_from_package_resource() -> None:
-    scenarios = Scenario.load_scenarios()
+    scenarios = ScenarioRepository().load_scenarios()
 
     assert scenarios
     assert all(scenario.name for scenario in scenarios.values())
@@ -61,7 +61,7 @@ def test_scenarios_load_from_explicit_path(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    scenarios = Scenario.load_scenarios(json_path=scenarios_path)
+    scenarios = ScenarioRepository(scenarios_path).load_scenarios()
 
     assert scenarios["test"].name == "Test scenario"
     assert scenarios["test"].year == 1454
@@ -117,11 +117,12 @@ def test_resources_load_after_installing_wheel(tmp_path: Path) -> None:
                 "from machiavelli.engine import GameEngine; "
                 "from machiavelli.game import Command, Game, Player; "
                 "from machiavelli.game.map import Map; "
-                "from machiavelli.game.scenario import Scenario; "
+                "from machiavelli.repositories.scenario_repository import "
+                "ScenarioRepository; "
                 "assert 'site-packages' in Path(machiavelli.__file__).parts; "
                 "assert GameEngine and Game and Player and Command; "
                 "assert Map.load_map().provinces; "
-                "assert Scenario.load_scenarios()"
+                "assert ScenarioRepository().load_scenarios()"
             ),
         ],
         cwd=clean_cwd,
