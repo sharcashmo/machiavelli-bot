@@ -52,7 +52,7 @@ distribución wheel generada mediante `python -m build`.
 
 ## Versión
 
-Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.0.0.
+Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.0.1.
 
 ## Comandos disponibles
 
@@ -205,11 +205,15 @@ partida, ni devuelve las órdenes enviadas.
 
 Se prevén las siguientes versiones
 
-### Versión 1.0.0
+### Versión 1.0.1
 
 - [X] Bugs solucionados
-  - [X] No permitir el envío de gastos (expenses) en el turno de mantenimiento.
-  - [X] No se permite la retirada a guarnición en la ciudad de Venecia.
+  - [X] Permitir ordenar gastos por más importe del disponible por el jugador.
+
+### Versión 2.0.0
+
+- [ ] Hacer que el archivo de mapas pueda tener más de un mapa disponible.
+- [ ] Hacer que el escenario permita escoger distintos mapas y potencias.
 
 ### Desarrollos futuros
 
@@ -340,3 +344,4 @@ versiones conforme se completen.
   permite la retirada a guarnición en ciudades con el `is_venice` flag activo (en esas
   provincias pueden haber unidades en la ciudad o en la provincia, pero no en las dos
   a la vez).
+- Versión 1.0.1: permitir el envío de gastos por importe mayor al disponible.
