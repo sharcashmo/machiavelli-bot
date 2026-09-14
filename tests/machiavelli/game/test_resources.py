@@ -47,15 +47,15 @@ def test_map_loads_from_explicit_path(tmp_path: Path) -> None:
 
 
 def test_scenarios_load_from_explicit_path(tmp_path: Path) -> None:
-    scenarios_path = tmp_path / "scenarios.json"
-    scenarios_path.write_text(
+    scenarios_path = tmp_path / "scenarios"
+    scenarios_path.mkdir()
+    (scenarios_path / "test.json").write_text(
         json.dumps(
             {
-                "test": {
-                    "name": "Test scenario",
-                    "year": 1454,
-                    "victory_conditions": {"cities": 12, "home_countries": 2},
-                }
+                "scenario_id": "test",
+                "name": "Test scenario",
+                "year": 1454,
+                "victory_conditions": {"cities": 12, "home_countries": 2},
             }
         ),
         encoding="utf-8",

@@ -1,0 +1,135 @@
+{
+  "scenario_id": "Ba2",
+  "name": "The balance of power (two players, five powers)",
+  "year": 1454,
+  "victory_conditions": {
+    "cities": 0,
+    "home_countries": 5
+  },
+  "rules": {
+    "first_turn_famine": false,
+    "fortress_active": false
+  },
+  "home_countries": {
+    "M": [
+      "pavia",
+      "cremo",
+      "como",
+      "forno",
+      "pianc",
+      "parma",
+      "milan"
+    ],
+    "V": [
+      "padua",
+      "veron",
+      "venic",
+      "dalma",
+      "bresc",
+      "berga",
+      "vicen",
+      "trevi",
+      "friul",
+      "istri"
+    ],
+    "L": [
+      "arezz",
+      "flore",
+      "pisa",
+      "pisto"
+    ],
+    "P": [
+      "bolog",
+      "ancon",
+      "perug",
+      "rome",
+      "patri",
+      "spole",
+      "urbin",
+      "romag",
+      "tivol"
+    ],
+    "N": [
+      "bari",
+      "naple",
+      "messi",
+      "paler",
+      "otran",
+      "saler",
+      "aquil",
+      "capua"
+    ]
+  },
+  "powers": {
+    "M": {
+      "home_countries": [
+        "M",
+        "L",
+        "N"
+      ],
+      "armies": [
+        "pavia",
+        "cremo",
+        "milan",
+        "arezz",
+        "flore",
+        "bari",
+        "messi"
+      ],
+      "fleets": [
+        "pisa",
+        "naple",
+        "paler"
+      ]
+    },
+    "V": {
+      "home_countries": [
+        "V",
+        "P"
+      ],
+      "armies": [
+        "padua",
+        "veron",
+        "bolog",
+        "perug",
+        "rome"
+      ],
+      "fleets": [
+        "dalma",
+        "ancon"
+      ],
+      "garrisons": [
+        "venic"
+      ]
+    }
+  },
+  "excluded_locations": [
+    "hunga",
+    "austr",
+    "tyrol",
+    "carin",
+    "swiss",
+    "avign",
+    "marse",
+    "prove",
+    "alban",
+    "duraz",
+    "tunis",
+    "herze",
+    "bosni"
+  ],
+  "variable_income_home_countries": [
+    "P",
+    "N",
+    "M",
+    "L",
+    "L",
+    "V",
+    "V"
+  ],
+  "variable_income_provinces": [
+    "genoa",
+    "naple",
+    "milan"
+  ]
+}

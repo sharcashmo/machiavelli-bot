@@ -8,7 +8,8 @@ from zipfile import ZipFile
 
 _REQUIRED_FILES = {
     "machiavelli/map_data.json",
-    "machiavelli/scenarios.json",
+    "machiavelli/assets/scenarios/Aa.json",
+    "machiavelli/assets/scenarios/De.json",
     "machiavelli/engine/__init__.py",
     "machiavelli/engine/core.py",
     "machiavelli/db/database.py",

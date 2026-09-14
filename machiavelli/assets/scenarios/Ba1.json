@@ -1,0 +1,155 @@
+{
+  "scenario_id": "Ba1",
+  "name": "The balance of power (two players, four powers each)",
+  "year": 1454,
+  "victory_conditions": {
+    "cities": 0,
+    "home_countries": 8
+  },
+  "rules": {
+    "first_turn_famine": false,
+    "fortress_active": false
+  },
+  "home_countries": {
+    "M": [
+      "pavia",
+      "cremo",
+      "como",
+      "forno",
+      "pianc",
+      "parma",
+      "milan"
+    ],
+    "V": [
+      "padua",
+      "veron",
+      "venic",
+      "dalma",
+      "bresc",
+      "berga",
+      "vicen",
+      "trevi",
+      "friul",
+      "istri"
+    ],
+    "L": [
+      "arezz",
+      "flore",
+      "pisa",
+      "pisto"
+    ],
+    "P": [
+      "bolog",
+      "ancon",
+      "perug",
+      "rome",
+      "patri",
+      "spole",
+      "urbin",
+      "romag",
+      "tivol"
+    ],
+    "N": [
+      "bari",
+      "naple",
+      "messi",
+      "paler",
+      "otran",
+      "saler",
+      "aquil",
+      "capua"
+    ],
+    "T": [
+      "alban",
+      "duraz",
+      "tunis",
+      "herze",
+      "bosni"
+    ],
+    "A": [
+      "hunga",
+      "austr",
+      "tyrol",
+      "carin"
+    ],
+    "F": [
+      "swiss",
+      "avign",
+      "marse",
+      "prove"
+    ]
+  },
+  "powers": {
+    "M": {
+      "home_countries": [
+        "M",
+        "A",
+        "P",
+        "N"
+      ],
+      "armies": [
+        "pavia",
+        "cremo",
+        "milan",
+        "hunga",
+        "austr",
+        "tyrol",
+        "bolog",
+        "perug",
+        "rome",
+        "bari",
+        "messi"
+      ],
+      "fleets": [
+        "ancon",
+        "naple",
+        "paler"
+      ]
+    },
+    "V": {
+      "home_countries": [
+        "V",
+        "F",
+        "L",
+        "T"
+      ],
+      "armies": [
+        "padua",
+        "veron",
+        "swiss",
+        "avign",
+        "arezz",
+        "flore",
+        "alban"
+      ],
+      "fleets": [
+        "dalma",
+        "marse",
+        "pisa",
+        "duraz",
+        "tunis"
+      ],
+      "garrisons": [
+        "venic"
+      ]
+    }
+  },
+  "excluded_locations": [],
+  "variable_income_home_countries": [
+    "P",
+    "N",
+    "M",
+    "T",
+    "A",
+    "F",
+    "L",
+    "L",
+    "V",
+    "V"
+  ],
+  "variable_income_provinces": [
+    "genoa",
+    "naple",
+    "milan"
+  ]
+}

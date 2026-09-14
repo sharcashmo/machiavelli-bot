@@ -27,7 +27,7 @@ include = ["machiavelli*"]
 exclude = ["tests*", "specs*"]
 
 [tool.setuptools.package-data]
-machiavelli = ["*.json"]
+machiavelli = ["*.json", "assets/scenarios/*.json"]
 
 [tool.ruff]
 line-length = 88

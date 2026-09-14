@@ -205,10 +205,18 @@ partida, ni devuelve las órdenes enviadas.
 
 Se prevén las siguientes versiones
 
-### Versión 1.0.1
+### Versión 1.1.0
 
-- [X] Bugs solucionados
-  - [X] Permitir ordenar gastos por más importe del disponible por el jugador.
+Transición a la versión 2.0.0
+
+- [ ] Refactorizaciones.
+  - [ ] Scenarios
+    - [X] Trasladar la carga de archivos de escenarios a un `scenario_repository.py`.
+    - [X] Trasladar los datos de los escenarios a múltiples archivos json dentro de una
+    carpeta `assets\scenarios`.
+  - [ ] Maps
+    - [ ] Trasladar la carga de archivos de mapas a un `map_repository.py`.
+
 
 ### Versión 2.0.0
 

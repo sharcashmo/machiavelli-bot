@@ -107,42 +107,43 @@ class TestScenario(unittest.TestCase):
         {"M": "Milan", "V": "Venice"},
         clear=True,
     )
-    def test_load_scenarios_with_custom_file(self):
-        """Verifica que load_scenarios parsea un archivo JSON correctamente."""
+    def test_load_scenarios_with_custom_directory(self):
+        """Verifica que el repositorio carga un archivo de escenario correctamente."""
         sample_json_data = {
-            "Be": {
-                "name": "The balance of power",
-                "year": 1454,
-                "victory_conditions": {"cities": 15, "home_countries": 2},
-                "rules": {"fortress_active": False},
-                "home_countries": {
-                    "M": ["pavia", "milan"],
-                    "V": ["padua", "venic"],
+            "scenario_id": "Be",
+            "name": "The balance of power",
+            "year": 1454,
+            "victory_conditions": {"cities": 15, "home_countries": 2},
+            "rules": {"fortress_active": False},
+            "home_countries": {
+                "M": ["pavia", "milan"],
+                "V": ["padua", "venic"],
+            },
+            "powers": {
+                "M": {
+                    "home_countries": ["M"],
+                    "armies": ["pavia", "milan"],
+                    "extra_provinces": ["genoa"],
                 },
-                "powers": {
-                    "M": {
-                        "home_countries": ["M"],
-                        "armies": ["pavia", "milan"],
-                        "extra_provinces": ["genoa"],
-                    },
-                    "V": {
-                        "home_countries": ["V"],
-                        "armies": ["padua"],
-                        "fleets": ["venic"],
-                    },
+                "V": {
+                    "home_countries": ["V"],
+                    "armies": ["padua"],
+                    "fleets": ["venic"],
                 },
-                "excluded_locations": ["hunga"],
-                "variable_income_home_countries": ["M", "V"],
-                "variable_income_provinces": ["milan"],
-            }
+            },
+            "excluded_locations": ["hunga"],
+            "variable_income_home_countries": ["M", "V"],
+            "variable_income_provinces": ["milan"],
         }
 
-        # Uso de TemporaryDirectory para evitar bloqueos de archivo en Windows
         with tempfile.TemporaryDirectory() as tmp_dir:
-            json_path = Path(tmp_dir) / "test_scenarios.json"
-            json_path.write_text(json.dumps(sample_json_data), encoding="utf-8")
+            scenarios_path = Path(tmp_dir) / "scenarios"
+            scenarios_path.mkdir()
+            (scenarios_path / "Be.json").write_text(
+                json.dumps(sample_json_data), encoding="utf-8"
+            )
 
-            scenarios = ScenarioRepository(json_path).load_scenarios()
+            scenarios = ScenarioRepository(scenarios_path).load_scenarios()
 
         self.assertIn("Be", scenarios)
         sc = scenarios["Be"]

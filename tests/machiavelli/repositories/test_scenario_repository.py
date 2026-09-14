@@ -7,17 +7,17 @@ from machiavelli.repositories.scenario_repository import ScenarioRepository
 
 
 def test_load_scenarios_builds_domain_objects_from_json(tmp_path: Path) -> None:
-    scenarios_path = tmp_path / "scenarios.json"
-    scenarios_path.write_text(
+    scenarios_path = tmp_path / "scenarios"
+    scenarios_path.mkdir()
+    (scenarios_path / "test.json").write_text(
         json.dumps(
             {
-                "test": {
-                    "name": "Test scenario",
-                    "year": 1454,
-                    "victory_conditions": {"cities": 12, "home_countries": 2},
-                    "home_countries": {"M": ["milan"]},
-                    "powers": {"M": {"home_countries": ["M"]}},
-                }
+                "scenario_id": "test",
+                "name": "Test scenario",
+                "year": 1454,
+                "victory_conditions": {"cities": 12, "home_countries": 2},
+                "home_countries": {"M": ["milan"]},
+                "powers": {"M": {"home_countries": ["M"]}},
             }
         ),
         encoding="utf-8",

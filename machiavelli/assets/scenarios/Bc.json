@@ -1,0 +1,169 @@
+{
+  "scenario_id": "Bc",
+  "name": "The balance of power (four players)",
+  "year": 1454,
+  "victory_conditions": {
+    "cities": 0,
+    "home_countries": 4
+  },
+  "rules": {
+    "first_turn_famine": false,
+    "fortress_active": false
+  },
+  "home_countries": {
+    "M": [
+      "pavia",
+      "cremo",
+      "como",
+      "forno",
+      "pianc",
+      "parma",
+      "milan"
+    ],
+    "V": [
+      "padua",
+      "veron",
+      "venic",
+      "dalma",
+      "bresc",
+      "berga",
+      "vicen",
+      "trevi",
+      "friul",
+      "istri"
+    ],
+    "L": [
+      "arezz",
+      "flore",
+      "pisa",
+      "pisto"
+    ],
+    "P": [
+      "bolog",
+      "ancon",
+      "perug",
+      "rome",
+      "patri",
+      "spole",
+      "urbin",
+      "romag",
+      "tivol"
+    ],
+    "N": [
+      "bari",
+      "naple",
+      "messi",
+      "paler",
+      "otran",
+      "saler",
+      "aquil",
+      "capua"
+    ],
+    "T": [
+      "alban",
+      "duraz",
+      "tunis",
+      "herze",
+      "bosni"
+    ],
+    "A": [
+      "hunga",
+      "austr",
+      "tyrol",
+      "carin"
+    ],
+    "F": [
+      "swiss",
+      "avign",
+      "marse",
+      "prove"
+    ]
+  },
+  "powers": {
+    "M": {
+      "home_countries": [
+        "M",
+        "A"
+      ],
+      "armies": [
+        "pavia",
+        "cremo",
+        "milan",
+        "hunga",
+        "austr",
+        "tyrol"
+      ]
+    },
+    "V": {
+      "home_countries": [
+        "V",
+        "F"
+      ],
+      "armies": [
+        "padua",
+        "veron",
+        "swiss",
+        "avign"
+      ],
+      "fleets": [
+        "dalma",
+        "marse"
+      ],
+      "garrisons": [
+        "venic"
+      ]
+    },
+    "L": {
+      "home_countries": [
+        "L",
+        "T"
+      ],
+      "armies": [
+        "arezz",
+        "flore",
+        "alban"
+      ],
+      "fleets": [
+        "pisa",
+        "duraz",
+        "tunis"
+      ]
+    },
+    "P": {
+      "home_countries": [
+        "P",
+        "N"
+      ],
+      "armies": [
+        "bolog",
+        "perug",
+        "rome",
+        "bari",
+        "messi"
+      ],
+      "fleets": [
+        "ancon",
+        "naple",
+        "paler"
+      ]
+    }
+  },
+  "excluded_locations": [],
+  "variable_income_home_countries": [
+    "P",
+    "N",
+    "M",
+    "T",
+    "A",
+    "F",
+    "L",
+    "L",
+    "V",
+    "V"
+  ],
+  "variable_income_provinces": [
+    "genoa",
+    "naple",
+    "milan"
+  ]
+}

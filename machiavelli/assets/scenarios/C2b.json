@@ -1,0 +1,167 @@
+{
+  "scenario_id": "C2b",
+  "name": "The struggle for dominance, part two (five players)",
+  "year": 1513,
+  "victory_conditions": {
+    "cities": 23,
+    "home_countries": 3
+  },
+  "rules": {
+    "first_turn_famine": false,
+    "fortress_active": false
+  },
+  "home_countries": {
+    "F": [
+      "avign",
+      "marse",
+      "prove",
+      "saluz"
+    ],
+    "T": [
+      "duraz",
+      "alban",
+      "tunis",
+      "herze",
+      "bosni",
+      "hunga"
+    ],
+    "M": [
+      "pavia",
+      "cremo",
+      "swiss",
+      "moden",
+      "ferra"
+    ],
+    "A": [
+      "tyrol",
+      "austr",
+      "carin",
+      "paler",
+      "messi",
+      "naple",
+      "bari",
+      "capua",
+      "aquil",
+      "saler",
+      "otran",
+      "sardi"
+    ],
+    "P": [
+      "ancon",
+      "perug",
+      "rome",
+      "bolog",
+      "patri",
+      "spole",
+      "urbin",
+      "romag",
+      "tivol"
+    ],
+    "V": [
+      "padua",
+      "trevi",
+      "venic",
+      "dalma",
+      "istri",
+      "berga",
+      "bresc",
+      "veron",
+      "vicen",
+      "friul"
+    ]
+  },
+  "powers": {
+    "F": {
+      "home_countries": [
+        "F",
+        "T"
+      ],
+      "armies": [
+        "avign",
+        "saluz",
+        "duraz",
+        "hunga"
+      ],
+      "fleets": [
+        "marse",
+        "alban",
+        "tunis"
+      ],
+      "garrisons": [
+        "milan"
+      ]
+    },
+    "M": {
+      "home_countries": [
+        "M"
+      ],
+      "armies": [
+        "pavia",
+        "cremo",
+        "swiss",
+        "moden",
+        "ferra"
+      ]
+    },
+    "A": {
+      "home_countries": [
+        "A"
+      ],
+      "armies": [
+        "tyrol",
+        "austr",
+        "messi",
+        "bari",
+        "milan"
+      ],
+      "fleets": [
+        "paler",
+        "naple",
+        "sardi"
+      ]
+    },
+    "P": {
+      "home_countries": [
+        "P"
+      ],
+      "armies": [
+        "perug",
+        "rome",
+        "bolog"
+      ],
+      "fleets": [
+        "ancon"
+      ]
+    },
+    "V": {
+      "home_countries": [
+        "V"
+      ],
+      "armies": [
+        "padua",
+        "trevi"
+      ],
+      "fleets": [
+        "dalma"
+      ],
+      "garrisons": [
+        "venic"
+      ]
+    }
+  },
+  "excluded_locations": [],
+  "variable_income_home_countries": [
+    "F",
+    "T",
+    "M",
+    "P",
+    "A",
+    "A",
+    "V",
+    "V"
+  ],
+  "variable_income_provinces": [
+    "genoa",
+    "flore"
+  ]
+}
