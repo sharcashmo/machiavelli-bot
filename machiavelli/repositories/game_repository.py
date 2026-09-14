@@ -10,9 +10,9 @@ from dataclasses import fields
 from ..game.events import TurnEvent
 from ..game.exceptions import DuplicatedGameException, GameNotFoundException
 from ..game.game import Game
-from ..game.map import Map
 from .events_repository import TurnEventsRepository
 from .exchange_repository import ExchangeRepository
+from .map_repository import MapRepository
 from .player_repository import PlayerRepository
 from .scenario_repository import ScenarioRepository
 
@@ -193,7 +193,7 @@ class GameRepository:
             game.scenario = None
             excluded_locations = None
             fortress_active = True
-        game.map = Map.load_map(
+        game.map = MapRepository().load_map(
             exclude_ids=excluded_locations,
             fortress_active=fortress_active,
         )

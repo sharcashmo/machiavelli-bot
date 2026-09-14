@@ -1,10 +1,6 @@
 # machiavelli/game/map.py
-import json
 from dataclasses import dataclass, field
 from enum import StrEnum
-from pathlib import Path
-
-from .resources import read_package_json
 
 
 class MovementMode(StrEnum):
@@ -84,18 +80,6 @@ class Sea(Location):
         )
 
 
-def _parse_routes(
-    routes_raw: list[dict[str, str]],
-    exclude_set: set[str],
-) -> list[Route]:
-    """Helper interno para instanciar solo rutas hacia destinos no excluidos."""
-    return [
-        Route(destination=r["destination"], strait=r.get("strait"))
-        for r in routes_raw
-        if r["destination"].split()[0] not in exclude_set
-    ]
-
-
 @dataclass
 class Map:
     """Contiene las provincias y mares del mapa.
@@ -111,66 +95,6 @@ class Map:
     def __post_init__(self):
         """Realiza algunas operaciones para completar la inicialización"""
         self.locations = self.provinces | self.seas
-
-    @classmethod
-    def load_map(
-        cls,
-        exclude_ids: list[str] | None = None,
-        fortress_active: bool = True,
-        json_path: Path | str | None = None,
-    ) -> "Map":
-        """Carga el JSON maestro, purga las exclusiones y clasifica tierra y mar."""
-        exclude_set = set(exclude_ids) if exclude_ids else set()
-
-        if json_path is None:
-            raw_data = read_package_json("map_data.json")
-        else:
-            with Path(json_path).open(encoding="utf-8") as stream:
-                raw_data = json.load(stream)
-
-        if not isinstance(raw_data, dict):
-            raise TypeError("El recurso del mapa debe contener un objeto JSON")
-
-        processed_provinces: dict[str, Province] = {}
-        processed_seas: dict[str, Sea] = {}
-
-        # Procesamos las provincias
-        for item in raw_data.get("provinces", []):
-            province = Province(
-                name=item["name"],
-                city=item.get("city"),
-                has_port=item.get("has_port", False),
-                major_city=item.get("major_city"),
-                is_venice=item.get("is_venice", False),
-                custom_id=item.get("custom_id"),
-            )
-
-            # Excluimos las provincias que no entran en juego
-            if province.id.split()[0] in exclude_set:
-                continue
-
-            # y las rutas que llevan a ellas
-            province.land_routes = _parse_routes(
-                item.get("land_routes", []), exclude_set
-            )
-            province.sea_routes = _parse_routes(item.get("sea_routes", []), exclude_set)
-
-            # Elimina los fuertes si no están activos
-            if not fortress_active and province.city == "fortress":
-                province.city = None
-
-            processed_provinces[province.id] = province
-
-        for item in raw_data.get("seas", []):
-            sea = Sea(name=item["name"], custom_id=item.get("custom_id"))
-            if sea.id in exclude_set:
-                continue
-
-            sea.land_routes = _parse_routes(item.get("land_routes", []), exclude_set)
-            sea.sea_routes = _parse_routes(item.get("sea_routes", []), exclude_set)
-            processed_seas[sea.id] = sea
-
-        return cls(provinces=processed_provinces, seas=processed_seas)
 
     def adjacent_locations(
         self, origin: str, mode: MovementMode = MovementMode.BOTH

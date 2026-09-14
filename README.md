@@ -215,8 +215,9 @@ Transición a la versión 2.0.0
     - [X] Trasladar los datos de los escenarios a múltiples archivos json dentro de una
     carpeta `assets\scenarios`.
   - [ ] Maps
-    - [ ] Trasladar la carga de archivos de mapas a un `map_repository.py`.
-
+    - [X] Trasladar la carga de archivos de mapas a un `map_repository.py`.
+    - [ ] Trasladar los datos de los mapas a múltiples archivos json dentro de una
+    carpeta `assets\maps`.
 
 ### Versión 2.0.0
 

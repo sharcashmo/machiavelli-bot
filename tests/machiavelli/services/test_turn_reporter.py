@@ -9,8 +9,8 @@ import pytest
 
 from machiavelli.game.events import EventType, JSONValue, TurnEvent
 from machiavelli.game.game import Game
-from machiavelli.game.map import Map
 from machiavelli.game.trading import ExchangeProposal, TradeResource
+from machiavelli.repositories.map_repository import MapRepository
 from machiavelli.repositories.scenario_repository import ScenarioRepository
 from machiavelli.services.turn_reporter import TurnReporter
 
@@ -23,7 +23,7 @@ def make_report_game() -> Game:
         channel_id=123,
         scenario_id="Be",
         scenario=scenario,
-        map=Map.load_map(exclude_ids=scenario.excluded_locations),
+        map=MapRepository().load_map(exclude_ids=scenario.excluded_locations),
         turn_number=2,
     )
     first = game.add_player("player-1", 123)

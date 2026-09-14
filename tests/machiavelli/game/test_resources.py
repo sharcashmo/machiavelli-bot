@@ -9,13 +9,13 @@ from pathlib import Path
 
 import pytest
 
-from machiavelli.game.map import Map
 from machiavelli.game.resources import PackageResourceError, read_package_json
+from machiavelli.repositories.map_repository import MapRepository
 from machiavelli.repositories.scenario_repository import ScenarioRepository
 
 
 def test_default_map_loads_from_package_resource() -> None:
-    game_map = Map.load_map()
+    game_map = MapRepository().load_map()
 
     assert game_map.provinces
     assert game_map.seas
@@ -40,7 +40,7 @@ def test_map_loads_from_explicit_path(tmp_path: Path) -> None:
         encoding="utf-8",
     )
 
-    game_map = Map.load_map(json_path=map_path)
+    game_map = MapRepository(map_path).load_map()
 
     assert list(game_map.provinces) == ["rome"]
     assert list(game_map.seas) == ["IS"]
@@ -116,12 +116,12 @@ def test_resources_load_after_installing_wheel(tmp_path: Path) -> None:
                 "import machiavelli; "
                 "from machiavelli.engine import GameEngine; "
                 "from machiavelli.game import Command, Game, Player; "
-                "from machiavelli.game.map import Map; "
+                "from machiavelli.repositories.map_repository import MapRepository; "
                 "from machiavelli.repositories.scenario_repository import "
                 "ScenarioRepository; "
                 "assert 'site-packages' in Path(machiavelli.__file__).parts; "
                 "assert GameEngine and Game and Player and Command; "
-                "assert Map.load_map().provinces; "
+                "assert MapRepository().load_map().provinces; "
                 "assert ScenarioRepository().load_scenarios()"
             ),
         ],

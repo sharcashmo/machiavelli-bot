@@ -4,7 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from machiavelli.game.map import Map, MovementMode, Province, Route, Sea
+from machiavelli.game.map import MovementMode, Province, Route, Sea
+from machiavelli.repositories.map_repository import MapRepository
 
 
 @pytest.fixture
@@ -125,10 +126,12 @@ def test_sea_creation_generates_id_from_initials():
 def test_map_loading_separates_land_and_sea(mock_json_data):
     """El mapa lee el JSON y clasifica correctamente la tierra de los mares."""
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
-        game_map = Map.load_map()
+        game_map = MapRepository().load_map()
 
     # Comprobamos la carga de Provinces en el diccionario
     assert "rome" in game_map.provinces
@@ -146,10 +149,12 @@ def test_map_loading_applies_exclusions(mock_json_data):
     """Se purgan correctamente los IDs solicitados de ambos diccionarios."""
     # Le pedimos que excluya una provincia terrestre ('tivol') y un mar ('IS')
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
-        game_map = Map.load_map(exclude_ids=["tivol", "IS"])
+        game_map = MapRepository().load_map(exclude_ids=["tivol", "IS"])
 
     # Verificamos que hayan sido eliminados
     assert "tivol" not in game_map.provinces
@@ -165,10 +170,12 @@ def test_map_loading_without_fortress(mock_json_data):
     """Se eliminan los fortress del mapa."""
     # Le pedimos que excluya una provincia terrestre ('tivol') y un mar ('IS')
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
-        game_map = Map.load_map(fortress_active=False)
+        game_map = MapRepository().load_map(fortress_active=False)
 
     # Verificamos que el fortress de "tivol" no existe
     assert game_map.provinces["tivol"].city is None
@@ -220,10 +227,12 @@ def test_location_routes_integration():
 def test_map_loading_excludes_routes_to_excluded_locations(mock_json_data):
     """Comprueba que si una localización se excluye, las rutas hacia ella también."""
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
-        game_map = Map.load_map(exclude_ids=["tivol"])
+        game_map = MapRepository().load_map(exclude_ids=["tivol"])
 
     # Certificamos que Tivoli efectivamente no se ha procesado
     assert "tivol" not in game_map.provinces
@@ -242,11 +251,13 @@ def test_map_loading_excludes_routes_to_excluded_locations(mock_json_data):
 def test_map_loading_excludes_double_coasts_by_base_id(mock_json_data):
     """Excluir 'prove' elimina sus costas y limpia las rutas hacia ellas."""
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
         # Excluimos la provincia 'prove'
-        game_map = Map.load_map(exclude_ids=["prove"])
+        game_map = MapRepository().load_map(exclude_ids=["prove"])
 
     # 'prove S' ha sido eliminado de provinces
     assert "prove S" not in game_map.provinces
@@ -262,10 +273,12 @@ def test_map_loading_excludes_double_coasts_by_base_id(mock_json_data):
 def test_adjacent_locations_default_both_modes(mock_json_data):
     """Comprueba que por defecto (MovementMode.BOTH) devuelve rutas de tierra y mar."""
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
-        game_map = Map.load_map()
+        game_map = MapRepository().load_map()
 
     adjacent = game_map.adjacent_locations("rome")
 
@@ -276,10 +289,12 @@ def test_adjacent_locations_default_both_modes(mock_json_data):
 def test_adjacent_locations_land_mode_only(mock_json_data):
     """Comprueba que MovementMode.LAND solo devuelve las rutas terrestres."""
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
-        game_map = Map.load_map()
+        game_map = MapRepository().load_map()
 
     adjacent = game_map.adjacent_locations("rome", mode=MovementMode.LAND)
 
@@ -290,10 +305,12 @@ def test_adjacent_locations_land_mode_only(mock_json_data):
 def test_adjacent_locations_sea_mode_only(mock_json_data):
     """Comprueba que MovementMode.SEA solo devuelve las rutas marítimas."""
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
-        game_map = Map.load_map()
+        game_map = MapRepository().load_map()
 
     adjacent = game_map.adjacent_locations("rome", mode=MovementMode.SEA)
 
@@ -304,10 +321,12 @@ def test_adjacent_locations_sea_mode_only(mock_json_data):
 def test_adjacent_locations_double_coast_base_in_both_mode(mock_json_data):
     """Comprueba que los destinos de las costas se añaden al listado."""
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
-        game_map = Map.load_map()
+        game_map = MapRepository().load_map()
 
     adjacent = game_map.adjacent_locations("prove", mode=MovementMode.BOTH)
 
@@ -319,10 +338,12 @@ def test_adjacent_locations_double_coast_base_in_both_mode(mock_json_data):
 def test_adjacent_locations_double_coast_destination_normalizes_to_base(mock_json_data):
     """Comprueba que si una ruta marítima llega a una costa se incluye la base."""
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
-        game_map = Map.load_map()
+        game_map = MapRepository().load_map()
 
     # WGOL tiene ruta hacia 'prove S'
     adjacent = game_map.adjacent_locations("WGOL", mode=MovementMode.BOTH)
@@ -334,10 +355,12 @@ def test_adjacent_locations_double_coast_destination_normalizes_to_base(mock_jso
 def test_adjacent_locations_invalid_origin_raises_keyerror(mock_json_data):
     """Comprueba que si el origen no existe en el mapa se lanza KeyError."""
     with (
-        patch("machiavelli.game.map.json.load", return_value=mock_json_data),
-        patch("builtins.open"),
+        patch(
+            "machiavelli.repositories.map_repository.read_package_json",
+            return_value=mock_json_data,
+        ),
     ):
-        game_map = Map.load_map()
+        game_map = MapRepository().load_map()
 
     with pytest.raises(KeyError):
         game_map.adjacent_locations("invalid_id")

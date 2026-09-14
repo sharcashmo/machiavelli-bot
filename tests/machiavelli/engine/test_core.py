@@ -20,6 +20,7 @@ from machiavelli.game.scenario import (
     VictoryConditions,
 )
 from machiavelli.game.tables import GameTables
+from machiavelli.repositories.map_repository import MapRepository
 from machiavelli.repositories.scenario_repository import ScenarioRepository
 from tests.machiavelli.engine.helpers import create_military_game, military_snapshot
 
@@ -817,7 +818,7 @@ def test_real_turns_emit_only_ordered_reconstructible_events(
         name=f"integrated-events-{runs}",
         scenario_id="Be",
         scenario=scenario,
-        map=Map.load_map(),
+        map=MapRepository().load_map(),
     )
     for index in range(len(scenario.powers)):
         game.add_player(f"P{index}", discord_id=1000 + index)

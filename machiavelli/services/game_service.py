@@ -19,7 +19,6 @@ from machiavelli.game import (
     TradeRuleException,
     TurnType,
 )
-from machiavelli.game.map import Map
 from machiavelli.game.scenario import Scenario
 from machiavelli.game.tables import GameTables
 from machiavelli.game.trading import (
@@ -34,6 +33,7 @@ from machiavelli.repositories.game_repository import (
     GameNotFoundException,
     GameRepository,
 )
+from machiavelli.repositories.map_repository import MapRepository
 from machiavelli.repositories.scenario_repository import ScenarioRepository
 from machiavelli.services.status_reporter import StatusReporter
 
@@ -123,7 +123,7 @@ class GameService:
                 channel_id=channel_id,
                 scenario_id=scenario_id,
                 scenario=scenario,
-                map=Map.load_map(
+                map=MapRepository().load_map(
                     exclude_ids=scenario.excluded_locations,
                     fortress_active=scenario.rules.fortress_active,
                 ),
@@ -227,7 +227,7 @@ class GameService:
         game = self.get_game(channel_id)
         game.scenario_id = scenario_id
         game.scenario = scenario
-        game.map = Map.load_map(
+        game.map = MapRepository().load_map(
             exclude_ids=scenario.excluded_locations,
             fortress_active=scenario.rules.fortress_active,
         )
