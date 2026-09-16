@@ -218,6 +218,10 @@ Transición a la versión 2.0.0
     - [X] Trasladar la carga de archivos de mapas a un `map_repository.py`.
     - [X] Trasladar los datos de los mapas a múltiples archivos json dentro de una
     carpeta `assets\maps`.
+- [ ] Utilidades.
+  - [X] Crear utilidad `map_check.py` para comprobobar la consistencia de los mapas.
+- [ ] Bugs solucionados.
+  - [X] Corregir dos bugs en las rutas del mapa `Machiavelli`.
 
 ### Versión 2.0.0
 

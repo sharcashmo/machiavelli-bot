@@ -317,6 +317,7 @@
       "land_routes": [
         { "destination": "lucca" },
         { "destination": "pisto" },
+        { "destination": "flore" },
         { "destination": "sienn" },
         { "destination": "piomb" }
       ],
@@ -936,6 +937,7 @@
     {
       "name": "Western Gulf of Lyons",
       "sea_routes": [
+        { "destination": "avign" },
         { "destination": "prove N" },
         { "destination": "prove S" },
         { "destination": "marse" },
