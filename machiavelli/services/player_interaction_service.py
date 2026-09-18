@@ -245,16 +245,22 @@ class PlayerInteractionService:
                             ):
                                 if isinstance(locations[r], Sea):
                                     if r in fleets:
-                                        choices.append((r, f"{locations[r].name}"))
+                                        choices.append(
+                                            (r, f"{locations[r].name} (transportado)")
+                                        )
                                 else:
-                                    choices.append((r, f"{locations[r].name}"))
+                                    choices.append(
+                                        (r, f"{locations[r].name} (transportado)")
+                                    )
                             choices = list(dict.fromkeys(choices))
                     else:
                         for r in map.adjacent_locations(
                             actor_location, mode=MovementMode.BOTH
                         ):
                             if r in fleets:
-                                choices.append((r, f"{locations[r].name}"))
+                                choices.append(
+                                    (r, f"{locations[r].name} (transportado)")
+                                )
 
                 elif actor_type == "F":
                     for r in locations[actor_location].sea_routes:

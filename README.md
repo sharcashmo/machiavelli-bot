@@ -222,6 +222,8 @@ Transición a la versión 2.0.0
   - [X] Crear utilidad `map_check.py` para comprobobar la consistencia de los mapas.
 - [ ] Bugs solucionados.
   - [X] Corregir dos bugs en las rutas del mapa `Machiavelli`.
+- [ ] Mejoras.
+  - [X] Mostrar el texto "(transportado)" cuando el destino elegido necesita transporte.
 
 ### Versión 2.0.0
 
@@ -358,3 +360,7 @@ versiones conforme se completen.
   provincias pueden haber unidades en la ciudad o en la provincia, pero no en las dos
   a la vez).
 - Versión 1.0.1: permitir el envío de gastos por importe mayor al disponible.
+- Versión 1.1.0: refactorizaciones en Map y Scenario para que se carguen ambos de
+  diversos ficheros en la carpeta de `assets`. Creada una utilidad `map_check.py` para
+  chequear los mapas, y solucionado unos errores detectados con ella.
+  
