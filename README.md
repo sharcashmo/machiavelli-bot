@@ -363,4 +363,6 @@ versiones conforme se completen.
 - Versión 1.1.0: refactorizaciones en Map y Scenario para que se carguen ambos de
   diversos ficheros en la carpeta de `assets`. Creada una utilidad `map_check.py` para
   chequear los mapas, y solucionado unos errores detectados con ella.
+  Los destinos de ejércitos que requieran ser transportados ahora lo muestran tras el
+  nombre.
   
