@@ -52,7 +52,7 @@ distribución wheel generada mediante `python -m build`.
 
 ## Versión
 
-Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.0.1.
+Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.1.0.
 
 ## Comandos disponibles
 

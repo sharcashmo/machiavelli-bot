@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "machiavelli"
-version = "1.0.1"
+version = "1.1.0"
 description = "Motor y bot de Discord para el juego Machiavelli"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "discord.py>=2.3.2",
-    "python-dotenv>=1.0.1",
+    "python-dotenv>=1.1.0",
 ]
 
 [project.optional-dependencies]

@@ -1,0 +1,32 @@
+{
+  "provinces": [
+    {
+      "name": "Britannia",
+      "city": "todo",
+      "land_routes": [{ "destination": "londi" }],
+      "sea_routes": [{ "destination": "londi" }, { "destination": "BOB" }]
+    },
+    {
+      "name": "Londinium",
+      "city": "todo",
+      "land_routes": [{ "destination": "brita" }],
+      "sea_routes": [{ "destination": "brita" }, { "destination": "BOB" }]
+    }
+  ],
+  "seas": [
+    {
+      "name": "Western Gulf of Lyons",
+      "sea_routes": [
+        { "destination": "avign" },
+        { "destination": "prove N" },
+        { "destination": "prove S" },
+        { "destination": "marse" },
+        { "destination": "corsi" },
+        { "destination": "sardi" },
+        { "destination": "EGOL" },
+        { "destination": "WTS" },
+        { "destination": "WM" }
+      ]
+    }
+  ]
+}
