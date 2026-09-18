@@ -257,7 +257,10 @@ class PlayerInteractionService:
                         for r in map.adjacent_locations(
                             actor_location, mode=MovementMode.BOTH
                         ):
-                            if r in fleets:
+                            if (
+                                r in fleets
+                                and r not in locations[actor_location].land_routes
+                            ):
                                 choices.append(
                                     (r, f"{locations[r].name} (transportado)")
                                 )
