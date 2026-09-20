@@ -52,7 +52,7 @@ distribución wheel generada mediante `python -m build`.
 
 ## Versión
 
-Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.1.0.
+Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.1.1.
 
 ## Comandos disponibles
 
@@ -205,7 +205,7 @@ partida, ni devuelve las órdenes enviadas.
 
 Se prevén las siguientes versiones
 
-### Versión 1.1.0
+### Versión 1.1.1
 
 Transición a la versión 2.0.0
 
@@ -365,4 +365,4 @@ versiones conforme se completen.
   chequear los mapas, y solucionado unos errores detectados con ella.
   Los destinos de ejércitos que requieran ser transportados ahora lo muestran tras el
   nombre.
-  
+- Versión 1.1.1: solve a minor bug related to rebellions.
