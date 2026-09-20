@@ -111,7 +111,7 @@ class RebellionManager:
         self.do_rebellion(owner=player_owner, target=target)
 
     REBELLION_EXPENSE_PACIFY = {"B"}
-    REBELLION_EXPENSE_NON_HOME_COUNTRY = {"D"}
+    REBELLION_EXPENSE_NON_HOME_COUNTRY = {"C"}
     REBELLION_EXPENSE_HOME_COUNTRY = {"D"}
 
     def rebellion_expenses(self) -> None:
