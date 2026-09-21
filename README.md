@@ -365,4 +365,4 @@ versiones conforme se completen.
   chequear los mapas, y solucionado unos errores detectados con ella.
   Los destinos de ejércitos que requieran ser transportados ahora lo muestran tras el
   nombre.
-- Versión 1.1.1: solve a minor bug related to rebellions.
+- Versión 1.1.1: resolver varios bugs relacionados con las rebeliones.
