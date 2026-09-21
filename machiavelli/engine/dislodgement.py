@@ -141,11 +141,19 @@ class RetreatHandler:
         retreats: dict[UnitKey, DislodgementDecision] = {}
 
         # Comenzamos haciendo la lista de localizaciones no válidas para retiradas
+        # Primero, las localizaciones dónde ya hay una unidad
         invalid_destinations = {
             conflict_location(outcome.final_location, outcome.final_unit_type)
             for outcome in resolution.outcomes
             if not outcome.dislodged
         }
+        # Añadimos allí dónde tenemos rebeliones (puertas cerradas)
+        rebelled_cities = {
+            conflict_location(location, "G")
+            for player in self.game.players
+            for location in player.rebelled_cities
+        }
+        invalid_destinations |= rebelled_cities
         invalid_destinations |= resolution.contested_locations
 
         # Recorremos la tupla de unidades en retirada en orden aleatorio
