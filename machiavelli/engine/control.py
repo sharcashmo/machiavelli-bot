@@ -87,14 +87,6 @@ class ControlManager:
                 for p in player.controlled_locations
                 if p not in lost_controlled_provinces
             ]
-            player.rebelled_cities = [
-                p for p in player.rebelled_cities if p not in lost_controlled_provinces
-            ]
-            player.rebelled_provinces = [
-                p
-                for p in player.rebelled_provinces
-                if p not in lost_controlled_provinces
-            ]
 
     def home_country_control_loses(self, player: Player) -> None:
         """Comprueba si un jugador piede el control sobre algún país natal."""
