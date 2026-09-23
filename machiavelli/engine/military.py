@@ -1531,20 +1531,19 @@ class MilitaryResolver:
         final_dislodged = state.dislodged_units | frozenset(siege_dislodged)
         # Las rebeliones provinciales se actualizan desde el resultado militar estable.
         for owner_id in sorted(rebellions):
-            for location in tuple(sorted(rebellions[owner_id]["province"])):
-                if self._foreign_advance_succeeded(location, owner_id, state):
-                    rebellions[owner_id]["province"].remove(location)
-                    rebellion_events.append(
-                        [owner_id, "province", location, "liberated"]
-                    )
-                elif self._controller_hold_succeeded(
-                    location,
-                    owner_id,
-                    state,
-                    final_dislodged,
-                ):
-                    rebellions[owner_id]["province"].remove(location)
-                    rebellion_events.append([owner_id, "province", location, "subdued"])
+            for kind in ("province", "city"):
+                for location in tuple(sorted(rebellions[owner_id][kind])):
+                    if self._foreign_advance_succeeded(location, owner_id, state):
+                        rebellions[owner_id][kind].remove(location)
+                        rebellion_events.append([owner_id, kind, location, "liberated"])
+                    elif kind == "province" and self._controller_hold_succeeded(
+                        location,
+                        owner_id,
+                        state,
+                        final_dislodged,
+                    ):
+                        rebellions[owner_id][kind].remove(location)
+                        rebellion_events.append([owner_id, kind, location, "subdued"])
 
         for collections in rebellions.values():
             collections["province"].sort()

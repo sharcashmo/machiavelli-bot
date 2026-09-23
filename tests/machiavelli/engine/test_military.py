@@ -2139,13 +2139,13 @@ class TestRebellions(unittest.TestCase):
                 self.assertEqual(game.players[0].rebelled_provinces, [])
                 self.assertEqual(
                     game.players[0].rebelled_cities,
-                    ["fort"] if label == "city" else [],
+                    [],
                 )
                 self.assertEqual(
                     event["rebellions"],
                     [["P1", "province", "b", "liberated"]]
                     if label == "province"
-                    else [],
+                    else [["P1", "city", "fort", "liberated"]],
                 )
                 self.assertEqual(
                     military_snapshot(game)[0],
