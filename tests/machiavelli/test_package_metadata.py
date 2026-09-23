@@ -9,4 +9,4 @@ def test_runtime_version_matches_distribution_metadata() -> None:
 
 
 def test_current_development_version() -> None:
-    assert machiavelli.__version__ == "1.1.1"
+    assert machiavelli.__version__ == "1.2.0"
