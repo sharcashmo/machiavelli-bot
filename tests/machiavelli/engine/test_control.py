@@ -159,6 +159,10 @@ class TestControlChanges(unittest.TestCase):
                 self.manager, "_provinces_with_others_units", return_value={"flore"}
             ),
         ):
+            # Añadimos una rebelión en "flore"
+            self.player.rebelled_cities = ["flore"]
+            self.player.rebelled_provinces = ["rome"]
+
             self.manager.control_changes(self.player)
 
             # Pierde 'flore'
@@ -171,6 +175,8 @@ class TestControlChanges(unittest.TestCase):
             self.assertEqual(
                 event.data, {"player": "FLORENCE", "provinces": ("flore",)}
             )
+            self.assertEqual(self.player.rebelled_cities, [])
+            self.assertEqual(self.player.rebelled_provinces, ["rome"])
 
     def test_control_changes_retain_control(self):
         """Mantiene el control de una provincia vacía si no hay unidades ajenas."""
