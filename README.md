@@ -52,7 +52,7 @@ distribución wheel generada mediante `python -m build`.
 
 ## Versión
 
-Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.1.1.
+Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.2.0.
 
 ## Comandos disponibles
 
@@ -205,25 +205,10 @@ partida, ni devuelve las órdenes enviadas.
 
 Se prevén las siguientes versiones
 
-### Versión 1.1.1
+### Versión 1.2.0
 
-Transición a la versión 2.0.0
-
-- [ ] Refactorizaciones.
-  - [ ] Scenarios
-    - [X] Trasladar la carga de archivos de escenarios a un `scenario_repository.py`.
-    - [X] Trasladar los datos de los escenarios a múltiples archivos json dentro de una
-    carpeta `assets\scenarios`.
-  - [ ] Maps
-    - [X] Trasladar la carga de archivos de mapas a un `map_repository.py`.
-    - [X] Trasladar los datos de los mapas a múltiples archivos json dentro de una
-    carpeta `assets\maps`.
-- [ ] Utilidades.
-  - [X] Crear utilidad `map_check.py` para comprobobar la consistencia de los mapas.
-- [ ] Bugs solucionados.
-  - [X] Corregir dos bugs en las rutas del mapa `Machiavelli`.
-- [ ] Mejoras.
-  - [X] Mostrar el texto "(transportado)" cuando el destino elegido necesita transporte.
+- Nuevo escenario Bh - Balance of power (six players, HC), que incluye ajustes de
+  equilibrio.
 
 ### Versión 2.0.0
 
@@ -366,3 +351,5 @@ versiones conforme se completen.
   Los destinos de ejércitos que requieran ser transportados ahora lo muestran tras el
   nombre.
 - Versión 1.1.1: resolver varios bugs relacionados con las rebeliones.
+- Versión 1.2.0: nuevo escenario para Horror Cósmico, Bh: Balance of power (six players,
+  HC).

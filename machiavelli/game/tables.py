@@ -30,6 +30,9 @@ class GameTables:
         "milan": [2, 3, 3, 4, 4, 5],
         "naple": [1, 2, 2, 3, 3, 4],
         "rome": [2, 2, 3, 4, 5, 6],
+        "tunis": [1, 2, 3, 4, 5, 6],
+        "flore": [1, 2, 3, 3, 4, 5],
+        "venic": [2, 3, 3, 4, 4, 5],
     }
 
     assassination_rebellions: Final[list[int]] = [1, 2, 3, 5]
