@@ -205,10 +205,15 @@ partida, ni devuelve las órdenes enviadas.
 
 Se prevén las siguientes versiones
 
-### Versión 1.2.0
+### Versión 1.3.0
 
-- Nuevo escenario Bh - Balance of power (six players, HC), que incluye ajustes de
-  equilibrio.
+- [ ] Nuevas funcionalidades
+  - [ ] `/mach game_report` no muestra los recursos del resto de jugadores.
+- [ ] Comprobar y solucionar bugs
+  - [ ] Rebeliones
+    - [ ] No se puede reclutar una guarnición si hay una rebelión en la ciudad.
+    - [X] No se puede iniciar una rebelión en Venecia si hay una unidad allí.
+    - [ ] No se puede avanzar a Venecia si tienes una rebelión en contra.
 
 ### Versión 2.0.0
 

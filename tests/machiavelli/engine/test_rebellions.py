@@ -164,13 +164,21 @@ class TestDoRebellion(unittest.TestCase):
 class TestExpenseRebellionNonHomeCountry(unittest.TestCase):
     def setUp(self):
         self.mock_game = Mock()
+        self.mock_game.map.provinces = {
+            "flore": Mock(city="fortified", is_venice=False),
+            "pisa": Mock(city="city", is_venice=False),
+            "venic": Mock(city="fortified", is_venice=True),
+        }
         self.manager = RebellionManager(game=self.mock_game)
 
         # Mock del dueño actual de la provincia (ej. Florencia)
         self.owner_player = Mock()
         self.owner_player.player_id = "FLORENCE"
-        self.owner_player.controlled_locations = ["pisa", "flore"]
+        self.owner_player.controlled_locations = ["pisa", "flore", "venic"]
         self.owner_player.home_countries = ["L"]
+        self.owner_player.armies = ["venic"]
+        self.owner_player.fleets = []
+        self.owner_player.garrisons = []
 
         self.mock_game.players = [self.owner_player]
 
@@ -234,13 +242,21 @@ class TestExpenseRebellionNonHomeCountry(unittest.TestCase):
 class TestExpenseRebellionHomeCountry(unittest.TestCase):
     def setUp(self):
         self.mock_game = Mock()
+        self.mock_game.map.provinces = {
+            "flore": Mock(city="fortified", is_venice=False),
+            "pisa": Mock(city="city", is_venice=False),
+            "venic": Mock(city="fortified", is_venice=True),
+        }
         self.manager = RebellionManager(game=self.mock_game)
 
         # Mock del dueño controlador (ej. Florencia)
         self.owner_player = Mock()
         self.owner_player.player_id = "FLORENCE"
-        self.owner_player.controlled_locations = ["flore", "pisa"]
+        self.owner_player.controlled_locations = ["flore", "pisa", "venic"]
         self.owner_player.home_countries = ["L"]
+        self.owner_player.armies = ["venic"]
+        self.owner_player.fleets = []
+        self.owner_player.garrisons = []
 
         self.mock_game.players = [self.owner_player]
         self.mock_command = Mock()
@@ -267,6 +283,30 @@ class TestExpenseRebellionHomeCountry(unittest.TestCase):
             self.manager._expense_rebellion_home_country(self.mock_command)
 
             mock_do_rebellion.assert_not_called()
+
+    def test_expense_rebellion_home_country_venice_has_army(self):
+        """No hace nada si la provincia es venecia y hay un ejército."""
+        self.mock_command.target = "venic"
+        self.mock_game.scenario.province_home_country.return_value = "L"
+
+        with patch.object(self.manager, "do_rebellion") as mock_do_rebellion:
+            self.manager._expense_rebellion_home_country(self.mock_command)
+
+            mock_do_rebellion.assert_not_called()
+
+    def test_expense_rebellion_home_country_venice_is_empty(self):
+        """Dispara do_rebellion si es venecia y no hay ejército."""
+        self.mock_command.target = "venic"
+        self.owner_player.armies = []
+        # Es provincia natal de Florencia
+        self.mock_game.scenario.province_home_country.return_value = "L"
+
+        with patch.object(self.manager, "do_rebellion") as mock_do_rebellion:
+            self.manager._expense_rebellion_home_country(self.mock_command)
+
+            mock_do_rebellion.assert_called_once_with(
+                owner=self.owner_player, target="venic"
+            )
 
     def test_expense_rebellion_home_country_not_home_country(self):
         """No hace nada si la provincia NO pertenece al país natal del controlador."""

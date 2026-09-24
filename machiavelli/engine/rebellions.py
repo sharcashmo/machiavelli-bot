@@ -77,6 +77,15 @@ class RebellionManager:
         if not player_owner:
             return
 
+        # Si es venecia y hay alguna unidad militar, no es posible
+        province = self._map().provinces.get(target)
+        if province.is_venice and (
+            target in player_owner.armies
+            or target in player_owner.fleets
+            or target in player_owner.garrisons
+        ):
+            return
+
         # Comprobamos que no sea una provincia natal del jugador. Si es natal de otro
         # jugador no importa
         hc = self._scenario().province_home_country(target)
@@ -100,6 +109,15 @@ class RebellionManager:
         )
 
         if not player_owner:
+            return
+
+        # Si es venecia y hay alguna unidad militar, no es posible
+        province = self._map().provinces.get(target)
+        if province.is_venice and (
+            target in player_owner.armies
+            or target in player_owner.fleets
+            or target in player_owner.garrisons
+        ):
             return
 
         # Comprobamos que sea una provincia natal del jugador
