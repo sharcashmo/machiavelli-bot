@@ -282,15 +282,17 @@ class GameService:
         )
         return lines
 
-    def get_turn_report(self, channel_id: int) -> list[str]:
+    def get_turn_report(self, channel_id: int, discord_id: int) -> list[str]:
         """Devuelve el informe persistido del último turno."""
-        return TurnReporter.generate(self.get_game(channel_id))
+        game = self.get_game(channel_id)
+        player = self.resolve_player(game, discord_id)
+        return TurnReporter.generate(game, player.player_id)
 
     def run_turn(self, channel_id: int) -> list[str]:
         """Ejecuta un turno y después guarda atómicamente el agregado resultante."""
         game = self.get_game(channel_id)
         GameEngine(game).run()
-        report_lines = TurnReporter.generate(game)
+        report_lines = TurnReporter.generate(game, None)
         self.repo.save(game)
         return report_lines
 

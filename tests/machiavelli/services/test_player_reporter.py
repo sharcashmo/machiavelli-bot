@@ -70,12 +70,56 @@ class TestPlayerReporter:
 
         mock_game.besieges = {"milan"}
 
-        report = PlayerReporter.generate_report(player)
+        report = PlayerReporter.generate_report(player, True)
 
         assert "### 🏰 __**Venice (<@123456789>)**__" in report
         assert "> 👑 **Naciones controladas (2):** Venice y Florence" in report
         assert "> 💰 **Recursos:** 75 ducados." in report
         assert "> 🗡️ **Fichas de asesinato (1):** Milan" in report
+        assert (
+            "> 🗺️ **Provincias controladas (2 provincias, 2 ciudades):** Milan y Venice"
+            in report
+        )
+        assert "> 🔥 **Rebeliones:** Naples" in report
+        assert "> ⚔️ **Ejércitos:** Milan (asediando)" in report
+        assert "> ⚓ **Flotas:** Upper Adriatic" in report
+        assert "> 🛡️ **Guarniciones:** Venice" in report
+
+    def test_active_player_blinded_report(self, mock_game, monkeypatch):
+        """Verifica el informe de un jugador activo sin sus recursos."""
+        monkeypatch.setattr(
+            GameTables,
+            "powers",
+            {
+                "V": "Venice",
+                "L": "Florence",
+                "M": "Milan",
+                "N": "Naples",
+            },
+        )
+
+        player = MagicMock()
+        player.game = mock_game
+        player.power = "V"
+        player.discord_id = 123456789
+        player.home_countries = ["V", "L"]
+        player.ducats = 75
+        player.ass_counters = ["M"]
+        player.controlled_locations = ["milan", "venic"]
+        player.rebelled_provinces = ["naple"]
+        player.rebelled_cities = []
+        player.armies = ["milan"]
+        player.fleets = ["UA"]
+        player.garrisons = ["venic"]
+
+        mock_game.besieges = {"milan"}
+
+        report = PlayerReporter.generate_report(player, False)
+
+        assert "### 🏰 __**Venice (<@123456789>)**__" in report
+        assert "> 👑 **Naciones controladas (2):** Venice y Florence" in report
+        assert "> 💰 **Recursos:** 75 ducados." not in report
+        assert "> 🗡️ **Fichas de asesinato (1):** Milan" not in report
         assert (
             "> 🗺️ **Provincias controladas (2 provincias, 2 ciudades):** Milan y Venice"
             in report
@@ -95,7 +139,7 @@ class TestPlayerReporter:
         player.discord_id = 123456789
         player.home_countries = []
 
-        report = PlayerReporter.generate_report(player)
+        report = PlayerReporter.generate_report(player, True)
 
         assert len(report) == 2
         assert report[0] == "### 🏰 __**Venice (<@123456789>)**__"

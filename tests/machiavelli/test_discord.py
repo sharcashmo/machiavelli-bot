@@ -365,6 +365,7 @@ class TestReports(unittest.IsolatedAsyncioTestCase):
             _get_turn_report,
             game_group.db_path,
             interaction.channel_id,
+            interaction.user.id,
         )
         interaction.followup.send.assert_awaited_once_with(
             "report one\nreport two",

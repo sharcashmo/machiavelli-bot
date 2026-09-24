@@ -138,11 +138,12 @@ class Player:
 
         return PlayerRepository(conn).get_by_game(game)
 
-    def player_report(self) -> list[str]:
+    def player_report(self, player_id: str = None) -> list[str]:
         """Genera el informe público actual del jugador."""
         from machiavelli.services.player_reporter import PlayerReporter
 
-        return PlayerReporter.generate_report(self)
+        show_resources = player_id is None or player_id == self.player_id
+        return PlayerReporter.generate_report(self, show_resources)
 
     def cmd_available_actors(self) -> list[tuple[str, str]]:
         from machiavelli.services.player_interaction_service import (

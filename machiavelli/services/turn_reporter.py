@@ -66,7 +66,7 @@ class TurnReporter:
     """Genera el informe público del historial validado de un turno."""
 
     @staticmethod
-    def generate(game: Game) -> list[str]:
+    def generate(game: Game, player_id: str | None) -> list[str]:
         """Renderiza las cabeceras, los eventos y la situación actual sin mutar el
         estado.
         """
@@ -109,7 +109,7 @@ class TurnReporter:
             report.append(f"🛡️ **Guarniciones independientes:** {garrisons}")
 
         for player in game.players:
-            report.extend(player.player_report())
+            report.extend(player.player_report(player_id))
 
         return report
 

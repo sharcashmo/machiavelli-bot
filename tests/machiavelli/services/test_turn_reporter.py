@@ -52,7 +52,7 @@ def test_every_event_type_has_a_non_empty_spanish_representation(
     event = TurnEvent(event_type, valid_event_payloads[event_type])
     game.turn_events = [event]
 
-    report = TurnReporter.generate(game)
+    report = TurnReporter.generate(game, None)
     rendered = event_lines(report)
 
     assert rendered
@@ -69,7 +69,7 @@ def test_report_preserves_general_order_event_order_and_repetitions() -> None:
     eliminated = TurnEvent(EventType.PLAYER_ELIMINATED, {"player": "player-2"})
     game.turn_events = [repeated, eliminated, repeated]
 
-    report = TurnReporter.generate(game)
+    report = TurnReporter.generate(game, None)
     rendered = event_lines(report)
 
     assert report[:3] == [
@@ -101,7 +101,7 @@ def test_report_resolves_known_player_power_province_and_unit_identifiers() -> N
         ),
     ]
 
-    rendered = "\n".join(event_lines(TurnReporter.generate(game)))
+    rendered = "\n".join(event_lines(TurnReporter.generate(game, None)))
 
     assert "Milan <@123>" in rendered
     assert "Venice <@456>" in rendered
@@ -130,7 +130,7 @@ def test_power_assignment_prefers_persisted_discord_id_with_safe_fallback(
         )
     ]
 
-    assert event_lines(TurnReporter.generate(game)) == [
+    assert event_lines(TurnReporter.generate(game, None)) == [
         f"> {expected_player} recibió la potencia Milan."
     ]
 
@@ -144,7 +144,7 @@ def test_power_expense_resolves_its_target_as_a_power() -> None:
         )
     ]
 
-    assert event_lines(TurnReporter.generate(game)) == [
+    assert event_lines(TurnReporter.generate(game, None)) == [
         "> Milan <@123> registró Ordenar asesinato sobre Venice por 12 ducados."
     ]
 
@@ -209,7 +209,7 @@ def test_generate_does_not_mutate_game_or_events() -> None:
     ]
     famine_snapshot = tuple(game.famine)
 
-    TurnReporter.generate(game)
+    TurnReporter.generate(game, None)
 
     current_events = [(id(event), event.to_json()) for event in game.turn_events]
     assert current_events == event_snapshot
@@ -236,7 +236,7 @@ def test_pending_exchange_does_not_change_public_turn_report() -> None:
     second.ducats = 11
     second.ass_counters = ["M"]
 
-    before = TurnReporter.generate(game)
+    before = TurnReporter.generate(game, None)
 
     game.pending_exchanges = [
         ExchangeProposal(
@@ -247,7 +247,7 @@ def test_pending_exchange_does_not_change_public_turn_report() -> None:
         )
     ]
 
-    after = TurnReporter.generate(game)
+    after = TurnReporter.generate(game, None)
     rendered = "\n".join(after)
 
     assert after == before
@@ -278,7 +278,7 @@ def test_military_orders_are_grouped_by_player_with_their_presentation() -> None
         )
     ]
 
-    assert event_lines(TurnReporter.generate(game)) == [
+    assert event_lines(TurnReporter.generate(game, None)) == [
         "### :scroll: **Órdenes recibidas:**",
         "🏰 __**Milan <@123>**__",
         "> Ejército de Milan asediar",
@@ -311,7 +311,7 @@ def test_military_resolution_renders_every_item_in_group_order() -> None:
         )
     ]
 
-    rendered = event_lines(TurnReporter.generate(game))
+    rendered = event_lines(TurnReporter.generate(game, None))
 
     assert rendered == [
         "### :crossed_swords: **Resultados militares:**",
@@ -356,7 +356,7 @@ def test_military_resolution_omits_only_empty_groups() -> None:
         )
     ]
 
-    rendered = event_lines(TurnReporter.generate(game))
+    rendered = event_lines(TurnReporter.generate(game, None))
 
     assert rendered == [
         "### :crossed_swords: **Resultados militares:**",
@@ -394,4 +394,4 @@ def test_empty_military_resolution_has_exactly_one_line() -> None:
         )
     ]
 
-    assert event_lines(TurnReporter.generate(game)) == ["Sin cambios militares."]
+    assert event_lines(TurnReporter.generate(game, None)) == ["Sin cambios militares."]

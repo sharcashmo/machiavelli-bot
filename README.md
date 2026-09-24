@@ -207,11 +207,12 @@ Se prevén las siguientes versiones
 
 ### Versión 1.3.0
 
-- [ ] Nuevas funcionalidades
-  - [ ] `/mach game_report` no muestra los recursos del resto de jugadores.
-- [ ] Comprobar y solucionar bugs
+- [X] Nuevas funcionalidades
+  - [X] `/mach game_report` no muestra los recursos del resto de jugadores.
+- [X] Comprobar y solucionar bugs
   - [X] Rebeliones
     - [X] No se puede iniciar una rebelión en Venecia si hay una unidad en ella.
+  - [X] Venecia
     - [X] No se puede reclutar en Venecia si hay una rebelión en ella.
     - [X] No se puede avanzar a Venecia si tienes una rebelión en contra.
     - [X] No se puede avanzar a Venecia si hay una guarnición en ella.
@@ -361,3 +362,6 @@ versiones conforme se completen.
 - Versión 1.1.1: resolver varios bugs relacionados con las rebeliones.
 - Versión 1.2.0: nuevo escenario para Horror Cósmico, Bh: Balance of power (six players,
   HC).
+- Versión 1.3.0: resueltos varios bugs relacionados con las rebeliones y con el
+  tratamiento de Venecia en la resolución militar. El comando `/mach game_report` ya no
+  muestra los recursos de los demás jugadores.  

@@ -14,7 +14,7 @@ class PlayerReporter:
     """Responsable exclusivo de generar el informe de situación de un jugador."""
 
     @staticmethod
-    def generate_report(player: Player) -> list[str]:
+    def generate_report(player: Player, show_resources: bool) -> list[str]:
         """Genera las líneas del informe de situación para el jugador.
 
         Args:
@@ -46,14 +46,15 @@ class PlayerReporter:
             )
 
             # Recursos
-            ass_names = [GameTables.powers.get(p, p) for p in player.ass_counters]
-            assassination = PlayerReporter._format_joined_names(
-                ass_names, default="Ninguna"
-            )
-            report.append(f"> 💰 **Recursos:** {player.ducats} ducados.")
-            report.append(
-                f"> 🗡️ **Fichas de asesinato ({len(ass_names)}):** {assassination}"
-            )
+            if show_resources:
+                ass_names = [GameTables.powers.get(p, p) for p in player.ass_counters]
+                assassination = PlayerReporter._format_joined_names(
+                    ass_names, default="Ninguna"
+                )
+                report.append(f"> 💰 **Recursos:** {player.ducats} ducados.")
+                report.append(
+                    f"> 🗡️ **Fichas de asesinato ({len(ass_names)}):** {assassination}"
+                )
 
             # Provincias controladas
             province_names = [

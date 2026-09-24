@@ -252,6 +252,8 @@ def test_turn_boundaries_do_not_accept_a_dislodgement_resolver() -> None:
 def test_get_turn_report_uses_the_reporter_and_returns_its_lines() -> None:
     repository = Mock(name="repository")
     game = Mock(name="game")
+    player = Mock(player_id="p1", discord_id=303, game_id=7004)
+    game.players = [player]
     repository.get_by_channel.return_value = game
     service = GameService(repository)
 
@@ -259,10 +261,10 @@ def test_get_turn_report_uses_the_reporter_and_returns_its_lines() -> None:
         "machiavelli.services.game_service.TurnReporter.generate",
         return_value=["report one", "report two"],
     ) as generate:
-        report = service.get_turn_report(7004)
+        report = service.get_turn_report(7004, 303)
 
     assert report == ["report one", "report two"]
-    generate.assert_called_once_with(game)
+    generate.assert_called_once_with(game, player.player_id)
     repository.save.assert_not_called()
 
 
@@ -281,14 +283,16 @@ def test_run_turn_uses_strict_load_engine_reporter_save_order() -> None:
         patch("machiavelli.services.game_service.TurnReporter.generate") as generate,
     ):
         engine_class.return_value.run.side_effect = lambda: calls.append("engine")
-        generate.side_effect = lambda _game: calls.append("reporter") or ["turn report"]
+        generate.side_effect = lambda _game, _player_id: (
+            calls.append("reporter") or ["turn report"]
+        )
         report = service.run_turn(7005)
 
     assert report == ["turn report"]
     assert calls == ["load", "engine", "reporter", "save"]
     engine_class.assert_called_once_with(game)
     engine_class.return_value.run.assert_called_once_with()
-    generate.assert_called_once_with(game)
+    generate.assert_called_once_with(game, None)
     repository.save.assert_called_once_with(game)
 
 

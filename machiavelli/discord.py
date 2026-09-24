@@ -211,10 +211,10 @@ def _get_status_report(
         return tuple(service.get_status_report(channel_id, discord_id))
 
 
-def _get_turn_report(db_path: str, channel_id: int) -> tuple[str, ...]:
+def _get_turn_report(db_path: str, channel_id: int, discord_id: int) -> tuple[str, ...]:
     """Carga el informe del último turno a través de la capa del servicio."""
     with game_service_session(db_path) as service:
-        return tuple(service.get_turn_report(channel_id))
+        return tuple(service.get_turn_report(channel_id, discord_id))
 
 
 def _get_available_actors(
@@ -1053,6 +1053,7 @@ async def game_report(interaction: discord.Interaction):
             _get_turn_report,
             game_group.db_path,
             _require_channel_id(interaction),
+            interaction.user.id,
         )
         messages = _chunk_lines(report) or ["No hay datos del último turno."]
         for message in messages:
