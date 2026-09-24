@@ -3701,3 +3701,230 @@ class TestIntegratedMilitaryAcceptance(unittest.TestCase):
         self.assertTrue(
             all(observation == observations[0] for observation in observations)
         )
+
+
+def venice_map() -> Map:
+    """Mapa mínimo con Venecia fortificada, con puerto y acceso terrestre."""
+    provinces = {name: Province(name, custom_id=name) for name in ("a", "b", "c")}
+    provinces["venice"] = Province(
+        "venice",
+        custom_id="venice",
+        city="fortified",
+        has_port=True,
+        is_venice=True,
+    )
+    for origin, destination in (
+        ("a", "venice"),
+        ("venice", "a"),
+        ("b", "venice"),
+        ("venice", "b"),
+        ("a", "b"),
+        ("b", "a"),
+        ("b", "c"),
+        ("c", "b"),
+    ):
+        provinces[origin].land_routes.append(Route(destination))
+    return Map(provinces=provinces, seas={})
+
+
+class TestVeniceRules(unittest.TestCase):
+    """Cubre las restricciones de entrada y conversión en Venecia."""
+
+    def _compile(self, players, orders, **game_kwargs):
+        resolver = MilitaryResolver(
+            create_military_game(venice_map(), players, orders=orders, **game_kwargs)
+        )
+        resolver._build_unit_index()
+        resolver._compile_orders()
+        resolver._link_and_validate_orders()
+        return resolver
+
+    # --- Reglas estáticas (1, 2 y rebelión) ---
+
+    def test_own_garrison_blocks_advance_even_if_converting(self):
+        for garrison_order in (("G venice", "H", ""), ("G venice", "C", "A")):
+            with self.subTest(garrison=garrison_order[1]):
+                resolver = self._compile(
+                    [
+                        {
+                            "player_id": "P1",
+                            "power": "M",
+                            "armies": ["a"],
+                            "garrisons": ["venice"],
+                        }
+                    ],
+                    {"P1": [("A a", "A", "venice"), garrison_order]},
+                )
+                army = UnitKey("P1", "A", "a")
+                self.assertEqual(resolver.orders_by_unit[army].order_type, "H")
+                self.assertIn(army, resolver.invalid_orders)
+
+    def test_enemy_garrison_on_hold_blocks_advance(self):
+        # Cubre tanto el hold explícito como la ausencia de órdenes (hold implícito).
+        for garrison_orders in ({"P2": [("G venice", "H", "")]}, {}):
+            with self.subTest(explicit=bool(garrison_orders)):
+                resolver = self._compile(
+                    [
+                        {"player_id": "P1", "power": "M", "armies": ["a"]},
+                        {"player_id": "P2", "power": "V", "garrisons": ["venice"]},
+                    ],
+                    {"P1": [("A a", "A", "venice")], **garrison_orders},
+                )
+                army = UnitKey("P1", "A", "a")
+                self.assertEqual(resolver.orders_by_unit[army].order_type, "H")
+                self.assertIn(army, resolver.invalid_orders)
+
+    def test_enemy_converting_garrison_does_not_block_statically(self):
+        resolver = self._compile(
+            [
+                {"player_id": "P1", "power": "M", "armies": ["a"]},
+                {"player_id": "P2", "power": "V", "garrisons": ["venice"]},
+            ],
+            {"P1": [("A a", "A", "venice")], "P2": [("G venice", "C", "A")]},
+        )
+        # El avance sigue vivo tras la compilación: se resuelve dinámicamente.
+        self.assertEqual(
+            resolver.orders_by_unit[UnitKey("P1", "A", "a")].order_type, "A"
+        )
+        self.assertFalse(resolver.invalid_orders)
+
+    def test_rebellion_against_owner_blocks_owner_advance(self):
+        game = create_military_game(
+            venice_map(),
+            [{"player_id": "P1", "power": "M", "armies": ["a"]}],
+            orders={"P1": [("A a", "A", "venice")]},
+        )
+        game.players[0].rebelled_cities = ["venice"]
+        resolver = MilitaryResolver(game)
+        resolver._build_unit_index()
+        resolver._compile_orders()
+        resolver._link_and_validate_orders()
+        army = UnitKey("P1", "A", "a")
+        self.assertEqual(resolver.orders_by_unit[army].order_type, "H")
+        self.assertIn(army, resolver.invalid_orders)
+
+    def test_rebellion_against_owner_does_not_block_other_powers(self):
+        game = create_military_game(
+            venice_map(),
+            [
+                {"player_id": "P1", "power": "M", "armies": ["a"]},
+                {"player_id": "P2", "power": "V", "armies": ["b"]},
+            ],
+            orders={"P2": [("A b", "A", "venice")]},
+        )
+        game.players[0].rebelled_cities = ["venice"]
+        resolver = MilitaryResolver(game)
+        resolver._build_unit_index()
+        resolver._compile_orders()
+        resolver._link_and_validate_orders()
+        self.assertEqual(
+            resolver.orders_by_unit[UnitKey("P2", "A", "b")].order_type, "A"
+        )
+
+    def test_province_rebellion_does_not_block_owner_advance(self):
+        game = create_military_game(
+            venice_map(),
+            [{"player_id": "P1", "power": "M", "armies": ["a"]}],
+            orders={"P1": [("A a", "A", "venice")]},
+        )
+        game.players[0].rebelled_provinces = ["venice"]
+        resolver = MilitaryResolver(game)
+        resolver._build_unit_index()
+        resolver._compile_orders()
+        resolver._link_and_validate_orders()
+        self.assertEqual(
+            resolver.orders_by_unit[UnitKey("P1", "A", "a")].order_type, "A"
+        )
+
+    # --- Regla dinámica (3) ---
+
+    def test_converting_garrison_and_enemy_advance_both_fail(self):
+        game = create_military_game(
+            venice_map(),
+            [
+                {"player_id": "P1", "power": "M", "armies": ["a"]},
+                {"player_id": "P2", "power": "V", "garrisons": ["venice"]},
+            ],
+            orders={"P1": [("A a", "A", "venice")], "P2": [("G venice", "C", "A")]},
+        )
+        MilitaryResolver(game).run()
+        self.assertEqual(game.players[0].armies, ["a"])
+        self.assertEqual(game.players[1].garrisons, ["venice"])
+        self.assertEqual(game.players[1].armies, [])
+
+    def test_converting_garrison_blocks_even_supported_advance(self):
+        # La regla no depende de la fuerza: los apoyos no la esquivan.
+        game = create_military_game(
+            venice_map(),
+            [
+                {"player_id": "P1", "power": "M", "armies": ["a"]},
+                {"player_id": "P2", "power": "V", "garrisons": ["venice"]},
+                {"player_id": "P3", "power": "G", "armies": ["b"]},
+            ],
+            orders={
+                "P1": [("A a", "A", "venice")],
+                "P2": [("G venice", "C", "A")],
+                "P3": [("A b", "S", "venice (M)")],
+            },
+        )
+        MilitaryResolver(game).run()
+        self.assertEqual(game.players[0].armies, ["a"])
+        self.assertEqual(game.players[1].garrisons, ["venice"])
+
+    # --- Regla 4: conflicto normal contra unidad de campaña ---
+
+    def test_tie_against_campaign_unit_leaves_both_in_place(self):
+        game = create_military_game(
+            venice_map(),
+            [
+                {"player_id": "P1", "power": "M", "armies": ["a"]},
+                {"player_id": "P2", "power": "V", "armies": ["venice"]},
+            ],
+            orders={"P1": [("A a", "A", "venice")]},
+        )
+        resolution = MilitaryResolver(game).run()
+        self.assertEqual(game.players[0].armies, ["a"])
+        self.assertEqual(game.players[1].armies, ["venice"])
+        self.assertIn("venice", resolution.contested_locations)
+
+    def test_supported_advance_against_campaign_unit_wins_and_dislodges(self):
+        game = create_military_game(
+            venice_map(),
+            [
+                {"player_id": "P1", "power": "M", "armies": ["a"], "fleets": []},
+                {"player_id": "P2", "power": "V", "armies": ["venice"]},
+                {"player_id": "P3", "power": "G", "armies": ["b"]},
+            ],
+            orders={
+                "P1": [("A a", "A", "venice")],
+                "P3": [("A b", "S", "venice (M)")],
+            },
+        )
+        resolver = MilitaryResolver(game)
+        resolver._build_unit_index()
+        resolver._compile_orders()
+        resolver._link_and_validate_orders()
+        resolution = resolver._build_resolution(resolver._resolve_conflicts())
+        outcomes = {outcome.unit: outcome for outcome in resolution.outcomes}
+        self.assertEqual(outcomes[UnitKey("P1", "A", "a")].final_location, "venice")
+        self.assertTrue(outcomes[UnitKey("P2", "A", "venice")].dislodged)
+
+    def test_two_enemy_advances_against_converting_garrison_all_fail(self):
+        game = create_military_game(
+            venice_map(),
+            [
+                {"player_id": "P1", "power": "M", "armies": ["a"]},
+                {"player_id": "P2", "power": "V", "armies": ["b"]},
+                {"player_id": "P3", "power": "G", "garrisons": ["venice"]},
+            ],
+            orders={
+                "P1": [("A a", "A", "venice")],
+                "P2": [("A b", "A", "venice")],
+                "P3": [("G venice", "C", "A")],
+            },
+        )
+        MilitaryResolver(game).run()
+        self.assertEqual(game.players[0].armies, ["a"])
+        self.assertEqual(game.players[1].armies, ["b"])
+        self.assertEqual(game.players[2].garrisons, ["venice"])
+        self.assertEqual(game.players[2].armies, [])

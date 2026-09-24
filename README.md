@@ -210,10 +210,13 @@ Se prevén las siguientes versiones
 - [ ] Nuevas funcionalidades
   - [ ] `/mach game_report` no muestra los recursos del resto de jugadores.
 - [ ] Comprobar y solucionar bugs
-  - [ ] Rebeliones
+  - [X] Rebeliones
     - [X] No se puede iniciar una rebelión en Venecia si hay una unidad en ella.
     - [X] No se puede reclutar en Venecia si hay una rebelión en ella.
-    - [ ] No se puede avanzar a Venecia si tienes una rebelión en contra.
+    - [X] No se puede avanzar a Venecia si tienes una rebelión en contra.
+    - [X] No se puede avanzar a Venecia si hay una guarnición en ella.
+    - [X] Una unidad que avanza a Venecia contra una guarnición que se convierte
+      bloquea ambas órdenes.
 
 ### Versión 2.0.0
 

@@ -424,6 +424,103 @@ class MilitaryResolver:
                     straits=self._straits_for_path(path, mode),
                 )
 
+    def _garrison_at(self, province: str) -> UnitKey | None:
+        """Devuelve la guarnición situada en una provincia, si existe."""
+        return next(
+            (
+                key
+                for key in self.units_by_key
+                if key.unit_type == "G" and key.origin == province
+            ),
+            None,
+        )
+
+    def _venice_advance_invalid_reason(self, key: UnitKey, target: str) -> str | None:
+        """Aplica las restricciones de entrada a Venecia sobre un avance."""
+        province = self.map.provinces.get(target)
+        if province is None or not province.is_venice:
+            return None
+
+        # Rebelión urbana contra el propietario de la unidad: entrada prohibida.
+        rebellion = self.rebellions_by_location.get(
+            target
+        ) or self.rebellions_by_location.get(target.split()[0])
+        if (
+            rebellion is not None
+            and rebellion[1] == "city"
+            and rebellion[0] == key.player_id
+        ):
+            return "no se puede avanzar a Venecia en rebelión contra el propietario"
+
+        garrison = self._garrison_at(target)
+        if garrison is None:
+            return None
+        if garrison.player_id == key.player_id:
+            return "no se puede avanzar a Venecia con guarnición propia"
+        # Sin órdenes la guarnición compila a Hold, así que también bloquea.
+        garrison_order = self.orders_by_unit.get(garrison)
+        if garrison_order is not None and garrison_order.order_type == "H":
+            return "no se puede avanzar a Venecia con guarnición enemiga en hold"
+        return None  # convirtiéndose: se resuelve dinámicamente en el bucle
+
+    def _venice_conversion_conflicts(self, state: ResolutionState) -> set[UnitKey]:
+        """Detecta avances enemigos a Venecia contra una guarnición convirtiéndose.
+
+        Devuelve la guarnición y todos los avances enemigos: todos fallan,
+        sin importar los apoyos acumulados por ninguna de las partes.
+        """
+        blocked: set[UnitKey] = set()
+        for garrison in sorted(self.units_by_key, key=_key_sort):
+            if garrison.unit_type != "G":
+                continue
+            province = self.map.provinces.get(garrison.origin)
+            if province is None or not province.is_venice:
+                continue
+            garrison_order = self.orders_by_unit.get(garrison)
+            if (
+                garrison_order is None
+                or garrison_order.order_type != "C"
+                or garrison in state.cancelled_orders
+                or garrison in state.dislodged_units
+            ):
+                continue
+            for mover in sorted(self.units_by_key, key=_key_sort):
+                if mover.unit_type == "G" or mover.player_id == garrison.player_id:
+                    continue
+                mover_order = self.orders_by_unit.get(mover)
+                if (
+                    mover_order is None
+                    or mover_order.order_type != "A"
+                    or mover_order.target_location != garrison.origin
+                    or mover in state.cancelled_orders
+                    or mover in state.dislodged_units
+                    or (mover_order.is_convoy and mover not in state.available_convoys)
+                ):
+                    continue
+                blocked.add(mover)
+            if blocked:
+                blocked.add(garrison)
+        return blocked
+
+    def _venice_conflict_locations(self, blocked: set[UnitKey]) -> frozenset[str]:
+        """Reproyecta las plazas de conflicto de las unidades bloqueadas en Venecia."""
+        locations: set[str] = set()
+        for unit in blocked:
+            order = self.orders_by_unit[unit]
+            if order.order_type == "A":
+                locations.add(
+                    conflict_location(
+                        order.target_location or unit.origin, unit.unit_type
+                    )
+                )
+            elif order.order_type == "C":
+                locations.add(
+                    conflict_location(
+                        unit.origin, order.target_location or unit.unit_type
+                    )
+                )
+        return frozenset(locations)
+
     def _straits_for_path(
         self, path: tuple[str | None, ...], mode: MovementMode
     ) -> tuple[str, ...]:
@@ -506,6 +603,10 @@ class MilitaryResolver:
             return "orden de guarnición no permitida durante asedio"
 
         if order.order_type == "A":
+            if key.unit_type == "G" or not self._location_exists(target):
+                return "avance inválido"
+            if (reason := self._venice_advance_invalid_reason(key, target)) is not None:
+                return reason
             if order.is_convoy:
                 return None
             if key.unit_type == "G" or not self._location_exists(target):
@@ -703,6 +804,17 @@ class MilitaryResolver:
         while True:
             # Cada iteración parte de un estado canónico para comparar firmas fiables.
             state = self._normalise_state(state)
+            if blocked := self._venice_conversion_conflicts(state):
+                state = replace(
+                    state,
+                    cancelled_orders=state.cancelled_orders | frozenset(blocked),
+                    successful_moves=state.successful_moves - frozenset(blocked),
+                    successful_conversions=state.successful_conversions
+                    - frozenset(blocked),
+                    resolved_conflicts=state.resolved_conflicts
+                    | self._venice_conflict_locations(blocked),
+                )
+                continue
             groups, moving = self._conflict_groups(state)
             pending = tuple(
                 sorted(
