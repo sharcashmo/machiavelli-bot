@@ -211,8 +211,8 @@ Se prevén las siguientes versiones
   - [ ] `/mach game_report` no muestra los recursos del resto de jugadores.
 - [ ] Comprobar y solucionar bugs
   - [ ] Rebeliones
-    - [ ] No se puede reclutar una guarnición si hay una rebelión en la ciudad.
-    - [X] No se puede iniciar una rebelión en Venecia si hay una unidad allí.
+    - [X] No se puede iniciar una rebelión en Venecia si hay una unidad en ella.
+    - [X] No se puede reclutar en Venecia si hay una rebelión en ella.
     - [ ] No se puede avanzar a Venecia si tienes una rebelión en contra.
 
 ### Versión 2.0.0

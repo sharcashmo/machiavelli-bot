@@ -122,7 +122,11 @@ class MaintenanceResolver:
                     fleet.split()[0] == unit_id for fleet in player.fleets
                 )
                 if province.is_venice:
-                    occupied = occupied or unit_id in player.garrisons
+                    occupied = (
+                        occupied
+                        or unit_id in player.garrisons
+                        or unit_id in player.rebelled_cities
+                    )
 
                 if unit_type in ("A", "F"):
                     if occupied:
