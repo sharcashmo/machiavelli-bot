@@ -930,7 +930,7 @@ async def set_rumor_channel(
     interaction: discord.Interaction, canal: discord.TextChannel
 ) -> None:
     try:
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=False)
         if interaction.guild is None:
             raise ValueError("Este comando solo puede usarse en el servidor.")
         if not interaction.permissions.administrator:

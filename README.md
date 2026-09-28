@@ -205,19 +205,10 @@ partida, ni devuelve las órdenes enviadas.
 
 Se prevén las siguientes versiones
 
-### Versión 1.3.0
+### Versión 1.3.1
 
-- [X] Nuevas funcionalidades
-  - [X] `/mach game_report` no muestra los recursos del resto de jugadores.
 - [X] Comprobar y solucionar bugs
-  - [X] Rebeliones
-    - [X] No se puede iniciar una rebelión en Venecia si hay una unidad en ella.
-  - [X] Venecia
-    - [X] No se puede reclutar en Venecia si hay una rebelión en ella.
-    - [X] No se puede avanzar a Venecia si tienes una rebelión en contra.
-    - [X] No se puede avanzar a Venecia si hay una guarnición en ella.
-    - [X] Una unidad que avanza a Venecia contra una guarnición que se convierte
-      bloquea ambas órdenes.
+  - [ ] `/shar set_rumor_channel` no debe ser ephemeral.
 
 ### Versión 2.0.0
 
