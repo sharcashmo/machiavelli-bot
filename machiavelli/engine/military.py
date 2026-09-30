@@ -557,7 +557,7 @@ class MilitaryResolver:
                 continue
             transporters: list[UnitKey] = []
             for origin, target in zip(order.path[:-1], order.path[1:], strict=True):
-                if target not in self.map.adjacent_locations(origin):
+                if target not in self.map.adjacent_locations(origin, MovementMode.SEA):
                     self._invalid_order(key, "tramo de convoy no adyacente")
                     break
             else:
@@ -579,11 +579,12 @@ class MilitaryResolver:
                     if fleet not in transporters:
                         transporters.append(fleet)
                 else:
+                    arrival = destination.split()[0]
                     self.orders_by_unit[key] = MilitaryOrder(
                         key,
                         "A",
-                        destination,
-                        path=order.path,
+                        arrival,
+                        path=(*order.path[:-1], arrival),
                         transporters=tuple(transporters),
                         is_convoy=True,
                     )

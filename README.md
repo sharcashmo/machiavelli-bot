@@ -208,7 +208,8 @@ Se prevén las siguientes versiones
 ### Versión 1.3.1
 
 - [X] Comprobar y solucionar bugs
-  - [ ] `/shar set_rumor_channel` no debe ser ephemeral.
+  - [X] `/shar set_rumor_channel` no debe ser ephemeral.
+  - [X] Resueltos bugs relacionados con el transporte de tropas.
 
 ### Versión 2.0.0
 

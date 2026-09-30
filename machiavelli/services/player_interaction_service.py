@@ -241,7 +241,7 @@ class PlayerInteractionService:
                         else:
                             convoy_end = convoy[-1]
                             for r in map.adjacent_locations(
-                                convoy_end, mode=MovementMode.BOTH
+                                convoy_end, mode=MovementMode.SEA
                             ):
                                 if isinstance(locations[r], Sea):
                                     if r in fleets:

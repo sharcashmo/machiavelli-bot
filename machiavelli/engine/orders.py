@@ -191,6 +191,6 @@ class OrderProcessor:
         return (
             last_place in fleets
             and command.target
-            in game_map.adjacent_locations(last_place, MovementMode.BOTH)
+            in game_map.adjacent_locations(last_place, MovementMode.SEA)
             and (command.target in fleets or isinstance(destination, Province))
         )
