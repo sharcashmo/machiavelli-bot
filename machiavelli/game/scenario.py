@@ -51,6 +51,7 @@ class Rules:
     famine_active: bool = True
     first_turn_famine: bool = True
     plague_active: bool = True
+    first_turn_plague: bool = True
 
 
 @dataclass

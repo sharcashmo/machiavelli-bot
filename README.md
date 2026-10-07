@@ -205,11 +205,9 @@ partida, ni devuelve las órdenes enviadas.
 
 Se prevén las siguientes versiones
 
-### Versión 1.3.1
+### Versión 1.4.0
 
-- [X] Comprobar y solucionar bugs
-  - [X] `/shar set_rumor_channel` no debe ser ephemeral.
-  - [X] Resueltos bugs relacionados con el transporte de tropas.
+- [X] Nueva opción de configuración `first_turn_plague`.
 
 ### Versión 2.0.0
 

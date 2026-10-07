@@ -390,6 +390,7 @@ class TestSpawnFamine(unittest.TestCase):
 class TestSpawnPlague(unittest.TestCase):
     def setUp(self):
         self.mock_game = Mock()
+        self.mock_game.turn_number = 12
         self.manager = DisastersManager(game=self.mock_game)
 
     def test_spawn_plague(self):
@@ -421,11 +422,36 @@ class TestInactiveDisasterRules(unittest.TestCase):
         self.game.famine = ["pisa"]
         self.game.players = []
         self.game.independent_garrisons = ["pisa"]
+        self.game.turn_number = 2
         self.manager = DisastersManager(self.game)
 
     @patch("machiavelli.engine.disasters.GameTables")
     def test_inactive_rules_make_all_public_disaster_methods_no_ops(self, mock_tables):
         mock_tables.expenses = {"A": {"cost": 3}}
+
+        with (
+            patch.object(self.manager, "_spawn_disaster") as spawn,
+            patch.object(self.manager, "_apply_disaster_deaths") as deaths,
+        ):
+            self.manager.process_famine_relief_expenses()
+            self.manager.resolve_famine_attrition()
+            self.manager.clear_famine()
+            self.manager.spawn_famine()
+            self.manager.spawn_plague()
+
+        self.assertEqual(self.game.famine, ["pisa"])
+        self.assertEqual(self.game.independent_garrisons, ["pisa"])
+        self.game.add_event.assert_not_called()
+        spawn.assert_not_called()
+        deaths.assert_not_called()
+
+    @patch("machiavelli.engine.disasters.GameTables")
+    def test_no_first_turn_plague(self, mock_tables):
+        mock_tables.expenses = {"A": {"cost": 3}}
+
+        self.game.scenario.rules = Rules(
+            famine_active=False, plague_active=True, first_turn_plague=False
+        )
 
         with (
             patch.object(self.manager, "_spawn_disaster") as spawn,

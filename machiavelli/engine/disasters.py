@@ -192,6 +192,10 @@ class DisastersManager:
         if (
             self.game.scenario is not None
             and not self.game.scenario.rules.plague_active
+            or (
+                self.game.turn_number < 4
+                and not self.game.scenario.rules.first_turn_plague
+            )
         ):
             return
         plague_provinces = self._spawn_disaster(event_type=EventType.PLAGUE_SPAWN)

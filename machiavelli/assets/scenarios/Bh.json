@@ -9,7 +9,8 @@
   },
   "rules": {
     "first_turn_famine": false,
-    "fortress_active": false
+    "fortress_active": false,
+    "first_turn_plague": false
   },
   "home_countries": {
     "M": ["pavia", "cremo", "como", "forno", "pianc", "parma", "milan"],
