@@ -52,7 +52,7 @@ distribución wheel generada mediante `python -m build`.
 
 ## Versión
 
-Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.3.1.
+Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.4.0.
 
 ## Comandos disponibles
 
@@ -357,3 +357,4 @@ versiones conforme se completen.
   muestra los recursos de los demás jugadores.  
 - Versión 1.3.1: resueltos varios bugs relacionados con el transporte de tropas. El
   comando `/shar set_rumor_channel` se hace no ephemeral.
+- Versión 1.4.0: nueva regla `first_turn_plague`.
