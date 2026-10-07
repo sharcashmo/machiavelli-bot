@@ -52,7 +52,7 @@ distribución wheel generada mediante `python -m build`.
 
 ## Versión
 
-Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.3.0.
+Versión de desarrollo actual: 2.0.0. Última versión estable publicada: 1.3.1.
 
 ## Comandos disponibles
 
@@ -357,3 +357,5 @@ versiones conforme se completen.
 - Versión 1.3.0: resueltos varios bugs relacionados con las rebeliones y con el
   tratamiento de Venecia en la resolución militar. El comando `/mach game_report` ya no
   muestra los recursos de los demás jugadores.  
+- Versión 1.3.1: resueltos varios bugs relacionados con el transporte de tropas. El
+  comando `/shar set_rumor_channel` se hace no ephemeral.
